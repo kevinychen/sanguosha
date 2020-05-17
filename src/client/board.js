@@ -31,7 +31,7 @@ export class SanGuoShaBoard extends React.Component {
 
     renderNodes() {
         const {
-            G: { characterChoices, characters },
+            G: { roles, characterChoices, characters },
             ctx: { numPlayers, playOrder, phase, activePlayers },
             moves: { selectCharacter },
             playerID,
@@ -46,10 +46,9 @@ export class SanGuoShaBoard extends React.Component {
         const { playerAreas, scale } = this.findPlayerAreas(numPlayers);
         const scaledWidth = PLAYER_AREA_WIDTH * scale;
         const scaledHeight = PLAYER_AREA_HEIGHT * scale;
-        const myPlayerIndex = playOrder.indexOf(playerID);
+        const myPlayerIndex = Math.max(playOrder.indexOf(playerID), 0);
 
         const cards = [];
-        const nodes = [];
 
         // render each player's character
         playerAreas.forEach((playerArea, i) => {
@@ -58,7 +57,7 @@ export class SanGuoShaBoard extends React.Component {
             const name = character ? character.name : 'Unknown Character';
             cards.push(<img
                 key={`playerArea-img-${i}`}
-                className='character'
+                className='card'
                 src={`./characters/${name}.jpg`}
                 alt={name}
                 style={{
@@ -66,6 +65,24 @@ export class SanGuoShaBoard extends React.Component {
                     top: playerArea.y,
                     width: scaledWidth,
                     height: scaledHeight,
+                }}
+            />);
+
+            // Ratio of role card size in top right of character card, to character card size
+            const ROLE_RATIO = 0.25;
+            // Number of pixels between the role card and the border of the character card
+            const ROLE_DELTA = 4;
+            const role = roles[player];
+            cards.push(<img
+                key={`playerArea-role-img-${i}`}
+                className='card'
+                src={`./roles/${role}.jpg`}
+                alt={role}
+                style={{
+                    left: playerArea.x + (1 - ROLE_RATIO) * scaledWidth - ROLE_DELTA,
+                    top: playerArea.y + ROLE_DELTA,
+                    width: scaledWidth * ROLE_RATIO,
+                    height: scaledHeight * ROLE_RATIO,
                 }}
             />);
         });
@@ -78,7 +95,7 @@ export class SanGuoShaBoard extends React.Component {
                 choices.forEach((choice, i) => {
                     cards.push(<img
                         key={`characterChoices-img-${i}`}
-                        className='character selectable'
+                        className='card selectable'
                         src={`./characters/${choice.name}.jpg`}
                         alt={choice.name}
                         style={{

@@ -2,7 +2,7 @@ import CHARACTERS from './characters.js';
 
 // Recommended role distribution for different numbers of players
 // http://www.englishsanguosha.com/rules/roles
-const ROLE_DIST_LABELS = ['KING', 'REBEL', 'LOYALIST', 'SPY'];
+const ROLE_DIST_LABELS = ['King', 'Rebel', 'Loyalist', 'Spy'];
 const ROLE_DIST = {
     2: [1, 1, 0, 0],
     3: [1, 1, 0, 1],
@@ -18,7 +18,7 @@ const ROLE_DIST = {
 const NUM_CHARACTER_CHOICES = 3;
 
 function findKingPlayer(G) {
-    return G.roles.indexOf('KING');
+    return G.roles.indexOf('King');
 }
 
 function selectCharacter(G, ctx, index) {
