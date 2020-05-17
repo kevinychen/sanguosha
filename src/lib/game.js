@@ -15,7 +15,7 @@ const ROLE_DIST = {
     10: [1, 5, 3, 1],
 };
 
-const NUM_CHARACTER_CHOICES = 1;
+const NUM_CHARACTER_CHOICES = 3;
 
 function findKingPlayer(G) {
     return G.roles.indexOf('KING');

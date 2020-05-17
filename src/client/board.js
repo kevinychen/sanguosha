@@ -31,7 +31,7 @@ export class SanGuoShaBoard extends React.Component {
 
     renderNodes() {
         const {
-            G: { characters },
+            G: { characterChoices, characters },
             ctx: { numPlayers, playOrder, phase, activePlayers },
             playerID,
         } = this.props;
@@ -41,7 +41,10 @@ export class SanGuoShaBoard extends React.Component {
             return undefined;
         }
 
+        const { width, height } = clientRect;
         const { playerAreas, scale } = this.findPlayerAreas(numPlayers - 1);
+        const scaledWidth = PLAYER_AREA_WIDTH * scale;
+        const scaledHeight = PLAYER_AREA_HEIGHT * scale;
         const myPlayerIndex = playOrder.indexOf(playerID);
 
         const nodes = [];
@@ -58,15 +61,30 @@ export class SanGuoShaBoard extends React.Component {
                 style={{
                     left: playerArea.x,
                     top: playerArea.y,
-                    width: PLAYER_AREA_WIDTH * scale,
-                    height: PLAYER_AREA_HEIGHT * scale,
+                    width: scaledWidth,
+                    height: scaledHeight,
                 }}
             />);
         });
 
         if (phase === 'selectCharacters') {
             if (activePlayers[playerID] === 'selectCharacter') {
-                // TODO
+                const choices = characterChoices[playerID];
+                const startX = (width - choices.length * scaledWidth - (choices.length - 1) * DELTA) / 2;
+                choices.forEach((choice, i) => {
+                    nodes.push(<img
+                        key={`characterChoices-img-${i}`}
+                        className='character'
+                        src={choice.name + '.jpg'}
+                        alt={choice.name}
+                        style={{
+                            left: startX + (scaledWidth + DELTA) * i,
+                            top: height / 2,
+                            width: scaledWidth,
+                            height: scaledHeight,
+                        }}
+                    />);
+                });
             }
         }
 

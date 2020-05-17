@@ -26,12 +26,6 @@ export default [
         gender: 'M',
     },
     {
-        name: 'Zhang Yun',
-        country: 'Shu',
-        health: 4,
-        gender: 'M',
-    },
-    {
         name: 'Ma Chao',
         country: 'Shu',
         health: 4,
@@ -98,6 +92,12 @@ export default [
         gender: 'M',
     },
     {
+        name: 'Sima Yi',
+        country: 'Wei',
+        health: 3,
+        gender: 'M',
+    },
+    {
         name: 'Xiahou Dun',
         country: 'Wei',
         health: 4,
@@ -144,11 +144,5 @@ export default [
         country: 'Kingdomless',
         health: 3,
         gender: 'F',
-    },
-    {
-        name: 'Hua Xiong',
-        country: 'Kingdomless',
-        health: 6,
-        gender: 'M',
     },
 ];
