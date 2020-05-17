@@ -18,7 +18,7 @@ const ROLE_DIST = {
 const NUM_CHARACTER_CHOICES = 3;
 
 function findKingPlayer(G) {
-    return G.roles.indexOf('King');
+    return G.roles.findIndex(role => role.name === 'King');
 }
 
 function selectCharacter(G, ctx, index) {
@@ -63,22 +63,36 @@ export const SanGuoSha = {
     setup: ctx => {
         const { numPlayers, playOrder, random } = ctx;
 
-        const roles = random.Shuffle(ROLE_DIST_LABELS.flatMap((role, i) => Array(ROLE_DIST[numPlayers][i]).fill(role)));
+        const unshuffledRoles = [];
+        ROLE_DIST_LABELS.forEach((role, i) => {
+            for (let j = 0; j < ROLE_DIST[numPlayers][i]; j++) {
+                unshuffledRoles.push({ name: role });
+            }
+        });
+        const roles = random.Shuffle(unshuffledRoles);
+        for (let i = 0; i < roles.length; i++) {
+            roles[i].id = `role-${i}`;
+        }
 
-        const shuffledCharacters = random.Shuffle(CHARACTERS);
+        const allCharacterChoices = random.Shuffle(CHARACTERS);
         const characterChoices = Object.fromEntries(playOrder.map((player, i) =>
-            [player, shuffledCharacters.slice(NUM_CHARACTER_CHOICES * i, NUM_CHARACTER_CHOICES * (i + 1))]));
+            [player, allCharacterChoices.slice(NUM_CHARACTER_CHOICES * i, NUM_CHARACTER_CHOICES * (i + 1))]));
         const characters = {};
 
-        const deck = [];
+        const unshuffledDeck = [];
         // TODO use more than one card lol
         for (let i = 0; i < 20; i++) {
-            deck.push({
+            unshuffledDeck.push({
                 value: '10',
                 suit: 'CLUB',
                 type: 'Attack',
             });
         }
+        const deck = random.Shuffle(unshuffledDeck);
+        for (let i = 0; i < deck.length; i++) {
+            deck[i].id = `card-${i}`;
+        }
+
         const hands = Object.fromEntries(playOrder.map(player => [player, []]));
 
         return {
@@ -97,8 +111,8 @@ export const SanGuoSha = {
         const newRoles = { ...roles };
         for (let i = 0; i < numPlayers; i++) {
             // TODO show role if dead
-            if (playOrder[i] !== playerID && newRoles[i] !== 'King') {
-                newRoles[i] = undefined;
+            if (playOrder[i] !== playerID && newRoles[i].name !== 'King') {
+                newRoles[i] = {id: roles[i].id};
             }
         }
         return {
