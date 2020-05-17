@@ -26,15 +26,18 @@ export default props => {
     const scaledHeight = PLAYER_AREA_HEIGHT * scale;
     const myPlayerIndex = Math.max(playOrder.indexOf(playerID), 0);
 
-    const toAnimate = [];
+    const characterBacks = [];
     const characterCards = [];
+    const roleCards = [];
+    const playerCards = [];
+    const playerCardLabels = [];
 
     playerAreas.forEach((playerArea, i) => {
         const player = (myPlayerIndex + i) % numPlayers;
 
         // Render each player's character
         const character = characters[player];
-        toAnimate.push(<img
+        characterBacks.push(<img
             key={`character-back-${i}`}
             className='card'
             src={`./characters/Character Back.jpg`}
@@ -59,7 +62,7 @@ export default props => {
         const ROLE_RATIO = 0.25;
         const role = roles[player];
         const roleName = role.name || 'Role Back';
-        toAnimate.push(<img
+        roleCards.push(<img
             key={`role-${role.id}`}
             className='card'
             src={`./roles/${roleName}.jpg`}
@@ -73,25 +76,23 @@ export default props => {
         />);
 
         const CARD_RATIO = 0.3;
-        // Show number of cards
+        // Show other player's hands
         if (playOrder[player] !== playerID) {
             const hand = hands[playOrder[player]];
+            // Show the card backs
             hand.forEach(card => {
-                toAnimate.push(<img
-                    key={`card-${card.id}`}
-                    className='card'
-                    src={'./cards/Card Back.jpg'}
-                    alt={'card'}
-                    style={{
-                        left: playerArea.x + INFO_DELTA,
-                        top: playerArea.y + (1 - CARD_RATIO) * scaledHeight - INFO_DELTA,
-                        width: scaledWidth * CARD_RATIO,
-                        height: scaledHeight * CARD_RATIO,
-                    }}
-                />);
+                playerCards.push({
+                    key: `card-${card.id}`,
+                    name: 'Card Back',
+                    left: playerArea.x + INFO_DELTA,
+                    top: playerArea.y + (1 - CARD_RATIO) * scaledHeight - INFO_DELTA,
+                    width: scaledWidth * CARD_RATIO,
+                    height: scaledHeight * CARD_RATIO,
+                });
             });
+            // Show the card count
             if (hand.length > 0) {
-                toAnimate.push(<div
+                playerCardLabels.push(<div
                     key={`card-count-${i}`}
                     className='game-label'
                     style={{
@@ -130,18 +131,14 @@ export default props => {
     if (phase === 'play') {
         // render my cards
         hands[playerID].forEach((card, i) => {
-            toAnimate.push(<img
-                key={`card-${card.id}`}
-                className='card selectable'
-                src={`./cards/${card.type}.jpg`}
-                alt={card.type}
-                style={{
-                    left: (scaledWidth + DELTA) * i,
-                    top: height - scaledHeight - DELTA,
-                    width: scaledWidth,
-                    height: scaledHeight,
-                }}
-            />);
+            playerCards.push({
+                key: `card-${card.id}`,
+                name: card.type,
+                left: (scaledWidth + DELTA) * i,
+                top: height - scaledHeight - DELTA,
+                width: scaledWidth,
+                height: scaledHeight,
+            });
         })
     }
 
@@ -153,6 +150,14 @@ export default props => {
         unique: true,
     });
 
+    const cardTransitions = useTransition(playerCards, card => card.key, {
+        from: {opacity: 0, left: (width - scaledWidth) / 2, top: (height - scaledHeight) / 2, width: 0, height: 0 },
+        enter: card => { return { opacity: 1, left: card.left, top: card.top, width: card.width, height: card.height } },
+        update: card => { return { opacity: 1, left: card.left, top: card.top, width: card.width, height: card.height } },
+        leave: {opacity: 0, left: (width - scaledWidth) / 2, top: (height - scaledHeight) / 2, scale: 1, width: 0, height: 0 },
+        unique: true,
+    });
+
     return <div>
         <div
             className='my-region'
@@ -160,7 +165,7 @@ export default props => {
                 height: scaledHeight + 2 * DELTA,
             }}
         />
-        {toAnimate}
+        {characterBacks}
         {characterTransitions.map(({ item, props }) => {
             const selectable = item.characterChoiceIndex !== undefined;
             const onClick = selectable ? () => selectCharacter(item.characterChoiceIndex) : undefined;
@@ -183,6 +188,23 @@ export default props => {
                 />
             </div>
         })}
+        {roleCards}
+        {cardTransitions.map(({ item, props }) => {
+            return <animated.img
+                key={item.key}
+                className='card'
+                src={`./cards/${item.name}.jpg`}
+                alt={item.name}
+                style={{
+                    opacity: props.opacity,
+                    left: props.left,
+                    top: props.top,
+                    width: props.width,
+                    height: props.height,
+                }}
+            />
+        })}
+        {playerCardLabels}
     </div>;
 }
 
