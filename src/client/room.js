@@ -11,7 +11,7 @@ const MULTIPLAYER = false;
 const SanGuoShaClient = Client({
     game: SanGuoSha,
     board: SanGuoShaBoard,
-    numPlayers: 3,
+    numPlayers: 7,
     multiplayer: MULTIPLAYER ? SocketIO({ server: 'http://localhost:8000/' }) : undefined,
     enhancer: applyMiddleware(logger),
 });

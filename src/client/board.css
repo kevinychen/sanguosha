@@ -1,9 +1,37 @@
+body {
+    margin: 0;
+}
+
 #board {
-    position: absolute;
-    width: 80%;
-    height: calc(100vh - 50px);
+    position: relative;
+    width: 100vw;
+    max-width: 1300px;
+    margin: 0 auto;
+    height: 100vh;
+    background-color: #ffebd0;
+    border: 3px solid #2B1A15;
 }
 
 .character {
     position: absolute;
+}
+
+.my-region {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color: #2B1A15;
+}
+
+.selectable {
+    cursor: pointer;
+    border: 4px solid #ffebd0;
+}
+
+.selectable:hover {
+    border: 4px solid orange;
+}
+
+.selectable:active {
+    transform: scale(0.99);
 }
