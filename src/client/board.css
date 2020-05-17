@@ -26,7 +26,7 @@ body {
 
 .selectable {
     cursor: pointer;
-    border: 4px solid #ffebd0;
+    border: 4px solid rgba(255, 255, 255, 0);
 }
 
 .selectable:hover {

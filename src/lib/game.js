@@ -70,10 +70,23 @@ export const SanGuoSha = {
             [player, shuffledCharacters.slice(NUM_CHARACTER_CHOICES * i, NUM_CHARACTER_CHOICES * (i + 1))]));
         const characters = {};
 
+        const deck = [];
+        // TODO use more than one card lol
+        for (let i = 0; i < 20; i++) {
+            deck.push({
+                value: '10',
+                suit: 'CLUB',
+                type: 'Attack',
+            });
+        }
+        const hands = Object.fromEntries(playOrder.map(player => [player, []]));
+
         return {
             roles,
             characterChoices,
             characters,
+            deck,
+            hands,
         };
     },
 
@@ -116,9 +129,11 @@ export const SanGuoSha = {
         },
 
         play: {
-            onBegin: () => {
-                // TODO deal initial cards
-                console.log('deal cards');
+            onBegin: (G, ctx) => {
+                // Deal 4 cards to each person at beginning of game
+                const { deck, hands } = G;
+                const { playOrder } = ctx;
+                playOrder.map(player => hands[player].push(...deck.splice(0, 4)));
             },
 
             turn: {

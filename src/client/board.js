@@ -31,7 +31,7 @@ export class SanGuoShaBoard extends React.Component {
 
     renderNodes() {
         const {
-            G: { roles, characterChoices, characters },
+            G: { roles, characterChoices, characters, hands },
             ctx: { numPlayers, playOrder, phase, activePlayers },
             moves: { selectCharacter },
             playerID,
@@ -108,6 +108,25 @@ export class SanGuoShaBoard extends React.Component {
                     />);
                 });
             }
+        }
+
+        if (phase === 'play') {
+            // render my cards
+            hands[playerID].forEach((card, i) => {
+                const type = card.type;
+                cards.push(<img
+                    key={`hand-img-${i}`}
+                    className='card selectable'
+                    src={`./cards/${type}.jpg`}
+                    alt={type}
+                    style={{
+                        left: (scaledWidth + DELTA) * i,
+                        top: height - scaledHeight - DELTA,
+                        width: scaledWidth,
+                        height: scaledHeight,
+                    }}
+                />);
+            })
         }
 
         return <div>
