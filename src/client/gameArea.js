@@ -15,7 +15,7 @@ export default props => {
     const {
         G: { roles, characterChoices, characters, hands },
         ctx: { numPlayers, playOrder, phase, activePlayers },
-        moves: { selectCharacter },
+        moves: { selectCharacter, playCard },
         playerID,
         clientRect,
     } = props;
@@ -84,6 +84,7 @@ export default props => {
                 playerCards.push({
                     key: `card-${card.id}`,
                     name: 'Card Back',
+                    opacity: 1,
                     left: playerArea.x + INFO_DELTA,
                     top: playerArea.y + (1 - CARD_RATIO) * scaledHeight - INFO_DELTA,
                     width: scaledWidth * CARD_RATIO,
@@ -122,7 +123,7 @@ export default props => {
                     name: choice.name,
                     left: startX + (scaledWidth + DELTA) * i,
                     top: (height - scaledHeight) / 2,
-                    characterChoiceIndex: i,
+                    selectIndex: i,
                 });
             });
         }
@@ -130,16 +131,21 @@ export default props => {
 
     if (phase === 'play') {
         // render my cards
-        hands[playerID].forEach((card, i) => {
-            playerCards.push({
-                key: `card-${card.id}`,
-                name: card.type,
-                left: (scaledWidth + DELTA) * i,
-                top: height - scaledHeight - DELTA,
-                width: scaledWidth,
-                height: scaledHeight,
-            });
-        })
+        const myHand = hands[playerID];
+        if (myHand) {
+            hands[playerID].forEach((card, i) => {
+                playerCards.push({
+                    key: `card-${card.id}`,
+                    name: card.type,
+                    opacity: card.selectable ? 1 : 0.3,
+                    left: (scaledWidth + DELTA) * i,
+                    top: height - scaledHeight - DELTA,
+                    width: scaledWidth,
+                    height: scaledHeight,
+                    selectIndex: card.selectable ? i : undefined,
+                });
+            })
+        }
     }
 
     const characterTransitions = useTransition(characterCards, card => card.key, {
@@ -151,10 +157,10 @@ export default props => {
     });
 
     const cardTransitions = useTransition(playerCards, card => card.key, {
-        from: {opacity: 0, left: (width - scaledWidth) / 2, top: (height - scaledHeight) / 2, width: 0, height: 0 },
-        enter: card => { return { opacity: 1, left: card.left, top: card.top, width: card.width, height: card.height } },
-        update: card => { return { opacity: 1, left: card.left, top: card.top, width: card.width, height: card.height } },
-        leave: {opacity: 0, left: (width - scaledWidth) / 2, top: (height - scaledHeight) / 2, scale: 1, width: 0, height: 0 },
+        from: {opacity: 0, left: width / 2, top: height / 2, width: 0, height: 0 },
+        enter: card => { return { opacity: card.opacity, left: card.left, top: card.top, width: card.width, height: card.height } },
+        update: card => { return { opacity: card.opacity, left: card.left, top: card.top, width: card.width, height: card.height } },
+        leave: {opacity: 0, left: width / 2, top: height / 2, scale: 1, width: 0, height: 0 },
         unique: true,
     });
 
@@ -167,8 +173,8 @@ export default props => {
         />
         {characterBacks}
         {characterTransitions.map(({ item, props }) => {
-            const selectable = item.characterChoiceIndex !== undefined;
-            const onClick = selectable ? () => selectCharacter(item.characterChoiceIndex) : undefined;
+            const selectable = item.selectIndex !== undefined;
+            const onClick = selectable ? () => selectCharacter(item.selectIndex) : undefined;
             return <div
                 key={item.key}
                 className={classNames('card', {'selectable': selectable})}
@@ -190,9 +196,12 @@ export default props => {
         })}
         {roleCards}
         {cardTransitions.map(({ item, props }) => {
+            const selectable = item.selectIndex !== undefined;
+            const onClick = selectable ? () => playCard(item.selectIndex) : undefined;
             return <animated.img
                 key={item.key}
-                className='card'
+                className={classNames('card', {'selectable': selectable})}
+                onClick={onClick}
                 src={`./cards/${item.name}.jpg`}
                 alt={item.name}
                 style={{

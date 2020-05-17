@@ -1,4 +1,6 @@
 import CHARACTERS from './characters.js';
+import CARD_TYPES from './cardTypes.js';
+import gameArea from '../client/gameArea.js';
 
 // Recommended role distribution for different numbers of players
 // http://www.englishsanguosha.com/rules/roles
@@ -21,18 +23,32 @@ function findKingPlayer(G) {
     return G.roles.findIndex(role => role.name === 'King');
 }
 
+/* Moves */
+
 function selectCharacter(G, ctx, index) {
+    const { characterChoices, characters } = G;
     const { playerID } = ctx;
-    G.characters[playerID] = G.characterChoices[playerID][index];
-    G.characterChoices[playerID] = undefined;
+    characters[playerID] = characterChoices[playerID][index];
+    characterChoices[playerID] = undefined;
 }
 
-function playCard(G, ctx, card) {
-    // TODO
+function playCard(G, ctx, index) {
+    const { hands } = G;
+    const { playerID } = ctx;
+    const [card] = hands[playerID].splice(index, 1);
+    G.activeCard = card;
 }
 
-function discard(G, ctx, cards) {
-    // TODO
+/* Game object helper functions */
+
+function onBeforeMove(G, ctx) {
+    const { hands } = G;
+    const { currentPlayer, playOrder } = ctx;
+    playOrder.forEach(player => {
+        hands[player].forEach(card => {
+            card.selectable = player === currentPlayer && CARD_TYPES[card.type].canStart;
+        });
+    });
 }
 
 const turn = {
@@ -46,16 +62,13 @@ const turn = {
             moves: { selectCharacter },
         },
 
-        action: {
+        play: {
             moves: { playCard },
-            next: 'discard',
-        },
-
-        maybeDiscard: {
-            moves: { discard },
         },
     },
 };
+
+/* Game object */
 
 export const SanGuoSha = {
     name: "san-guo-sha",
@@ -94,6 +107,7 @@ export const SanGuoSha = {
         }
 
         const hands = Object.fromEntries(playOrder.map(player => [player, []]));
+        const activeCard = undefined;
 
         return {
             roles,
@@ -101,6 +115,7 @@ export const SanGuoSha = {
             characters,
             deck,
             hands,
+            activeCard,
         };
     },
 
@@ -125,7 +140,7 @@ export const SanGuoSha = {
         selectCharacters: {
             start: true,
             onBegin: (G, ctx) => {
-                const { events, playOrder } = ctx;
+                const { playOrder, events } = ctx;
                 events.setActivePlayers({
                     // first the king selects a character
                     value: {[playOrder[findKingPlayer(G)]]: 'selectCharacter'},
@@ -135,6 +150,13 @@ export const SanGuoSha = {
                         others: 'selectCharacter',
                         moveLimit: 1,
                     }
+                });
+
+                // make choices automatically for easier testing
+                // TODO remove
+                playOrder.forEach(player => {
+                    G.characters[player] = G.characterChoices[player][0];
+                    G.characterChoices[player] = undefined;
                 });
             },
             // end select characters phase if everyone has made a character choice
@@ -152,7 +174,7 @@ export const SanGuoSha = {
 
             turn: {
                 ...turn,
-                onBegin: (_G, ctx) => {
+                onBegin: (G, ctx) => {
                     const { events } = ctx;
 
                     // TODO run begin phase powers
@@ -160,11 +182,23 @@ export const SanGuoSha = {
                     // TODO draw cards
 
                     events.setActivePlayers({
-                        currentPlayer: 'action',
+                        currentPlayer: 'play',
                     })
+
+                    onBeforeMove(G, ctx);
                 },
                 onEnd: () => {
                     // TODO run end phase powers
+                },
+                onMove: (G, ctx) => {
+                    const { activeCard } = G;
+                    if (activeCard) {
+                        // TODO
+                        console.log('Processing active card');
+                        console.log(activeCard);
+                    }
+
+                    onBeforeMove(G, ctx);
                 }
             },
         },
