@@ -62,7 +62,6 @@ export default function setup(ctx) {
     }
 
     const hands = Object.fromEntries(playOrder.map(player => [player, []]));
-    const activeCard = undefined;
 
     return {
         roles,
@@ -70,6 +69,5 @@ export default function setup(ctx) {
         characters,
         deck,
         hands,
-        activeCard,
     };
 }

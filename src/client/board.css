@@ -43,3 +43,14 @@ body {
 .selectable > .item:active {
     transform: scale(0.99);
 }
+
+.target-line {
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+}
+
+.target-line > .item {
+    stroke: orange;
+    stroke-width: 2;
+}

@@ -1,9 +1,5 @@
 import setup from './setup.js';
 
-function findKingPlayer(G) {
-    return G.roles.findIndex(role => role.name === 'King');
-}
-
 /* Moves */
 
 function selectCharacter(G, ctx, index) {
@@ -27,14 +23,23 @@ function playCard(G, ctx, index) {
     }
 }
 
-function selectPlayer(G, _ctx, playerID) {
-    const { activeCard } = G;
-    activeCard.player = playerID;
+function targetPlayer(G, ctx, target) {
+    const { playerID } = ctx;
+    G.targets.push({ targeter: playerID, target });
 }
 
 function ignore() {}
 
 /* Game object helper functions */
+
+function findKingPlayer(G) {
+    return G.roles.findIndex(role => role.name === 'King');
+}
+
+const turnOrder = {
+    first: findKingPlayer,
+    next: (_G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+};
 
 function prepareNextPlay(G, ctx) {
     const { events } = ctx;
@@ -42,32 +47,8 @@ function prepareNextPlay(G, ctx) {
         currentPlayer: 'play',
     })
     G.activeCard = undefined;
+    G.targets = [];
 }
-
-const turn = {
-    order: {
-        first: findKingPlayer,
-        next: (_G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
-    },
-
-    stages: {
-        selectCharacter: {
-            moves: { selectCharacter },
-        },
-
-        play: {
-            moves: { playCard },
-        },
-
-        targetOtherPlayerInRange: {
-            moves: { selectPlayer },
-        },
-
-        tryDodge: {
-            moves: { playCard, ignore },
-        }
-    },
-};
 
 /* Game object */
 
@@ -96,6 +77,7 @@ export const SanGuoSha = {
     phases: {
         selectCharacters: {
             start: true,
+
             onBegin: (G, ctx) => {
                 const { playOrder, events } = ctx;
                 events.setActivePlayers({
@@ -116,9 +98,20 @@ export const SanGuoSha = {
                     G.characterChoices[player] = undefined;
                 });
             },
+
             // end select characters phase if everyone has made a character choice
             endIf: G => Object.values(G.characterChoices).every(choices => choices === undefined),
+
             next: 'play',
+
+            turn: {
+                order: turnOrder,
+                stages: {
+                    selectCharacter: {
+                        moves: { selectCharacter },
+                    },
+                },
+            }
         },
 
         play: {
@@ -130,7 +123,7 @@ export const SanGuoSha = {
             },
 
             turn: {
-                ...turn,
+                order: turnOrder,
                 onBegin: (G, ctx) => {
                     // TODO run begin phase powers
                     // TODO run judgment
@@ -142,7 +135,7 @@ export const SanGuoSha = {
                     // TODO run end phase powers
                 },
                 onMove: (G, ctx) => {
-                    const { activeCard } = G;
+                    const { activeCard, targets } = G;
                     const { events } = ctx;
                     if (activeCard) {
                         activeCard.step = (activeCard.step + 1) || 0;
@@ -155,7 +148,7 @@ export const SanGuoSha = {
                                     });
                                 } else if (activeCard.step === 1) {
                                     events.setActivePlayers({
-                                        value: { [activeCard.player]: 'tryDodge' },
+                                        value: { [targets[0].target]: 'tryDodge' },
                                         moveLimit: 1,
                                     });
                                 } else {
@@ -172,10 +165,21 @@ export const SanGuoSha = {
                             }
                         }
                     }
-                }
+                },
+                stages: {
+                    play: {
+                        moves: { playCard },
+                    },
+
+                    targetOtherPlayerInRange: {
+                        moves: { targetPlayer },
+                    },
+
+                    tryDodge: {
+                        moves: { playCard, ignore },
+                    },
+                },
             },
         },
     },
-
-    turn,
 };

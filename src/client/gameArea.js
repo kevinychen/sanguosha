@@ -14,9 +14,9 @@ const INFO_DELTA = 4;
 
 export default props => {
     const { G, ctx, moves, playerID: myPlayer, clientRect } = props;
-    const { roles, characterChoices, characters, hands } = G;
+    const { roles, characterChoices, characters, hands, targets } = G;
     const { numPlayers, playOrder, phase, activePlayers } = ctx;
-    const { selectCharacter, playCard, selectPlayer } = moves;
+    const { selectCharacter, playCard, targetPlayer } = moves;
 
     const { width, height } = clientRect;
     const { playerAreas, scale } = findPlayerAreas(numPlayers, clientRect);
@@ -30,6 +30,7 @@ export default props => {
     const roleCards = [];
     const playerCards = [];
     const playerCardLabels = [];
+    const targetLines = [];
 
     playerAreas.forEach((playerArea, i) => {
         const playerIndex = (myPlayerIndex + i) % numPlayers;
@@ -56,7 +57,7 @@ export default props => {
                 left: playerArea.x,
                 top: playerArea.y,
                 // TODO this ignores the range criteria
-                onClick: myStage === 'targetOtherPlayerInRange' ? () => selectPlayer(player) : undefined,
+                onClick: myStage === 'targetOtherPlayerInRange' ? () => targetPlayer(player) : undefined,
             });
         }
 
@@ -114,20 +115,36 @@ export default props => {
         }
     });
 
+    if (targets !== undefined) {
+        targets.forEach(({targeter, target}) => {
+            const targeterArea = playerAreas.find((_, i) => playOrder[(myPlayerIndex + i) % numPlayers] === targeter);
+            const targetArea = playerAreas.find((_, i) => playOrder[(myPlayerIndex + i) % numPlayers] === target);
+            targetLines.push({
+                key: `target-${targeter}-${target}`,
+                startX: targeterArea.x + scaledWidth / 2,
+                startY: targeterArea.y + scaledHeight / 2,
+                endX: targetArea.x + scaledWidth / 2,
+                endY: targetArea.y + scaledHeight / 2,
+            });
+        });
+    }
+
     // render the three starting characters (select one)
     if (phase === 'selectCharacters') {
         if (myStage === 'selectCharacter') {
             const choices = characterChoices[myPlayer];
-            const startX = (width - choices.length * scaledWidth - (choices.length - 1) * DELTA) / 2;
-            choices.forEach((choice, i) => {
-                characterCards.push({
-                    key: `character-${choice.name}`,
-                    name: choice.name,
-                    left: startX + (scaledWidth + DELTA) * i,
-                    top: (height - scaledHeight) / 2,
-                    onClick: () => selectCharacter(i),
+            if (choices !== undefined) {
+                const startX = (width - choices.length * scaledWidth - (choices.length - 1) * DELTA) / 2;
+                choices.forEach((choice, i) => {
+                    characterCards.push({
+                        key: `character-${choice.name}`,
+                        name: choice.name,
+                        left: startX + (scaledWidth + DELTA) * i,
+                        top: (height - scaledHeight) / 2,
+                        onClick: () => selectCharacter(i),
+                    });
                 });
-            });
+            }
         }
     }
 
@@ -164,6 +181,14 @@ export default props => {
         enter: card => { return { opacity: card.opacity, left: card.left, top: card.top, width: card.width, height: card.height } },
         update: card => { return { opacity: card.opacity, left: card.left, top: card.top, width: card.width, height: card.height } },
         leave: {opacity: 0, left: width / 2, top: height / 2, scale: 1, width: 0, height: 0 },
+        unique: true,
+    });
+
+    const targetTransitions = useTransition(targetLines, item => item.key, {
+        from: item => { return { opacity: 0, endX: item.startX, endY: item.startY } },
+        enter: item => { return { opacity: 1, endX: item.endX, endY: item.endY } },
+        update: item => { return { opacity: 1, endX: item.endX, endY: item.endY } },
+        leave: item => { return { opacity: 0, endX: item.endX, endY: item.endY } },
         unique: true,
     });
 
@@ -216,6 +241,16 @@ export default props => {
                 />
             </div>
         })}
+        <svg className='positioned target-line' >
+            {targetTransitions.map(({ item, props }) => <animated.line
+                key={item.key}
+                className='item'
+                x1={item.startX}
+                y1={item.startY}
+                x2={props.endX}
+                y2={props.endY}
+            />)}
+        </svg>
         {playerCardLabels}
     </div>;
 }
