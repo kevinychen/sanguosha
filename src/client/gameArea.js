@@ -15,8 +15,8 @@ export default props => {
     const {
         G: { roles, characterChoices, characters, hands },
         ctx: { numPlayers, playOrder, phase, activePlayers },
-        moves: { selectCharacter, playCard },
-        playerID,
+        moves: { selectCharacter, playCard, selectPlayer },
+        playerID: myPlayer,
         clientRect,
     } = props;
 
@@ -24,7 +24,8 @@ export default props => {
     const { playerAreas, scale } = findPlayerAreas(numPlayers, clientRect);
     const scaledWidth = PLAYER_AREA_WIDTH * scale;
     const scaledHeight = PLAYER_AREA_HEIGHT * scale;
-    const myPlayerIndex = Math.max(playOrder.indexOf(playerID), 0);
+    const myPlayerIndex = Math.max(playOrder.indexOf(myPlayer), 0);
+    const myStage = activePlayers ? activePlayers[myPlayer] : undefined;
 
     const characterBacks = [];
     const characterCards = [];
@@ -33,13 +34,14 @@ export default props => {
     const playerCardLabels = [];
 
     playerAreas.forEach((playerArea, i) => {
-        const player = (myPlayerIndex + i) % numPlayers;
+        const playerIndex = (myPlayerIndex + i) % numPlayers;
+        const player = playOrder[playerIndex];
 
         // Render each player's character
-        const character = characters[player];
+        const character = characters[playerIndex];
         characterBacks.push(<img
             key={`character-back-${i}`}
-            className='card'
+            className='positioned'
             src={`./characters/Character Back.jpg`}
             alt={'Character Back'}
             style={{
@@ -55,16 +57,17 @@ export default props => {
                 name: character ? character.name : 'Character Back',
                 left: playerArea.x,
                 top: playerArea.y,
+                onClick: myStage === 'targetOtherPlayer' ? () => selectPlayer(player) : undefined,
             });
         }
 
         // Ratio of role card size in top right of character card, to character card size
         const ROLE_RATIO = 0.25;
-        const role = roles[player];
+        const role = roles[playerIndex];
         const roleName = role.name || 'Role Back';
         roleCards.push(<img
             key={`role-${role.id}`}
-            className='card'
+            className='positioned'
             src={`./roles/${roleName}.jpg`}
             alt={roleName}
             style={{
@@ -77,8 +80,8 @@ export default props => {
 
         const CARD_RATIO = 0.3;
         // Show other player's hands
-        if (playOrder[player] !== playerID) {
-            const hand = hands[playOrder[player]];
+        if (player !== myPlayer) {
+            const hand = hands[player];
             // Show the card backs
             hand.forEach(card => {
                 playerCards.push({
@@ -114,8 +117,8 @@ export default props => {
 
     // render the three starting characters (select one)
     if (phase === 'selectCharacters') {
-        if (activePlayers[playerID] === 'selectCharacter') {
-            const choices = characterChoices[playerID];
+        if (myStage === 'selectCharacter') {
+            const choices = characterChoices[myPlayer];
             const startX = (width - choices.length * scaledWidth - (choices.length - 1) * DELTA) / 2;
             choices.forEach((choice, i) => {
                 characterCards.push({
@@ -123,7 +126,7 @@ export default props => {
                     name: choice.name,
                     left: startX + (scaledWidth + DELTA) * i,
                     top: (height - scaledHeight) / 2,
-                    selectIndex: i,
+                    onClick: () => selectCharacter(i),
                 });
             });
         }
@@ -131,9 +134,9 @@ export default props => {
 
     if (phase === 'play') {
         // render my cards
-        const myHand = hands[playerID];
+        const myHand = hands[myPlayer];
         if (myHand) {
-            hands[playerID].forEach((card, i) => {
+            hands[myPlayer].forEach((card, i) => {
                 playerCards.push({
                     key: `card-${card.id}`,
                     name: card.type,
@@ -142,7 +145,7 @@ export default props => {
                     top: height - scaledHeight - DELTA,
                     width: scaledWidth,
                     height: scaledHeight,
-                    selectIndex: card.selectable ? i : undefined,
+                    onClick: card.selectable ? () => playCard(i) : undefined,
                 });
             })
         }
@@ -173,16 +176,14 @@ export default props => {
         />
         {characterBacks}
         {characterTransitions.map(({ item, props }) => {
-            const selectable = item.selectIndex !== undefined;
-            const onClick = selectable ? () => selectCharacter(item.selectIndex) : undefined;
             return <div
                 key={item.key}
-                className={classNames('card', {'selectable': selectable})}
-                onClick={onClick}
+                className={classNames('positioned', {'selectable': item.onClick !== undefined})}
+                onClick={item.onClick}
             >
                 <animated.img
+                    className='positioned item'
                     src={`./characters/${item.name}.jpg`}
-                    className='card'
                     alt={item.name}
                     style={{
                         opacity: props.opacity,
@@ -196,22 +197,24 @@ export default props => {
         })}
         {roleCards}
         {cardTransitions.map(({ item, props }) => {
-            const selectable = item.selectIndex !== undefined;
-            const onClick = selectable ? () => playCard(item.selectIndex) : undefined;
-            return <animated.img
+            return <div
                 key={item.key}
-                className={classNames('card', {'selectable': selectable})}
-                onClick={onClick}
-                src={`./cards/${item.name}.jpg`}
-                alt={item.name}
-                style={{
-                    opacity: props.opacity,
-                    left: props.left,
-                    top: props.top,
-                    width: props.width,
-                    height: props.height,
-                }}
-            />
+                className={classNames('positioned', { 'selectable': item.onClick !== undefined })}
+                onClick={item.onClick}
+            >
+                <animated.img
+                    className='positioned item'
+                    src={`./cards/${item.name}.jpg`}
+                    alt={item.name}
+                    style={{
+                        opacity: props.opacity,
+                        left: props.left,
+                        top: props.top,
+                        width: props.width,
+                        height: props.height,
+                    }}
+                />
+            </div>
         })}
         {playerCardLabels}
     </div>;

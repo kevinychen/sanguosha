@@ -13,7 +13,7 @@ body {
     border: 3px solid #2B1A15;
 }
 
-.card {
+.positioned {
     position: absolute;
 }
 
@@ -29,15 +29,17 @@ body {
     background-color: #2B1A15;
 }
 
-.selectable {
+.selectable > .item {
     cursor: pointer;
+    margin-left: -4px;
+    margin-top: -4px;
     border: 4px solid rgba(255, 255, 255, 0);
 }
 
-.selectable:hover {
+.selectable > .item:hover {
     border: 4px solid orange;
 }
 
-.selectable:active {
+.selectable > .item:active {
     transform: scale(0.99);
 }

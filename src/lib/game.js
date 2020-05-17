@@ -1,6 +1,5 @@
 import CHARACTERS from './characters.js';
 import CARD_TYPES from './cardTypes.js';
-import gameArea from '../client/gameArea.js';
 
 // Recommended role distribution for different numbers of players
 // http://www.englishsanguosha.com/rules/roles
@@ -36,7 +35,16 @@ function playCard(G, ctx, index) {
     const { hands } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
-    G.activeCard = card;
+    G.activeCard = {
+        ...card,
+        step: 0,
+    };
+}
+
+function selectPlayer(G, _ctx, playerID) {
+    const { activeCard } = G;
+    activeCard.step++;
+    activeCard.player = playerID;
 }
 
 /* Game object helper functions */
@@ -64,6 +72,10 @@ const turn = {
 
         play: {
             moves: { playCard },
+        },
+
+        targetOtherPlayer: {
+            moves: { selectPlayer },
         },
     },
 };
@@ -192,10 +204,22 @@ export const SanGuoSha = {
                 },
                 onMove: (G, ctx) => {
                     const { activeCard } = G;
+                    const { events } = ctx;
                     if (activeCard) {
-                        // TODO
-                        console.log('Processing active card');
-                        console.log(activeCard);
+                        switch (activeCard.type) {
+                            case 'Attack': {
+                                if (activeCard.step === 0) {
+                                    events.setActivePlayers({
+                                        currentPlayer: 'targetOtherPlayer',
+                                        moveLimit: 1,
+                                    });
+                                }
+                                break;
+                            }
+                            default: {
+
+                            }
+                        }
                     }
 
                     onBeforeMove(G, ctx);
