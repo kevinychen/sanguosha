@@ -1,6 +1,7 @@
 import * as classNames from 'classnames';
 import React from 'react';
 import { animated, useTransition } from 'react-spring';
+import { isCardSelectable } from '../lib/cards';
 
 const PLAYER_AREA_WIDTH = 200;
 const PLAYER_AREA_HEIGHT = 300;
@@ -12,13 +13,10 @@ const DELTA = 10;
 const INFO_DELTA = 4;
 
 export default props => {
-    const {
-        G: { roles, characterChoices, characters, hands },
-        ctx: { numPlayers, playOrder, phase, activePlayers },
-        moves: { selectCharacter, playCard, selectPlayer },
-        playerID: myPlayer,
-        clientRect,
-    } = props;
+    const { G, ctx, moves, playerID: myPlayer, clientRect } = props;
+    const { roles, characterChoices, characters, hands } = G;
+    const { numPlayers, playOrder, phase, activePlayers } = ctx;
+    const { selectCharacter, playCard, selectPlayer } = moves;
 
     const { width, height } = clientRect;
     const { playerAreas, scale } = findPlayerAreas(numPlayers, clientRect);
@@ -57,7 +55,8 @@ export default props => {
                 name: character ? character.name : 'Character Back',
                 left: playerArea.x,
                 top: playerArea.y,
-                onClick: myStage === 'targetOtherPlayer' ? () => selectPlayer(player) : undefined,
+                // TODO this ignores the range criteria
+                onClick: myStage === 'targetOtherPlayerInRange' ? () => selectPlayer(player) : undefined,
             });
         }
 
@@ -137,15 +136,16 @@ export default props => {
         const myHand = hands[myPlayer];
         if (myHand) {
             hands[myPlayer].forEach((card, i) => {
+                const selectable = isCardSelectable(G, ctx, myPlayer, card);
                 playerCards.push({
                     key: `card-${card.id}`,
                     name: card.type,
-                    opacity: card.selectable ? 1 : 0.3,
+                    opacity: selectable ? 1 : 0.3,
                     left: (scaledWidth + DELTA) * i,
                     top: height - scaledHeight - DELTA,
                     width: scaledWidth,
                     height: scaledHeight,
-                    onClick: card.selectable ? () => playCard(i) : undefined,
+                    onClick: selectable ? () => playCard(i) : undefined,
                 });
             })
         }

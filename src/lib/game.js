@@ -1,5 +1,4 @@
 import CHARACTERS from './characters.js';
-import CARD_TYPES from './cardTypes.js';
 
 // Recommended role distribution for different numbers of players
 // http://www.englishsanguosha.com/rules/roles
@@ -32,31 +31,34 @@ function selectCharacter(G, ctx, index) {
 }
 
 function playCard(G, ctx, index) {
-    const { hands } = G;
+    const { hands, activeCard } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
-    G.activeCard = {
-        ...card,
-        step: 0,
-    };
+    if (activeCard === undefined) {
+        G.activeCard = {
+            ...card,
+            responseCards: [],
+        };
+    } else {
+        activeCard.responseCards.push(card);
+    }
 }
 
 function selectPlayer(G, _ctx, playerID) {
     const { activeCard } = G;
-    activeCard.step++;
     activeCard.player = playerID;
 }
 
+function ignore() {}
+
 /* Game object helper functions */
 
-function onBeforeMove(G, ctx) {
-    const { hands } = G;
-    const { currentPlayer, playOrder } = ctx;
-    playOrder.forEach(player => {
-        hands[player].forEach(card => {
-            card.selectable = player === currentPlayer && CARD_TYPES[card.type].canStart;
-        });
-    });
+function prepareNextPlay(G, ctx) {
+    const { events } = ctx;
+    events.setActivePlayers({
+        currentPlayer: 'play',
+    })
+    G.activeCard = undefined;
 }
 
 const turn = {
@@ -74,9 +76,13 @@ const turn = {
             moves: { playCard },
         },
 
-        targetOtherPlayer: {
+        targetOtherPlayerInRange: {
             moves: { selectPlayer },
         },
+
+        tryDodge: {
+            moves: { playCard, ignore },
+        }
     },
 };
 
@@ -106,11 +112,18 @@ export const SanGuoSha = {
 
         const unshuffledDeck = [];
         // TODO use more than one card lol
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 10; i++) {
             unshuffledDeck.push({
                 value: '10',
                 suit: 'CLUB',
                 type: 'Attack',
+            });
+        }
+        for (let i = 0; i < 10; i++) {
+            unshuffledDeck.push({
+                value: '7',
+                suit: 'DIAMOND',
+                type: 'Dodge',
             });
         }
         const deck = random.Shuffle(unshuffledDeck);
@@ -187,17 +200,11 @@ export const SanGuoSha = {
             turn: {
                 ...turn,
                 onBegin: (G, ctx) => {
-                    const { events } = ctx;
-
                     // TODO run begin phase powers
                     // TODO run judgment
                     // TODO draw cards
 
-                    events.setActivePlayers({
-                        currentPlayer: 'play',
-                    })
-
-                    onBeforeMove(G, ctx);
+                    prepareNextPlay(G, ctx);
                 },
                 onEnd: () => {
                     // TODO run end phase powers
@@ -206,23 +213,33 @@ export const SanGuoSha = {
                     const { activeCard } = G;
                     const { events } = ctx;
                     if (activeCard) {
+                        activeCard.step = (activeCard.step + 1) || 0;
                         switch (activeCard.type) {
                             case 'Attack': {
                                 if (activeCard.step === 0) {
                                     events.setActivePlayers({
-                                        currentPlayer: 'targetOtherPlayer',
+                                        currentPlayer: 'targetOtherPlayerInRange',
                                         moveLimit: 1,
                                     });
+                                } else if (activeCard.step === 1) {
+                                    events.setActivePlayers({
+                                        value: { [activeCard.player]: 'tryDodge' },
+                                        moveLimit: 1,
+                                    });
+                                } else {
+                                    if (activeCard.responseCards.length === 0) {
+                                        console.log('Attack hit!');
+                                    } else {
+                                        console.log('Attack dodged.');
+                                    }
+                                    prepareNextPlay(G, ctx);
                                 }
                                 break;
                             }
                             default: {
-
                             }
                         }
                     }
-
-                    onBeforeMove(G, ctx);
                 }
             },
         },
