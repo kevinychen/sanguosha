@@ -7,6 +7,9 @@ const PLAYER_AREA_HEIGHT = 300;
 // Minimum number of pixels needed between two characters
 const DELTA = 10;
 
+// Number of pixels between info objects inside the character card to the character card's border
+const INFO_DELTA = 4;
+
 export class SanGuoShaBoard extends React.Component {
 
     constructor(props) {
@@ -49,6 +52,7 @@ export class SanGuoShaBoard extends React.Component {
         const myPlayerIndex = Math.max(playOrder.indexOf(playerID), 0);
 
         const cards = [];
+        const otherNodes = [];
 
         // render each player's character
         playerAreas.forEach((playerArea, i) => {
@@ -70,8 +74,6 @@ export class SanGuoShaBoard extends React.Component {
 
             // Ratio of role card size in top right of character card, to character card size
             const ROLE_RATIO = 0.25;
-            // Number of pixels between the role card and the border of the character card
-            const ROLE_DELTA = 4;
             const role = roles[player] || 'Role Back';
             cards.push(<img
                 key={`playerArea-role-img-${i}`}
@@ -79,12 +81,49 @@ export class SanGuoShaBoard extends React.Component {
                 src={`./roles/${role}.jpg`}
                 alt={role}
                 style={{
-                    left: playerArea.x + (1 - ROLE_RATIO) * scaledWidth - ROLE_DELTA,
-                    top: playerArea.y + ROLE_DELTA,
+                    left: playerArea.x + (1 - ROLE_RATIO) * scaledWidth - INFO_DELTA,
+                    top: playerArea.y + INFO_DELTA,
                     width: scaledWidth * ROLE_RATIO,
                     height: scaledHeight * ROLE_RATIO,
                 }}
             />);
+
+            const CARD_RATIO = 0.3;
+            // Show number of cards
+            if (playOrder[player] !== playerID) {
+                const hand = hands[playOrder[player]];
+                hand.forEach((_card, j) => {
+                    cards.push(<img
+                        key={`playerArea-card-img-${i}-${j}`}
+                        className='card'
+                        src={'./cards/Card Back.jpg'}
+                        alt={'card'}
+                        style={{
+                            left: playerArea.x + INFO_DELTA,
+                            top: playerArea.y + (1 - CARD_RATIO) * scaledHeight - INFO_DELTA,
+                            width: scaledWidth * CARD_RATIO,
+                            height: scaledHeight * CARD_RATIO,
+                        }}
+                    />);
+                });
+                if (hand.length > 0) {
+                    otherNodes.push(<div
+                        key={`playerArea-card-count-${i}`}
+                        className='game-label'
+                        style={{
+                            left: playerArea.x + INFO_DELTA,
+                            top: playerArea.y + (1 - CARD_RATIO) * scaledHeight - INFO_DELTA,
+                            width: scaledWidth * CARD_RATIO,
+                            height: scaledHeight * CARD_RATIO,
+                            marginLeft: scaledWidth * CARD_RATIO * 0.1,
+                            marginTop: scaledWidth * CARD_RATIO * 0.1,
+                            fontSize: scaledWidth * CARD_RATIO * 0.6,
+                        }}
+                    >
+                        {hand.length}
+                    </div>);
+                }
+            }
         });
 
         // render the three starting characters (select one)
@@ -137,6 +176,7 @@ export class SanGuoShaBoard extends React.Component {
                 }}
             />
             {cards}
+            {otherNodes}
         </div>;
     }
 

@@ -17,6 +17,11 @@ body {
     position: absolute;
 }
 
+.game-label {
+    position: absolute;
+    color: white;
+}
+
 .my-region {
     position: absolute;
     bottom: 0;
