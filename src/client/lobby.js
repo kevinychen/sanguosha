@@ -1,10 +1,10 @@
 import React from 'react';
 import { Lobby } from 'boardgame.io/react';
-import { TicTacToe } from '../lib/game';
-import { TicTacToeBoard } from './board';
+import { SanGuoSha } from '../lib/game';
+import { SanGuoShaBoard } from './board';
 
 const server = `http://${window.location.hostname}:8000`;
-const importedGames = [{ game: TicTacToe, board: TicTacToeBoard }];
+const importedGames = [{ game: SanGuoSha, board: SanGuoShaBoard }];
 
 export default () => (
     <div>
