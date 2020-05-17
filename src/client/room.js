@@ -38,7 +38,7 @@ export default class Room extends React.Component {
         }
         return (
             <div>
-                <SanGuoShaClient playerID={this.state.playerID} />
+                <SanGuoShaClient playerID={MULTIPLAYER ? this.state.playerID : "0"} />
             </div>
         );
     }

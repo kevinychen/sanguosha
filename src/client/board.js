@@ -72,7 +72,7 @@ export class SanGuoShaBoard extends React.Component {
             const ROLE_RATIO = 0.25;
             // Number of pixels between the role card and the border of the character card
             const ROLE_DELTA = 4;
-            const role = roles[player];
+            const role = roles[player] || 'Role Back';
             cards.push(<img
                 key={`playerArea-role-img-${i}`}
                 className='card'

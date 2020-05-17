@@ -77,6 +77,23 @@ export const SanGuoSha = {
         };
     },
 
+    playerView: (G, ctx, playerID) => {
+        const { roles } = G;
+        const { numPlayers, playOrder } = ctx;
+
+        const newRoles = { ...roles };
+        for (let i = 0; i < numPlayers; i++) {
+            // TODO show role if dead
+            if (playOrder[i] !== playerID && newRoles[i] !== 'King') {
+                newRoles[i] = undefined;
+            }
+        }
+        return {
+            ...G,
+            roles: newRoles,
+        };
+    },
+
     phases: {
         selectCharacters: {
             start: true,
