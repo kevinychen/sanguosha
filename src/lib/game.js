@@ -48,6 +48,21 @@ const turnOrder = {
     next: (_G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
 };
 
+function drawCard(G, ctx, player) {
+    const { deck, discard, hands } = G;
+    const { random } = ctx;
+
+    // shuffle cards in discard back into the deck
+    if (deck.length === 0) {
+        if (discard.length === 0) {
+            console.error('No cards left!');
+        }
+        deck.push(...random.Shuffle(discard.splice(0, discard.length)));
+    }
+
+    hands[player].push(G.deck.pop());
+}
+
 function prepareNextPlay(G, ctx) {
     const { events } = ctx;
     events.setActivePlayers({
@@ -134,9 +149,14 @@ export const SanGuoSha = {
             turn: {
                 order: turnOrder,
                 onBegin: (G, ctx) => {
+                    const { currentPlayer } = ctx;
+
                     // TODO run begin phase powers
                     // TODO run judgment
-                    // TODO draw cards
+
+                    for (let i = 0; i < 2; i++) {
+                        drawCard(G, ctx, currentPlayer);
+                    }
 
                     prepareNextPlay(G, ctx);
                 },
