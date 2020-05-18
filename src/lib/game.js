@@ -143,7 +143,7 @@ export const SanGuoSha = {
                     // TODO run end phase powers
                 },
                 onMove: (G, ctx) => {
-                    const { activeCard, targets } = G;
+                    const { healths, activeCard, targets } = G;
                     const { events } = ctx;
                     if (activeCard) {
                         activeCard.step = (activeCard.step + 1) || 0;
@@ -161,7 +161,8 @@ export const SanGuoSha = {
                                     });
                                 } else {
                                     if (activeCard.responseCards.length === 0) {
-                                        console.log('Attack hit!');
+                                        // TODO do brink of death and death logic
+                                        healths[targets[0].target].current--;
                                     } else {
                                         console.log('Attack dodged.');
                                     }

@@ -16,7 +16,6 @@ export default props => {
     const { G, ctx, moves, events, playerID: myPlayer, clientRect } = props;
     const { roles, characterChoices, characters, healths, hands, targets } = G;
     const { numPlayers, playOrder, phase, activePlayers } = ctx;
-    const { selectCharacter, playCard, targetPlayer } = moves;
 
     const { width, height } = clientRect;
     const { playerAreas, scale } = findPlayerAreas(numPlayers, clientRect);
@@ -60,16 +59,17 @@ export default props => {
                 left: playerArea.x,
                 top: playerArea.y,
                 // TODO this ignores the range criteria
-                onClick: myStage === 'targetOtherPlayerInRange' ? () => targetPlayer(player) : undefined,
+                onClick: myStage === 'targetOtherPlayerInRange' ? () => moves.targetPlayer(player) : undefined,
             });
         }
 
         // Render the player's health
         if (healths[player]) {
             for (let j = 0; j < healths[player].max; j++) {
+                const color = j < healths[player].current ? 'green' : 'red';
                 healthPoints.push({
-                    key: `health-${i}-${j}`,
-                    color: j < healths[player].current ? 'green' : 'red',
+                    key: `health-${i}-${j}-${color}`,
+                    color,
                     left: playerArea.x + scaledWidth * (0.23 + j * 0.06),
                     top: playerArea.y + scaledHeight * 0.01,
                     width: scaledWidth * 0.06,
@@ -158,7 +158,7 @@ export default props => {
                     name: choice.name,
                     left: startX + (scaledWidth + DELTA) * i,
                     top: (height - scaledHeight) / 2,
-                    onClick: () => selectCharacter(i),
+                    onClick: () => moves.selectCharacter(i),
                 });
             });
         }
@@ -186,27 +186,47 @@ export default props => {
                     top: height - scaledHeight - DELTA,
                     width: scaledWidth,
                     height: scaledHeight,
-                    onClick: selectable ? () => playCard(i) : undefined,
+                    onClick: selectable ? () => moves.playCard(i) : undefined,
                 });
             })
         }
     }
 
-    if (myStage === 'play') {
+    let actionButton = undefined;
+    switch (myStage) {
+        case 'play':
+            actionButton = {
+                text: 'End turn',
+                type: 'warn',
+                onClick: () => events.endTurn(),
+            };
+            break;
+        case 'tryDodge':
+            actionButton = {
+                text: 'Take the hit',
+                type: 'warn',
+                onClick: () => moves.ignore(),
+            };
+            break;
+        default:
+            break;
+    }
+    if (actionButton !== undefined) {
         const ACTION_BUTTON_WIDTH = 120; // pixels
         const ACTION_BUTTON_HEIGHT = 30; // pixels
+        const { text, type, onClick } = actionButton;
         backNodes.push(<button
             key='action-button'
-            className='positioned selectable warn'
+            className={`positioned selectable ${type}`}
             style={{
                 left: (width - ACTION_BUTTON_WIDTH) / 2,
                 top: height - scaledHeight - ACTION_BUTTON_HEIGHT - 3 * DELTA,
                 width: ACTION_BUTTON_WIDTH,
                 height: ACTION_BUTTON_HEIGHT,
             }}
-            onClick={() => events.endTurn()}
+            onClick={onClick}
         >
-            {'End turn'}
+            {text}
         </button>);
     }
 
