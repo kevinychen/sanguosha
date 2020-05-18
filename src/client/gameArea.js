@@ -1,20 +1,19 @@
-import * as classNames from 'classnames';
 import React from 'react';
-import { animated, useTransition } from 'react-spring';
+import { animated } from 'react-spring';
 import { isCardSelectable } from '../lib/cards';
 import AnimatedItems from './animatedItems';
 
 const PLAYER_AREA_WIDTH = 200;
 const PLAYER_AREA_HEIGHT = 300;
 
-// Minimum number of pixels needed between two characters
+// Standard margin between objects
 const DELTA = 10;
 
 // Number of pixels between info objects inside the character card to the character card's border
 const INFO_DELTA = 4;
 
 export default props => {
-    const { G, ctx, moves, playerID: myPlayer, clientRect } = props;
+    const { G, ctx, moves, events, playerID: myPlayer, clientRect } = props;
     const { roles, characterChoices, characters, hands, targets } = G;
     const { numPlayers, playOrder, phase, activePlayers } = ctx;
     const { selectCharacter, playCard, targetPlayer } = moves;
@@ -26,11 +25,13 @@ export default props => {
     const myPlayerIndex = Math.max(playOrder.indexOf(myPlayer), 0);
     const myStage = activePlayers ? activePlayers[myPlayer] : undefined;
 
-    const characterBacks = [];
+    // regular nodes to render
+    const backNodes = [];
+    const frontNodes = [];
+
+    // objects to animate
     const characterCards = [];
-    const roleCards = [];
     const playerCards = [];
-    const playerCardLabels = [];
     const targetLines = [];
 
     playerAreas.forEach((playerArea, i) => {
@@ -39,7 +40,7 @@ export default props => {
 
         // Render each player's character
         const character = characters[playerIndex];
-        characterBacks.push(<img
+        backNodes.push(<img
             key={`character-back-${i}`}
             className='positioned'
             src={`./characters/Character Back.jpg`}
@@ -66,7 +67,7 @@ export default props => {
         const ROLE_RATIO = 0.25;
         const role = roles[playerIndex];
         const roleName = role.name || 'Role Back';
-        roleCards.push(<img
+        frontNodes.push(<img
             key={`role-${role.id}`}
             className='positioned'
             src={`./roles/${roleName}.jpg`}
@@ -79,8 +80,8 @@ export default props => {
             }}
         />);
 
-        const CARD_RATIO = 0.3;
         // Show other player's hands
+        const CARD_RATIO = 0.3;
         if (player !== myPlayer) {
             const hand = hands[player];
             // Show the card backs
@@ -97,7 +98,7 @@ export default props => {
             });
             // Show the card count
             if (hand.length > 0) {
-                playerCardLabels.push(<div
+                frontNodes.push(<div
                     key={`card-count-${i}`}
                     className='game-label'
                     style={{
@@ -116,6 +117,7 @@ export default props => {
         }
     });
 
+    // render lines from players targeting other players
     if (targets !== undefined) {
         targets.forEach(({targeter, target}) => {
             const targeterArea = playerAreas.find((_, i) => playOrder[(myPlayerIndex + i) % numPlayers] === targeter);
@@ -131,24 +133,30 @@ export default props => {
     }
 
     // render the three starting characters (select one)
-    if (phase === 'selectCharacters') {
-        if (myStage === 'selectCharacter') {
-            const choices = characterChoices[myPlayer];
-            if (choices !== undefined) {
-                const startX = (width - choices.length * scaledWidth - (choices.length - 1) * DELTA) / 2;
-                choices.forEach((choice, i) => {
-                    characterCards.push({
-                        key: `character-${choice.name}`,
-                        name: choice.name,
-                        left: startX + (scaledWidth + DELTA) * i,
-                        top: (height - scaledHeight) / 2,
-                        onClick: () => selectCharacter(i),
-                    });
+    if (myStage === 'selectCharacter') {
+        const choices = characterChoices[myPlayer];
+        if (choices !== undefined) {
+            const startX = (width - choices.length * scaledWidth - (choices.length - 1) * DELTA) / 2;
+            choices.forEach((choice, i) => {
+                characterCards.push({
+                    key: `character-${choice.name}`,
+                    name: choice.name,
+                    left: startX + (scaledWidth + DELTA) * i,
+                    top: (height - scaledHeight) / 2,
+                    onClick: () => selectCharacter(i),
                 });
-            }
+            });
         }
     }
 
+    // render my player area
+    backNodes.push(<div
+        key='my-region'
+        className='my-region'
+        style={{
+            height: scaledHeight + 2 * DELTA,
+        }}
+    />);
     if (phase === 'play') {
         // render my cards
         const myHand = hands[myPlayer];
@@ -169,14 +177,26 @@ export default props => {
         }
     }
 
-    return <div>
-        <div
-            className='my-region'
+    if (myStage === 'play') {
+        const ACTION_BUTTON_WIDTH = 120; // pixels
+        const ACTION_BUTTON_HEIGHT = 30; // pixels
+        backNodes.push(<button
+            key='action-button'
+            className='positioned selectable warn'
             style={{
-                height: scaledHeight + 2 * DELTA,
+                left: (width - ACTION_BUTTON_WIDTH) / 2,
+                top: height - scaledHeight - ACTION_BUTTON_HEIGHT - 3 * DELTA,
+                width: ACTION_BUTTON_WIDTH,
+                height: ACTION_BUTTON_HEIGHT,
             }}
-        />
-        {characterBacks}
+            onClick={() => events.endTurn()}
+        >
+            {'End turn'}
+        </button>);
+    }
+
+    return <div>
+        {backNodes}
         <AnimatedItems
             items={characterCards}
             from={_ => { return { opacity: 0, left: (width - scaledWidth) / 2, top: (height - scaledHeight) / 2 } }}
@@ -194,7 +214,6 @@ export default props => {
                     height: scaledHeight,
                 }} />}
         />
-        {roleCards}
         <AnimatedItems
             items={playerCards}
             from={_ => { return {opacity: 0, left: width / 2, top: height / 2, width: 0, height: 0 } }}
@@ -213,6 +232,7 @@ export default props => {
                 }}
             />}
         />
+        {frontNodes}
         <svg className='positioned target-line' >
             <AnimatedItems
                 items={targetLines}
@@ -228,7 +248,6 @@ export default props => {
                 />}
             />
         </svg>
-        {playerCardLabels}
     </div>;
 }
 
