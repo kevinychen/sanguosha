@@ -6,7 +6,7 @@ export function isCardSelectable(_G, ctx, myPlayer, card) {
     switch (myStage) {
         case 'play':
             if (myPlayer === currentPlayer) {
-                return ['Attack'].includes(card.type);
+                return ['Attack', 'Peach'].includes(card.type);
             }
             break;
         case 'tryDodge':

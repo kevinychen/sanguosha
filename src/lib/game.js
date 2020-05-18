@@ -144,11 +144,11 @@ export const SanGuoSha = {
                 },
                 onMove: (G, ctx) => {
                     const { healths, activeCard, targets } = G;
-                    const { events } = ctx;
+                    const { currentPlayer, events } = ctx;
                     if (activeCard) {
                         activeCard.step = (activeCard.step + 1) || 0;
                         switch (activeCard.type) {
-                            case 'Attack': {
+                            case 'Attack':
                                 if (activeCard.step === 0) {
                                     events.setActivePlayers({
                                         currentPlayer: 'targetOtherPlayerInRange',
@@ -169,7 +169,10 @@ export const SanGuoSha = {
                                     prepareNextPlay(G, ctx);
                                 }
                                 break;
-                            }
+                            case 'Peach':
+                                healths[currentPlayer].current = Math.min(healths[currentPlayer].current + 1, healths[currentPlayer].max);
+                                prepareNextPlay(G, ctx);
+                                break;
                             default: {
                             }
                         }
