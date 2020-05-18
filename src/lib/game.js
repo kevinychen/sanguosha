@@ -1,4 +1,5 @@
 import setup from './setup.js';
+import { getStage } from './cards.js';
 
 /* Moves */
 
@@ -20,6 +21,12 @@ function playCard(G, ctx, index) {
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
     discard.push(card);
+
+    // If discarding, don't set/update the active card
+    if (getStage(ctx) === 'discard') {
+        return;
+    }
+
     if (activeCard === undefined) {
         G.activeCard = {
             ...card,
@@ -163,6 +170,11 @@ export const SanGuoSha = {
                 onEnd: () => {
                     // TODO run end phase powers
                 },
+                endIf: (G, ctx) => {
+                    const { healths, hands } = G;
+                    const { currentPlayer } = ctx;
+                    return getStage(ctx) === 'discard' && hands[currentPlayer].length <= healths[currentPlayer].current;
+                },
                 onMove: (G, ctx) => {
                     const { healths, activeCard, targets } = G;
                     const { currentPlayer, events } = ctx;
@@ -202,6 +214,10 @@ export const SanGuoSha = {
                 stages: {
                     play: {
                         moves: { playCard },
+                    },
+
+                    discard: {
+                        moves: { playCard, ignore },
                     },
 
                     targetOtherPlayerInRange: {

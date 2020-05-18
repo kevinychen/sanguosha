@@ -1,6 +1,6 @@
 import React from 'react';
 import { animated } from 'react-spring';
-import { isCardSelectable } from '../lib/cards';
+import { getStage, isCardSelectable } from '../lib/cards.js';
 import AnimatedItems from './animatedItems';
 
 const PLAYER_AREA_WIDTH = 200;
@@ -15,14 +15,14 @@ const INFO_DELTA = 4;
 export default props => {
     const { G, ctx, moves, events, playerID: myPlayer, clientRect } = props;
     const { roles, characterChoices, characters, healths, discard, hands, targets } = G;
-    const { numPlayers, playOrder, phase, activePlayers } = ctx;
+    const { numPlayers, playOrder } = ctx;
 
     const { width, height } = clientRect;
     const { playerAreas, scale } = findPlayerAreas(numPlayers, clientRect);
     const scaledWidth = PLAYER_AREA_WIDTH * scale;
     const scaledHeight = PLAYER_AREA_HEIGHT * scale;
     const myPlayerIndex = Math.max(playOrder.indexOf(myPlayer), 0);
-    const myStage = activePlayers ? activePlayers[myPlayer] : undefined;
+    const myStage = getStage(ctx, myPlayer);
 
     // regular nodes to render
     const backNodes = [];
@@ -140,7 +140,7 @@ export default props => {
             playerCards.push({
                 key: `card-${card.id}`,
                 name: card.type,
-                opacity: i == MAX_DISCARDS_SHOWN ? 0 : 1,
+                opacity: i === MAX_DISCARDS_SHOWN ? 0 : 1,
                 left: startX + (scaledWidth * DISCARD_RATIO + DELTA) * i,
                 top: (height - scaledHeight * DISCARD_RATIO) / 2,
                 width: scaledWidth * DISCARD_RATIO,
@@ -190,33 +190,37 @@ export default props => {
             height: scaledHeight + 2 * DELTA,
         }}
     />);
-    if (phase === 'play') {
-        // render my cards
-        const myHand = hands[myPlayer];
-        if (myHand) {
-            hands[myPlayer].forEach((card, i) => {
-                const selectable = isCardSelectable(G, ctx, myPlayer, card);
-                playerCards.push({
-                    key: `card-${card.id}`,
-                    name: card.type,
-                    opacity: selectable ? 1 : 0.3,
-                    left: (scaledWidth + DELTA) * i,
-                    top: height - scaledHeight - DELTA,
-                    width: scaledWidth,
-                    height: scaledHeight,
-                    onClick: selectable ? () => moves.playCard(i) : undefined,
-                });
-            })
-        }
+    // render my cards
+    const myHand = hands[myPlayer];
+    if (myHand) {
+        hands[myPlayer].forEach((card, i) => {
+            const selectable = isCardSelectable(G, ctx, myPlayer, card);
+            playerCards.push({
+                key: `card-${card.id}`,
+                name: card.type,
+                opacity: selectable ? 1 : 0.3,
+                left: (scaledWidth + DELTA) * i,
+                top: height - scaledHeight - DELTA,
+                width: scaledWidth,
+                height: scaledHeight,
+                onClick: selectable ? () => moves.playCard(i) : undefined,
+            });
+        })
     }
 
+    // render an "action button" to do something
     let actionButton = undefined;
     switch (myStage) {
         case 'play':
             actionButton = {
                 text: 'End turn',
                 type: 'warn',
-                onClick: () => events.endTurn(),
+                onClick: () => {
+                    events.setStage('discard')
+
+                    // endIf is only checked after move
+                    moves.ignore();
+                },
             };
             break;
         case 'tryDodge':
