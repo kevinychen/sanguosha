@@ -56,6 +56,7 @@ export default function setup(ctx) {
     for (let i = 0; i < deck.length; i++) {
         deck[i].id = `card-${i}`;
     }
+    const discard = [];
 
     const hands = Object.fromEntries(playOrder.map(player => [player, []]));
 
@@ -65,6 +66,7 @@ export default function setup(ctx) {
         characters,
         healths,
         deck,
+        discard,
         hands,
     };
 }

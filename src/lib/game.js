@@ -16,9 +16,10 @@ function selectCharacter(G, ctx, index) {
 }
 
 function playCard(G, ctx, index) {
-    const { hands, activeCard } = G;
+    const { discard, hands, activeCard } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
+    discard.push(card);
     if (activeCard === undefined) {
         G.activeCard = {
             ...card,

@@ -14,7 +14,7 @@ const INFO_DELTA = 4;
 
 export default props => {
     const { G, ctx, moves, events, playerID: myPlayer, clientRect } = props;
-    const { roles, characterChoices, characters, healths, hands, targets } = G;
+    const { roles, characterChoices, characters, healths, discard, hands, targets } = G;
     const { numPlayers, playOrder, phase, activePlayers } = ctx;
 
     const { width, height } = clientRect;
@@ -28,12 +28,10 @@ export default props => {
     const backNodes = [];
     const frontNodes = [];
 
-    // objects to animate
+    const playerCards = [];
+
     const characterCards = [];
     const healthPoints = [];
-    const playerCards = [];
-    const targetLines = [];
-
     playerAreas.forEach((playerArea, i) => {
         const playerIndex = (myPlayerIndex + i) % numPlayers;
         const player = playOrder[playerIndex];
@@ -132,7 +130,27 @@ export default props => {
         }
     });
 
+    if (discard !== undefined) {
+        const MAX_DISCARDS_SHOWN = 4;
+        const DISCARD_RATIO = 0.7;
+        const numCardsShown = Math.min(discard.length, MAX_DISCARDS_SHOWN);
+        const startX = (width - numCardsShown * scaledWidth * DISCARD_RATIO - (numCardsShown - 1) * DELTA) / 2;
+        for (let i = 0; i < discard.length && i <= MAX_DISCARDS_SHOWN; i++) {
+            const card = discard[discard.length - 1 - i];
+            playerCards.push({
+                key: `card-${card.id}`,
+                name: card.type,
+                opacity: i == MAX_DISCARDS_SHOWN ? 0 : 1,
+                left: startX + (scaledWidth * DISCARD_RATIO + DELTA) * i,
+                top: (height - scaledHeight * DISCARD_RATIO) / 2,
+                width: scaledWidth * DISCARD_RATIO,
+                height: scaledHeight * DISCARD_RATIO,
+            });
+        }
+    }
+
     // render lines from players targeting other players
+    const targetLines = [];
     if (targets !== undefined) {
         targets.forEach(({targeter, target}) => {
             const targeterArea = playerAreas.find((_, i) => playOrder[(myPlayerIndex + i) % numPlayers] === targeter);
