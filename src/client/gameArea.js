@@ -214,7 +214,7 @@ export default props => {
         case 'play':
             actionButton = {
                 text: 'End turn',
-                type: 'warn',
+                type: 'selectable warn',
                 onClick: () => {
                     events.setStage('discard')
 
@@ -223,23 +223,35 @@ export default props => {
                 },
             };
             break;
+        case 'discard':
+            actionButton = {
+                text: 'Discard cards',
+                type: 'disabled',
+            };
+            break;
         case 'tryDodge':
             actionButton = {
                 text: 'Take the hit',
-                type: 'warn',
+                type: 'selectable warn',
                 onClick: () => moves.ignore(),
+            };
+            break;
+        case 'targetOtherPlayerInRange':
+            actionButton = {
+                text: 'Select player',
+                type: 'disabled',
             };
             break;
         default:
             break;
     }
     if (actionButton !== undefined) {
-        const ACTION_BUTTON_WIDTH = 120; // pixels
+        const ACTION_BUTTON_WIDTH = 160; // pixels
         const ACTION_BUTTON_HEIGHT = 30; // pixels
         const { text, type, onClick } = actionButton;
         backNodes.push(<button
             key='action-button'
-            className={`positioned selectable ${type}`}
+            className={`positioned ${type}`}
             style={{
                 left: (width - ACTION_BUTTON_WIDTH) / 2,
                 top: height - scaledHeight - ACTION_BUTTON_HEIGHT - 3 * DELTA,
@@ -247,6 +259,7 @@ export default props => {
                 height: ACTION_BUTTON_HEIGHT,
             }}
             onClick={onClick}
+            disabled={onClick === undefined}
         >
             {text}
         </button>);
