@@ -3,10 +3,16 @@ import setup from './setup.js';
 /* Moves */
 
 function selectCharacter(G, ctx, index) {
-    const { characterChoices, characters } = G;
+    const { characterChoices, characters, healths } = G;
     const { playerID } = ctx;
-    characters[playerID] = characterChoices[playerID][index];
+    const character = characterChoices[playerID][index];
     characterChoices[playerID] = undefined;
+    characters[playerID] = character;
+    // TODO if >= 4 players, add 1 extra health for the King
+    healths[playerID] = {
+        max: character.health,
+        current: character.health,
+    };
 }
 
 function playCard(G, ctx, index) {
@@ -94,8 +100,10 @@ export const SanGuoSha = {
                 // make choices automatically for easier testing
                 // TODO remove
                 playOrder.forEach(player => {
-                    G.characters[player] = G.characterChoices[player][0];
+                    const character = G.characterChoices[player][0];
+                    G.characters[player] = character;
                     G.characterChoices[player] = undefined;
+                    G.healths[player] = { max: character.health, current: character.health };
                 });
             },
 

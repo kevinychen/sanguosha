@@ -14,7 +14,7 @@ const INFO_DELTA = 4;
 
 export default props => {
     const { G, ctx, moves, events, playerID: myPlayer, clientRect } = props;
-    const { roles, characterChoices, characters, hands, targets } = G;
+    const { roles, characterChoices, characters, healths, hands, targets } = G;
     const { numPlayers, playOrder, phase, activePlayers } = ctx;
     const { selectCharacter, playCard, targetPlayer } = moves;
 
@@ -31,6 +31,7 @@ export default props => {
 
     // objects to animate
     const characterCards = [];
+    const healthPoints = [];
     const playerCards = [];
     const targetLines = [];
 
@@ -44,7 +45,7 @@ export default props => {
             key={`character-back-${i}`}
             className='positioned'
             src={`./characters/Character Back.jpg`}
-            alt={'Character Back'}
+            alt='Character Back'
             style={{
                 left: playerArea.x,
                 top: playerArea.y,
@@ -61,6 +62,20 @@ export default props => {
                 // TODO this ignores the range criteria
                 onClick: myStage === 'targetOtherPlayerInRange' ? () => targetPlayer(player) : undefined,
             });
+        }
+
+        // Render the player's health
+        if (healths[player]) {
+            for (let j = 0; j < healths[player].max; j++) {
+                healthPoints.push({
+                    key: `health-${i}-${j}`,
+                    color: j < healths[player].current ? 'green' : 'red',
+                    left: playerArea.x + scaledWidth * (0.23 + j * 0.06),
+                    top: playerArea.y + scaledHeight * 0.01,
+                    width: scaledWidth * 0.06,
+                    height: scaledHeight * 0.05,
+                });
+            }
         }
 
         // Ratio of role card size in top right of character card, to character card size
@@ -213,6 +228,24 @@ export default props => {
                     width: scaledWidth,
                     height: scaledHeight,
                 }} />}
+        />
+        <AnimatedItems
+            items={healthPoints}
+            from={_ => { return { opacity: 0, left: 0, top: 0, width, height } }}
+            update={item => { return { opacity: 1, left: item.left, top: item.top, width: item.width, height: item.height } }}
+            animated={(item, props) => <animated.img
+                key={item.key}
+                className='positioned item'
+                src={`./health/health-${item.color}.png`}
+                alt='health'
+                style={{
+                    opacity: props.opacity,
+                    left: props.left,
+                    top: props.top,
+                    width: props.width,
+                    height: props.height,
+                }}
+            />}
         />
         <AnimatedItems
             items={playerCards}

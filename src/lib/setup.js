@@ -39,6 +39,7 @@ export default function setup(ctx) {
     const characterChoices = Object.fromEntries(playOrder.map((player, i) =>
         [player, allCharacterChoices.slice(NUM_CHARACTER_CHOICES * i, NUM_CHARACTER_CHOICES * (i + 1))]));
     const characters = {};
+    const healths = {};
 
     const unshuffledDeck = [];
     // TODO use more than one card lol
@@ -67,6 +68,7 @@ export default function setup(ctx) {
         roles,
         characterChoices,
         characters,
+        healths,
         deck,
         hands,
     };
