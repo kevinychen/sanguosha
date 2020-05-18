@@ -8,7 +8,8 @@ body {
     width: 100vw;
     max-width: 1300px;
     margin: 0 auto;
-    height: 99vh;
+    /* slightly smaller to avoid scrollbar */
+    height: calc(100vh - 10px);
     background-color: #ffebd0;
     border: 3px solid #2B1A15;
 }
@@ -45,8 +46,10 @@ body {
 }
 
 .target-line {
+    /* should be at most size of #board */
     width: 100vw;
-    height: 100vh;
+    max-width: 1300px;
+    height: calc(100vh - 10px);
     pointer-events: none;
 }
 
