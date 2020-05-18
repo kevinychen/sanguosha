@@ -2,6 +2,7 @@ import * as classNames from 'classnames';
 import React from 'react';
 import { animated, useTransition } from 'react-spring';
 import { isCardSelectable } from '../lib/cards';
+import AnimatedItems from './animatedItems';
 
 const PLAYER_AREA_WIDTH = 200;
 const PLAYER_AREA_HEIGHT = 300;
@@ -168,30 +169,6 @@ export default props => {
         }
     }
 
-    const characterTransitions = useTransition(characterCards, card => card.key, {
-        from: {opacity: 0, left: (width - scaledWidth) / 2, top: (height - scaledHeight) / 2 },
-        enter: card => { return { opacity: 1, left: card.left, top: card.top } },
-        update: card => { return { opacity: 1, left: card.left, top: card.top } },
-        leave: {opacity: 0, left: (width - scaledWidth) / 2, top: (height - scaledHeight) / 2 },
-        unique: true,
-    });
-
-    const cardTransitions = useTransition(playerCards, card => card.key, {
-        from: {opacity: 0, left: width / 2, top: height / 2, width: 0, height: 0 },
-        enter: card => { return { opacity: card.opacity, left: card.left, top: card.top, width: card.width, height: card.height } },
-        update: card => { return { opacity: card.opacity, left: card.left, top: card.top, width: card.width, height: card.height } },
-        leave: {opacity: 0, left: width / 2, top: height / 2, scale: 1, width: 0, height: 0 },
-        unique: true,
-    });
-
-    const targetTransitions = useTransition(targetLines, item => item.key, {
-        from: item => { return { opacity: 0, endX: item.startX, endY: item.startY } },
-        enter: item => { return { opacity: 1, endX: item.endX, endY: item.endY } },
-        update: item => { return { opacity: 1, endX: item.endX, endY: item.endY } },
-        leave: item => { return { opacity: 0, endX: item.endX, endY: item.endY } },
-        unique: true,
-    });
-
     return <div>
         <div
             className='my-region'
@@ -200,56 +177,56 @@ export default props => {
             }}
         />
         {characterBacks}
-        {characterTransitions.map(({ item, props }) => {
-            return <div
-                key={item.key}
-                className={classNames('positioned', {'selectable': item.onClick !== undefined})}
-                onClick={item.onClick}
-            >
-                <animated.img
-                    className='positioned item'
-                    src={`./characters/${item.name}.jpg`}
-                    alt={item.name}
-                    style={{
-                        opacity: props.opacity,
-                        left: props.left,
-                        top: props.top,
-                        width: scaledWidth,
-                        height: scaledHeight,
-                    }}
-                />
-            </div>
-        })}
+        <AnimatedItems
+            items={characterCards}
+            from={_ => { return { opacity: 0, left: (width - scaledWidth) / 2, top: (height - scaledHeight) / 2 } }}
+            update={item => { return { opacity: 1, left: item.left, top: item.top } }}
+            clickable={true}
+            animated={(item, props) => <animated.img
+                className='positioned item'
+                src={`./characters/${item.name}.jpg`}
+                alt={item.name}
+                style={{
+                    opacity: props.opacity,
+                    left: props.left,
+                    top: props.top,
+                    width: scaledWidth,
+                    height: scaledHeight,
+                }} />}
+        />
         {roleCards}
-        {cardTransitions.map(({ item, props }) => {
-            return <div
-                key={item.key}
-                className={classNames('positioned', { 'selectable': item.onClick !== undefined })}
-                onClick={item.onClick}
-            >
-                <animated.img
-                    className='positioned item'
-                    src={`./cards/${item.name}.jpg`}
-                    alt={item.name}
-                    style={{
-                        opacity: props.opacity,
-                        left: props.left,
-                        top: props.top,
-                        width: props.width,
-                        height: props.height,
-                    }}
-                />
-            </div>
-        })}
+        <AnimatedItems
+            items={playerCards}
+            from={_ => { return {opacity: 0, left: width / 2, top: height / 2, width: 0, height: 0 } }}
+            update={item => { return { opacity: item.opacity, left: item.left, top: item.top, width: item.width, height: item.height } }}
+            clickable={true}
+            animated={(item, props) => <animated.img
+                className='positioned item'
+                src={`./cards/${item.name}.jpg`}
+                alt={item.name}
+                style={{
+                    opacity: props.opacity,
+                    left: props.left,
+                    top: props.top,
+                    width: props.width,
+                    height: props.height,
+                }}
+            />}
+        />
         <svg className='positioned target-line' >
-            {targetTransitions.map(({ item, props }) => <animated.line
-                key={item.key}
-                className='item'
-                x1={item.startX}
-                y1={item.startY}
-                x2={props.endX}
-                y2={props.endY}
-            />)}
+            <AnimatedItems
+                items={targetLines}
+                from={item => { return { opacity: 0, endX: item.startX, endY: item.startY } }}
+                update={item => { return { opacity: 1, endX: item.endX, endY: item.endY } }}
+                animated={(item, props) => <animated.line
+                    key={item.key}
+                    className='item'
+                    x1={item.startX}
+                    y1={item.startY}
+                    x2={props.endX}
+                    y2={props.endY}
+                />}
+            />
         </svg>
         {playerCardLabels}
     </div>;
