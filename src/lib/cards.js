@@ -30,6 +30,57 @@ export function prepareNextPlay(G, ctx) {
     G.targets = [];
 }
 
+function roundRobinAttack(defendingCard) {
+    return {
+        canPlayCard: () => true,
+        playCard: (G, ctx) => {
+            const { activeCardData, targets } = G;
+            const { currentPlayer, events, numPlayers, playOrder, playOrderPos } = ctx;
+            activeCardData.index = 0;
+            targets.push(...[...Array(numPlayers - 1)]
+                .map((_, i) => {
+                    return {
+                        targeter: currentPlayer,
+                        target: playOrder[(playOrderPos + i + 1) % numPlayers],
+                    };
+                }));
+            events.setActivePlayers({
+                value: { [playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers]]: 'play' },
+                moveLimit: 1,
+            });
+        },
+        current: _data => {
+            const next = (G, ctx) => {
+                const { activeCardData, targets } = G;
+                const { events, numPlayers, playOrder, playOrderPos } = ctx;
+                targets.splice(0, 1);
+                activeCardData.index++;
+                if (activeCardData.index < numPlayers - 1) {
+                    events.setActivePlayers({
+                        value: { [playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers]]: 'play' },
+                        moveLimit: 1,
+                    });
+                } else {
+                    prepareNextPlay(G, ctx);
+                }
+            };
+            return {
+                text: 'Take the hit',
+                miscAction: (G, ctx) => {
+                    const { activeCardData } = G;
+                    const { numPlayers, playOrder, playOrderPos } = ctx;
+                    loseHealth(G, ctx, playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers], 1);
+                    next(G, ctx);
+                },
+                canPlayCard: (_G, _ctx, _playerID, card) => card.type === defendingCard,
+                playCard: (G, ctx, _card) => {
+                    next(G, ctx);
+                },
+            };
+        },
+    };
+}
+
 export const CARD_TYPES = {
     'Attack': {
         canPlayCard: () => true,
@@ -84,52 +135,6 @@ export const CARD_TYPES = {
             prepareNextPlay(G, ctx);
         },
     },
-    'Barbarians': {
-        canPlayCard: () => true,
-        playCard: (G, ctx) => {
-            const { activeCardData, targets } = G;
-            const { currentPlayer, events, numPlayers, playOrder, playOrderPos } = ctx;
-            activeCardData.index = 0;
-            targets.push(...[...Array(numPlayers - 1)]
-                .map((_, i) => {
-                    return {
-                        targeter: currentPlayer,
-                        target: playOrder[(playOrderPos + i + 1) % numPlayers],
-                    };
-                }));
-            events.setActivePlayers({
-                value: { [playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers]]: 'play' },
-                moveLimit: 1,
-            });
-        },
-        current: _data => {
-            const next = (G, ctx) => {
-                const { activeCardData, targets } = G;
-                const { events, numPlayers, playOrder, playOrderPos } = ctx;
-                targets.splice(0, 1);
-                activeCardData.index++;
-                if (activeCardData.index < numPlayers - 1) {
-                    events.setActivePlayers({
-                        value: { [playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers]]: 'play' },
-                        moveLimit: 1,
-                    });
-                } else {
-                    prepareNextPlay(G, ctx);
-                }
-            };
-            return {
-                text: 'Take the hit',
-                miscAction: (G, ctx) => {
-                    const { activeCardData } = G;
-                    const { numPlayers, playOrder, playOrderPos } = ctx;
-                    loseHealth(G, ctx, playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers], 1);
-                    next(G, ctx);
-                },
-                canPlayCard: (_G, _ctx, _playerID, card) => card.type === 'Attack',
-                playCard: (G, ctx, _card) => {
-                    next(G, ctx);
-                },
-            };
-        },
-    },
+    'Barbarians': roundRobinAttack('Attack'),
+    'Hail of Arrows': roundRobinAttack('Dodge'),
 };

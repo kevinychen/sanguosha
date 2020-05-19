@@ -56,6 +56,9 @@ export default function setup(ctx) {
     for (let i = 0; i < 5; i++) {
         unshuffledDeck.push({ value: '7', suit: 'CLUB', type: 'Barbarians' });
     }
+    for (let i = 0; i < 5; i++) {
+        unshuffledDeck.push({ value: 'A', suit: 'HEART', type: 'Hail of Arrows' });
+    }
     const deck = random.Shuffle(unshuffledDeck);
     for (let i = 0; i < deck.length; i++) {
         deck[i].id = `card-${i}`;
