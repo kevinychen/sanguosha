@@ -34,6 +34,7 @@ export default function setup(ctx) {
     for (let i = 0; i < roles.length; i++) {
         roles[i].id = `role-${i}`;
     }
+    const startPlayerIndex = roles.findIndex(role => role.name === 'King');
 
     const allCharacterChoices = random.Shuffle(CHARACTERS);
     const characterChoices = Object.fromEntries(playOrder.map((player, i) =>
@@ -62,6 +63,7 @@ export default function setup(ctx) {
 
     return {
         roles,
+        startPlayerIndex,
         characterChoices,
         characters,
         healths,

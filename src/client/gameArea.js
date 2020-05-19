@@ -1,6 +1,6 @@
 import React from 'react';
 import { animated } from 'react-spring';
-import { getStage, isCardSelectable } from '../lib/cards.js';
+import { CARD_TYPES } from '../lib/cards.js';
 import AnimatedItems from './animatedItems';
 
 const PLAYER_AREA_WIDTH = 200;
@@ -12,17 +12,35 @@ const DELTA = 10;
 // Number of pixels between info objects inside the character card to the character card's border
 const INFO_DELTA = 4;
 
+function canSelectPlayer(G, _ctx, playerID) {
+    const { activeCardType, activeCardData } = G;
+    if (activeCardType !== undefined) {
+        const { canSelectPlayer } = CARD_TYPES[activeCardType].current(activeCardData);
+        return canSelectPlayer && canSelectPlayer(playerID);
+    }
+}
+
+function canPlayCard(G, _ctx, card) {
+    const { activeCardType, activeCardData } = G;
+    if (activeCardType !== undefined) {
+        const { canPlayCard } = CARD_TYPES[activeCardType].current(activeCardData);
+        return canPlayCard && canPlayCard(card);
+    } else {
+        return CARD_TYPES[card.type].canPlayCard();
+    }
+}
+
 export default props => {
-    const { G, ctx, moves, events, playerID: myPlayer, clientRect } = props;
-    const { roles, characterChoices, characters, healths, discard, hands, targets } = G;
-    const { numPlayers, playOrder } = ctx;
+    const { G, ctx, moves, events, playerID, clientRect } = props;
+    const { roles, characterChoices, characters, healths, discard, hands, activeCardType, activeCardData, targets } = G;
+    const { activePlayers, numPlayers, playOrder } = ctx;
 
     const { width, height } = clientRect;
     const { playerAreas, scale } = findPlayerAreas(numPlayers, clientRect);
     const scaledWidth = PLAYER_AREA_WIDTH * scale;
     const scaledHeight = PLAYER_AREA_HEIGHT * scale;
-    const myPlayerIndex = Math.max(playOrder.indexOf(myPlayer), 0);
-    const myStage = getStage(ctx, myPlayer);
+    const playerIDIndex = Math.max(playOrder.indexOf(playerID), 0);
+    const stage = activePlayers && activePlayers[playerID];
 
     // regular nodes to render
     const backNodes = [];
@@ -33,7 +51,7 @@ export default props => {
     const characterCards = [];
     const healthPoints = [];
     playerAreas.forEach((playerArea, i) => {
-        const playerIndex = (myPlayerIndex + i) % numPlayers;
+        const playerIndex = (playerIDIndex + i) % numPlayers;
         const player = playOrder[playerIndex];
 
         // Render each player's character
@@ -51,13 +69,13 @@ export default props => {
             }}
         />);
         if (character) {
+            const canSelect = stage !== undefined && canSelectPlayer(G, ctx, playerID, player);
             characterCards.push({
                 key: character ? `character-${character.name}` : `character-back-${i}`,
                 name: character ? character.name : 'Character Back',
                 left: playerArea.x,
                 top: playerArea.y,
-                // TODO this ignores the range criteria
-                onClick: myStage === 'targetOtherPlayerInRange' ? () => moves.targetPlayer(player) : undefined,
+                onClick: canSelect ? () => moves.selectPlayer(player) : undefined,
             });
         }
 
@@ -95,7 +113,7 @@ export default props => {
 
         // Show other player's hands
         const CARD_RATIO = 0.3;
-        if (player !== myPlayer) {
+        if (player !== playerID) {
             const hand = hands[player];
             // Show the card backs
             hand.forEach(card => {
@@ -151,10 +169,10 @@ export default props => {
 
     // render lines from players targeting other players
     const targetLines = [];
-    if (targets !== undefined) {
+    if (targets) {
         targets.forEach(({targeter, target}) => {
-            const targeterArea = playerAreas.find((_, i) => playOrder[(myPlayerIndex + i) % numPlayers] === targeter);
-            const targetArea = playerAreas.find((_, i) => playOrder[(myPlayerIndex + i) % numPlayers] === target);
+            const targeterArea = playerAreas.find((_, i) => playOrder[(playerIDIndex + i) % numPlayers] === targeter);
+            const targetArea = playerAreas.find((_, i) => playOrder[(playerIDIndex + i) % numPlayers] === target);
             targetLines.push({
                 key: `target-${targeter}-${target}`,
                 startX: targeterArea.x + scaledWidth / 2,
@@ -166,8 +184,8 @@ export default props => {
     }
 
     // render the three starting characters (select one)
-    if (myStage === 'selectCharacter') {
-        const choices = characterChoices[myPlayer];
+    if (stage === 'selectCharacter') {
+        const choices = characterChoices[playerID];
         if (choices !== undefined) {
             const startX = (width - choices.length * scaledWidth - (choices.length - 1) * DELTA) / 2;
             choices.forEach((choice, i) => {
@@ -191,59 +209,56 @@ export default props => {
         }}
     />);
     // render my cards
-    const myHand = hands[myPlayer];
+    const myHand = hands[playerID];
     if (myHand) {
-        hands[myPlayer].forEach((card, i) => {
-            const selectable = isCardSelectable(G, ctx, myPlayer, card);
+        const move = stage === 'play' ? moves.playCard : moves.discardCard;
+        hands[playerID].forEach((card, i) => {
+            const canPlay = stage !== undefined && canPlayCard(G, ctx, card);
             playerCards.push({
                 key: `card-${card.id}`,
                 name: card.type,
-                opacity: selectable ? 1 : 0.3,
+                opacity: canPlay ? 1 : 0.3,
                 left: (scaledWidth + DELTA) * i,
                 top: height - scaledHeight - DELTA,
                 width: scaledWidth,
                 height: scaledHeight,
-                onClick: selectable ? () => moves.playCard(i) : undefined,
+                onClick: canPlay ? () => move(i) : undefined,
             });
         })
     }
 
     // render an "action button" to do something
     let actionButton = undefined;
-    switch (myStage) {
-        case 'play':
+    if (stage !== undefined && activeCardType !== undefined) {
+        const { text, miscAction } = CARD_TYPES[activeCardType].current(activeCardData);
+        if (miscAction) {
             actionButton = {
-                text: 'End turn',
+                text,
                 type: 'selectable warn',
-                onClick: () => {
-                    events.setStage('discard')
+                onClick: () => moves.miscAction(),
+            };
+        } else {
+            actionButton = {
+                text,
+                type: 'disabled',
+            };
+        }
+    } else if (stage === 'play') {
+        actionButton = {
+            text: 'End turn',
+            type: 'selectable warn',
+            onClick: () => {
+                events.setStage('discard')
 
-                    // endIf is only checked after move
-                    moves.ignore();
-                },
-            };
-            break;
-        case 'discard':
-            actionButton = {
-                text: 'Discard cards',
-                type: 'disabled',
-            };
-            break;
-        case 'tryDodge':
-            actionButton = {
-                text: 'Take the hit',
-                type: 'selectable warn',
-                onClick: () => moves.ignore(),
-            };
-            break;
-        case 'targetOtherPlayerInRange':
-            actionButton = {
-                text: 'Select player',
-                type: 'disabled',
-            };
-            break;
-        default:
-            break;
+                // endIf is only checked after move, so do a no-op
+                moves.doNothing();
+            },
+        }
+    } else if (stage === 'discard') {
+        actionButton = {
+            text: 'Discard cards',
+            type: 'disabled',
+        };
     }
     if (actionButton !== undefined) {
         const ACTION_BUTTON_WIDTH = 160; // pixels

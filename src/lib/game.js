@@ -1,5 +1,5 @@
 import setup from './setup.js';
-import { getStage } from './cards.js';
+import { prepareNextPlay, drawCards, CARD_TYPES } from './cards.js';
 
 /* Moves */
 
@@ -17,69 +17,44 @@ function selectCharacter(G, ctx, index) {
 }
 
 function playCard(G, ctx, index) {
-    const { discard, hands, activeCard } = G;
+    const { discard, hands, activeCardType, activeCardData } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
     discard.push(card);
 
-    // If discarding, don't set/update the active card
-    if (getStage(ctx) === 'discard') {
-        return;
-    }
-
-    if (activeCard === undefined) {
-        G.activeCard = {
-            ...card,
-            responseCards: [],
-        };
+    if (activeCardType === undefined) {
+        G.activeCardType = card.type;
+        CARD_TYPES[card.type].playCard(G, ctx);
     } else {
-        activeCard.responseCards.push(card);
+        CARD_TYPES[activeCardType].current(activeCardData).playCard(G, ctx, card);
     }
 }
 
-function targetPlayer(G, ctx, target) {
+function selectPlayer(G, ctx, selectedPlayer) {
+    const { activeCardType, activeCardData } = G;
+    CARD_TYPES[activeCardType].current(activeCardData).selectPlayer(G, ctx, selectedPlayer);
+}
+
+function miscAction(G, ctx) {
+    const { activeCardType, activeCardData } = G;
+    CARD_TYPES[activeCardType].current(activeCardData).miscAction(G, ctx);
+}
+
+function discardCard(G, ctx, index) {
+    const { discard, hands } = G;
     const { playerID } = ctx;
-    G.targets.push({ targeter: playerID, target });
+    const [card] = hands[playerID].splice(index, 1);
+    discard.push(card);
 }
 
-function ignore() {}
-
-/* Game object helper functions */
-
-function findKingPlayer(G) {
-    return G.roles.findIndex(role => role.name === 'King');
-}
-
-const turnOrder = {
-    first: findKingPlayer,
-    next: (_G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
-};
-
-function drawCard(G, ctx, player) {
-    const { deck, discard, hands } = G;
-    const { random } = ctx;
-
-    // shuffle cards in discard back into the deck
-    if (deck.length === 0) {
-        if (discard.length === 0) {
-            console.error('No cards left!');
-        }
-        deck.push(...random.Shuffle(discard.splice(0, discard.length)));
-    }
-
-    hands[player].push(G.deck.pop());
-}
-
-function prepareNextPlay(G, ctx) {
-    const { events } = ctx;
-    events.setActivePlayers({
-        currentPlayer: 'play',
-    })
-    G.activeCard = undefined;
-    G.targets = [];
-}
+function doNothing() {}
 
 /* Game object */
+
+const turnOrder = {
+    first: G => G.startPlayerIndex,
+    next: (_G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+};
 
 export const SanGuoSha = {
     name: "san-guo-sha",
@@ -108,26 +83,20 @@ export const SanGuoSha = {
             start: true,
 
             onBegin: (G, ctx) => {
-                const { playOrder, events } = ctx;
+                const { startPlayerIndex } = G;
+                const { events, playOrder } = ctx;
                 events.setActivePlayers({
-                    // first the king selects a character
-                    value: {[playOrder[findKingPlayer(G)]]: 'selectCharacter'},
+                    value: {[playOrder[startPlayerIndex]]: 'selectCharacter'},
                     moveLimit: 1,
                     next: {
-                        // then everyone else selects a character
                         others: 'selectCharacter',
                         moveLimit: 1,
                     }
                 });
 
-                // make choices automatically for easier testing
+                // make character choices automatically for easier testing
                 // TODO remove
-                playOrder.forEach(player => {
-                    const character = G.characterChoices[player][0];
-                    G.characters[player] = character;
-                    G.characterChoices[player] = undefined;
-                    G.healths[player] = { max: character.health, current: character.health };
-                });
+                ctx.playOrder.forEach(player => selectCharacter(G, {...ctx, playerID: player}, 0));
             },
 
             // end select characters phase if everyone has made a character choice
@@ -147,10 +116,8 @@ export const SanGuoSha = {
 
         play: {
             onBegin: (G, ctx) => {
-                // Deal 4 cards to each person at beginning of game
-                const { deck, hands } = G;
                 const { playOrder } = ctx;
-                playOrder.map(player => hands[player].push(...deck.splice(0, 4)));
+                playOrder.forEach(player => drawCards(G, ctx, player, 4));
             },
 
             turn: {
@@ -161,9 +128,7 @@ export const SanGuoSha = {
                     // TODO run begin phase powers
                     // TODO run judgment
 
-                    for (let i = 0; i < 2; i++) {
-                        drawCard(G, ctx, currentPlayer);
-                    }
+                    drawCards(G, ctx, currentPlayer, 2);
 
                     prepareNextPlay(G, ctx);
                 },
@@ -172,60 +137,18 @@ export const SanGuoSha = {
                 },
                 endIf: (G, ctx) => {
                     const { healths, hands } = G;
-                    const { currentPlayer } = ctx;
-                    return getStage(ctx) === 'discard' && hands[currentPlayer].length <= healths[currentPlayer].current;
-                },
-                onMove: (G, ctx) => {
-                    const { healths, activeCard, targets } = G;
-                    const { currentPlayer, events } = ctx;
-                    if (activeCard) {
-                        activeCard.step = (activeCard.step + 1) || 0;
-                        switch (activeCard.type) {
-                            case 'Attack':
-                                if (activeCard.step === 0) {
-                                    events.setActivePlayers({
-                                        currentPlayer: 'targetOtherPlayerInRange',
-                                        moveLimit: 1,
-                                    });
-                                } else if (activeCard.step === 1) {
-                                    events.setActivePlayers({
-                                        value: { [targets[0].target]: 'tryDodge' },
-                                        moveLimit: 1,
-                                    });
-                                } else {
-                                    if (activeCard.responseCards.length === 0) {
-                                        // TODO do brink of death and death logic
-                                        healths[targets[0].target].current--;
-                                    } else {
-                                        console.log('Attack dodged.');
-                                    }
-                                    prepareNextPlay(G, ctx);
-                                }
-                                break;
-                            case 'Peach':
-                                healths[currentPlayer].current = Math.min(healths[currentPlayer].current + 1, healths[currentPlayer].max);
-                                prepareNextPlay(G, ctx);
-                                break;
-                            default: {
-                            }
-                        }
-                    }
+                    const { currentPlayer, activePlayers } = ctx;
+                    return activePlayers
+                        && activePlayers[currentPlayer] === 'discard'
+                        && hands[currentPlayer].length <= healths[currentPlayer].current;
                 },
                 stages: {
                     play: {
-                        moves: { playCard },
+                        moves: { playCard, selectPlayer, miscAction },
                     },
 
                     discard: {
-                        moves: { playCard, ignore },
-                    },
-
-                    targetOtherPlayerInRange: {
-                        moves: { targetPlayer },
-                    },
-
-                    tryDodge: {
-                        moves: { playCard, ignore },
+                        moves: { discardCard, doNothing },
                     },
                 },
             },
