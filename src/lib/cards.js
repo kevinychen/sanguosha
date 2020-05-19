@@ -137,4 +137,13 @@ export const CARD_TYPES = {
     },
     'Barbarians': roundRobinAttack('Attack'),
     'Hail of Arrows': roundRobinAttack('Dodge'),
+    'Peach Garden': {
+        canPlayCard: () => true,
+        playCard: (G, ctx) => {
+            const { healths } = G;
+            const { playOrder } = ctx;
+            playOrder.forEach(player => healths[player].current = Math.min(healths[player].current + 1, healths[player].max));
+            prepareNextPlay(G, ctx);
+        },
+    },
 };
