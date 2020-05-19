@@ -14,6 +14,12 @@ export function drawCards(G, ctx, player, count) {
     }
 }
 
+export function loseHealth(G, _ctx, player, count) {
+    // TODO do brink of death and death logic
+    const { healths } = G;
+    healths[player].current -= count;
+}
+
 export function prepareNextPlay(G, ctx) {
     const { events } = ctx;
     events.setActivePlayers({
@@ -38,7 +44,10 @@ export const CARD_TYPES = {
             if (data.target === undefined) {
                 return {
                     text: 'Select player',
-                    canSelectPlayer: _playerID => true,
+                    canSelectPlayer: (_G, _ctx, playerID, selectedPlayerID) => {
+                        // TODO take range into account
+                        return playerID !== selectedPlayerID;
+                    },
                     selectPlayer: (G, ctx, selectedPlayerID) => {
                         const { activeCardData, targets } = G;
                         const { events, playerID } = ctx;
@@ -54,12 +63,10 @@ export const CARD_TYPES = {
                 return {
                     text: 'Take the hit',
                     miscAction: (G, ctx) => {
-                        const { healths } = G;
-                        healths[data.target].current--;
-                        // TODO do brink of death and death logic
+                        loseHealth(G, ctx, data.target, 1);
                         prepareNextPlay(G, ctx);
                     },
-                    canPlayCard: card => card.type === 'Dodge',
+                    canPlayCard: (_G, _ctx, _playerID, card) => card.type === 'Dodge',
                     playCard: prepareNextPlay,
                 };
             }
@@ -75,6 +82,54 @@ export const CARD_TYPES = {
             const { currentPlayer } = ctx;
             healths[currentPlayer].current = Math.min(healths[currentPlayer].current + 1, healths[currentPlayer].max);
             prepareNextPlay(G, ctx);
+        },
+    },
+    'Barbarians': {
+        canPlayCard: () => true,
+        playCard: (G, ctx) => {
+            const { activeCardData, targets } = G;
+            const { currentPlayer, events, numPlayers, playOrder, playOrderPos } = ctx;
+            activeCardData.index = 0;
+            targets.push(...[...Array(numPlayers - 1)]
+                .map((_, i) => {
+                    return {
+                        targeter: currentPlayer,
+                        target: playOrder[(playOrderPos + i + 1) % numPlayers],
+                    };
+                }));
+            events.setActivePlayers({
+                value: { [playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers]]: 'play' },
+                moveLimit: 1,
+            });
+        },
+        current: _data => {
+            const next = (G, ctx) => {
+                const { activeCardData, targets } = G;
+                const { events, numPlayers, playOrder, playOrderPos } = ctx;
+                targets.splice(0, 1);
+                activeCardData.index++;
+                if (activeCardData.index < numPlayers - 1) {
+                    events.setActivePlayers({
+                        value: { [playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers]]: 'play' },
+                        moveLimit: 1,
+                    });
+                } else {
+                    prepareNextPlay(G, ctx);
+                }
+            };
+            return {
+                text: 'Take the hit',
+                miscAction: (G, ctx) => {
+                    const { activeCardData } = G;
+                    const { numPlayers, playOrder, playOrderPos } = ctx;
+                    loseHealth(G, ctx, playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers], 1);
+                    next(G, ctx);
+                },
+                canPlayCard: (_G, _ctx, _playerID, card) => card.type === 'Attack',
+                playCard: (G, ctx, _card) => {
+                    next(G, ctx);
+                },
+            };
         },
     },
 };

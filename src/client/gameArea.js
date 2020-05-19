@@ -12,19 +12,19 @@ const DELTA = 10;
 // Number of pixels between info objects inside the character card to the character card's border
 const INFO_DELTA = 4;
 
-function canSelectPlayer(G, _ctx, playerID) {
+function canSelectPlayer(G, ctx, playerID, selectedPlayerID) {
     const { activeCardType, activeCardData } = G;
     if (activeCardType !== undefined) {
         const { canSelectPlayer } = CARD_TYPES[activeCardType].current(activeCardData);
-        return canSelectPlayer && canSelectPlayer(playerID);
+        return canSelectPlayer && canSelectPlayer(G, ctx, playerID, selectedPlayerID);
     }
 }
 
-function canPlayCard(G, _ctx, card) {
+function canPlayCard(G, ctx, playerID, card) {
     const { activeCardType, activeCardData } = G;
     if (activeCardType !== undefined) {
         const { canPlayCard } = CARD_TYPES[activeCardType].current(activeCardData);
-        return canPlayCard && canPlayCard(card);
+        return canPlayCard && canPlayCard(G, ctx, playerID, card);
     } else {
         return CARD_TYPES[card.type].canPlayCard();
     }
@@ -213,7 +213,7 @@ export default props => {
     if (myHand) {
         const move = stage === 'play' ? moves.playCard : moves.discardCard;
         hands[playerID].forEach((card, i) => {
-            const canPlay = stage !== undefined && canPlayCard(G, ctx, card);
+            const canPlay = stage !== undefined && canPlayCard(G, ctx, playerID, card);
             playerCards.push({
                 key: `card-${card.id}`,
                 name: card.type,

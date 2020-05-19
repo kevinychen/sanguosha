@@ -43,15 +43,18 @@ export default function setup(ctx) {
     const healths = {};
 
     const unshuffledDeck = [];
-    // TODO use more than one card lol
-    for (let i = 0; i < 7; i++) {
+    // TODO add all the cards!?!?
+    for (let i = 0; i < 5; i++) {
         unshuffledDeck.push({ value: '10', suit: 'CLUB', type: 'Attack' });
     }
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 5; i++) {
         unshuffledDeck.push({ value: '7', suit: 'DIAMOND', type: 'Dodge' });
     }
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 5; i++) {
         unshuffledDeck.push({ value: 'Q', suit: 'HEART', type: 'Peach' });
+    }
+    for (let i = 0; i < 5; i++) {
+        unshuffledDeck.push({ value: '7', suit: 'CLUB', type: 'Barbarians' });
     }
     const deck = random.Shuffle(unshuffledDeck);
     for (let i = 0; i < deck.length; i++) {
