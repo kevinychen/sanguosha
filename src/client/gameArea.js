@@ -13,16 +13,16 @@ const DELTA = 10;
 const INFO_DELTA = 4;
 
 function canSelectPlayer(G, ctx, playerID, selectedPlayerID) {
-    const { activeCardType, activeCardData } = G;
-    if (activeCardType !== undefined) {
+    const { isAlive, activeCardType, activeCardData } = G;
+    if (isAlive[playerID] && isAlive[selectedPlayerID] && activeCardType !== undefined) {
         const { canSelectPlayer } = CARD_TYPES[activeCardType].current(activeCardData);
         return canSelectPlayer && canSelectPlayer(G, ctx, playerID, selectedPlayerID);
     }
 }
 
 function canPlayCard(G, ctx, playerID, card) {
-    const { activeCardType, activeCardData } = G;
-    if (activeCardType !== undefined) {
+    const { isAlive, activeCardType, activeCardData } = G;
+    if (isAlive[playerID] && activeCardType !== undefined) {
         const { canPlayCard } = CARD_TYPES[activeCardType].current(activeCardData);
         return canPlayCard && canPlayCard(G, ctx, playerID, card);
     } else {
@@ -32,7 +32,7 @@ function canPlayCard(G, ctx, playerID, card) {
 
 export default props => {
     const { G, ctx, moves, events, playerID, clientRect } = props;
-    const { roles, characterChoices, characters, healths, discard, hands} = G;
+    const { roles, characterChoices, characters, healths, isAlive, discard, hands} = G;
     const { activeCardType, activeCardData, targets, dyingPlayer, passedPlayers } = G;
     const { activePlayers, numPlayers, playOrder } = ctx;
 
@@ -74,6 +74,7 @@ export default props => {
             characterCards.push({
                 key: character ? `character-${character.name}` : `character-back-${i}`,
                 name: character ? character.name : 'Character Back',
+                opacity: isAlive[player] ? 1 : 0.5,
                 left: playerArea.x,
                 top: playerArea.y,
                 onClick: canSelect ? () => moves.selectPlayer(player) : undefined,
@@ -211,6 +212,7 @@ export default props => {
                 characterCards.push({
                     key: `character-${choice.name}`,
                     name: choice.name,
+                    opacity: 1,
                     left: startX + (scaledWidth + DELTA) * i,
                     top: (height - scaledHeight) / 2,
                     onClick: () => moves.selectCharacter(i),
@@ -235,7 +237,7 @@ export default props => {
             if (stage === 'play' && canPlayCard(G, ctx, playerID, card)) {
                 onClick = () => moves.playCard(i);
             } else if (stage === 'brinkOfDeath' && card.type === 'Peach') {
-                onClick = () => moves.playPeach();
+                onClick = () => moves.playPeach(i);
             } else if (stage === 'discard') {
                 onClick = () => moves.discardCard(i);
             }
@@ -318,7 +320,7 @@ export default props => {
         <AnimatedItems
             items={characterCards}
             from={_ => { return { opacity: 0, left: (width - scaledWidth) / 2, top: (height - scaledHeight) / 2 } }}
-            update={item => { return { opacity: 1, left: item.left, top: item.top } }}
+            update={item => { return { opacity: item.opacity, left: item.left, top: item.top } }}
             clickable={true}
             animated={(item, props) => <animated.img
                 className='positioned item'

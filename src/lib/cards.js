@@ -48,13 +48,23 @@ export function prepareNextPlay(G, ctx) {
     G.targets = [];
 }
 
+export function nextAlivePlayerPos(G, ctx, pos) {
+    const { isAlive } = G;
+    const { numPlayers, playOrder } = ctx;
+    let newPos = pos;
+    do {
+        newPos = (newPos + 1) % numPlayers;
+    } while (!isAlive[playOrder[newPos]]);
+    return newPos;
+}
+
 function roundRobinAttack(defendingCard) {
     return {
         canPlayCard: () => true,
         playCard: (G, ctx) => {
             const { activeCardData, targets } = G;
             const { currentPlayer, numPlayers, playOrder, playOrderPos } = ctx;
-            activeCardData.index = 0;
+            activeCardData.pos = nextAlivePlayerPos(G, ctx, playOrderPos);
             targets.push(...[...Array(numPlayers - 1)]
                 .map((_, i) => {
                     return {
@@ -63,31 +73,31 @@ function roundRobinAttack(defendingCard) {
                     };
                 }));
             setActivePlayers(G, ctx, {
-                value: { [playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers]]: 'play' },
+                value: { [playOrder[activeCardData.pos]]: 'play' },
                 moveLimit: 1,
             });
         },
         current: _data => {
             const next = (G, ctx) => {
                 const { activeCardData, targets } = G;
-                const { numPlayers, playOrder, playOrderPos } = ctx;
+                const { playOrder, playOrderPos } = ctx;
                 targets.splice(0, 1);
-                activeCardData.index++;
-                if (activeCardData.index < numPlayers - 1) {
+                activeCardData.pos = nextAlivePlayerPos(G, ctx, activeCardData.pos);
+                if (activeCardData.pos === playOrderPos) {
+                    prepareNextPlay(G, ctx);
+                } else {
                     setActivePlayers(G, ctx, {
-                        value: { [playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers]]: 'play' },
+                        value: { [playOrder[activeCardData.pos]]: 'play' },
                         moveLimit: 1,
                     });
-                } else {
-                    prepareNextPlay(G, ctx);
                 }
             };
             return {
                 text: 'Take the hit',
                 miscAction: (G, ctx) => {
                     const { activeCardData } = G;
-                    const { numPlayers, playOrder, playOrderPos } = ctx;
-                    loseHealth(G, ctx, playOrder[(playOrderPos + activeCardData.index + 1) % numPlayers], 1);
+                    const { playOrder } = ctx;
+                    loseHealth(G, ctx, playOrder[activeCardData.pos], 1);
                     next(G, ctx);
                 },
                 canPlayCard: (_G, _ctx, _playerID, card) => card.type === defendingCard,
@@ -112,7 +122,7 @@ export const CARD_TYPES = {
             if (data.target === undefined) {
                 return {
                     text: 'Select player',
-                    canSelectPlayer: (_G, _ctx, playerID, selectedPlayerID) => {
+                    canSelectPlayer: (G, _ctx, playerID, selectedPlayerID) => {
                         // TODO take range into account
                         return playerID !== selectedPlayerID;
                     },
@@ -157,9 +167,11 @@ export const CARD_TYPES = {
     'Peach Garden': {
         canPlayCard: () => true,
         playCard: (G, ctx) => {
-            const { healths } = G;
+            const { healths, isAlive } = G;
             const { playOrder } = ctx;
-            playOrder.forEach(player => healths[player].current = Math.min(healths[player].current + 1, healths[player].max));
+            playOrder
+                .filter(player => isAlive[player])
+                .forEach(player => healths[player].current = Math.min(healths[player].current + 1, healths[player].max));
             prepareNextPlay(G, ctx);
         },
     },

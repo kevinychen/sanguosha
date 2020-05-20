@@ -1,18 +1,22 @@
 import setup from './setup.js';
-import { prepareNextPlay, drawCards, CARD_TYPES } from './cards.js';
+import { prepareNextPlay, drawCards, CARD_TYPES, nextAlivePlayerPos } from './cards.js';
 
 /* Moves */
 
 function selectCharacter(G, ctx, index) {
-    const { characterChoices, characters, healths } = G;
-    const { playerID } = ctx;
+    const { startPlayerIndex, characterChoices, characters, healths } = G;
+    const { numPlayers, playerID, playOrder } = ctx;
     const character = characterChoices[playerID][index];
     characterChoices[playerID] = undefined;
     characters[playerID] = character;
-    // TODO if >= 4 players, add 1 extra health for the King
+    let maxHealth = character.health;
+    if (numPlayers >= 4 && playOrder[startPlayerIndex] === playerID) {
+        // if >= 4 players, add 1 extra health for the King
+        maxHealth++;
+    }
     healths[playerID] = {
-        max: character.health,
-        current: character.health - 2, // TODO remove -2
+        max: maxHealth,
+        current: maxHealth,
     };
 }
 
@@ -30,8 +34,11 @@ function playCard(G, ctx, index) {
     }
 }
 
-function playPeach(G) {
-    const { healths, dyingPlayer } = G;
+function playPeach(G, ctx, index) {
+    const { healths, discard, hands, dyingPlayer } = G;
+    const { playerID } = ctx;
+    const [card] = hands[playerID].splice(index, 1);
+    discard.push(card);
     healths[dyingPlayer].current++;
 }
 
@@ -64,7 +71,7 @@ function doNothing() {}
 
 const turnOrder = {
     first: G => G.startPlayerIndex,
-    next: (_G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+    next: (G, ctx) => nextAlivePlayerPos(G, ctx, ctx.playOrderPos),
 };
 
 export const SanGuoSha = {
@@ -73,13 +80,12 @@ export const SanGuoSha = {
     setup,
 
     playerView: (G, ctx, playerID) => {
-        const { roles } = G;
+        const { roles, isAlive } = G;
         const { numPlayers, playOrder } = ctx;
 
         const newRoles = { ...roles };
         for (let i = 0; i < numPlayers; i++) {
-            // TODO show role if dead
-            if (playOrder[i] !== playerID && newRoles[i].name !== 'King') {
+            if (playOrder[i] !== playerID && isAlive[playOrder[i]] && newRoles[i].name !== 'King') {
                 newRoles[i] = {id: roles[i].id};
             }
         }
