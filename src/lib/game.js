@@ -12,7 +12,7 @@ function selectCharacter(G, ctx, index) {
     // TODO if >= 4 players, add 1 extra health for the King
     healths[playerID] = {
         max: character.health,
-        current: character.health,
+        current: character.health - 2, // TODO remove -2
     };
 }
 
@@ -30,6 +30,11 @@ function playCard(G, ctx, index) {
     }
 }
 
+function playPeach(G) {
+    const { healths, dyingPlayer } = G;
+    healths[dyingPlayer].current++;
+}
+
 function selectPlayer(G, ctx, selectedPlayer) {
     const { activeCardType, activeCardData } = G;
     CARD_TYPES[activeCardType].current(activeCardData).selectPlayer(G, ctx, selectedPlayer);
@@ -45,6 +50,12 @@ function discardCard(G, ctx, index) {
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
     discard.push(card);
+}
+
+function pass(G, ctx) {
+    const { passedPlayers } = G;
+    const { playerID } = ctx;
+    passedPlayers[playerID] = true;
 }
 
 function doNothing() {}
@@ -142,9 +153,28 @@ export const SanGuoSha = {
                         && activePlayers[currentPlayer] === 'discard'
                         && hands[currentPlayer].length <= healths[currentPlayer].current;
                 },
+                onMove: (G, ctx) => {
+                    const { healths, isAlive, dyingPlayer, passedPlayers, storedActivePlayers } = G;
+                    const { activePlayers, currentPlayer, events } = ctx;
+                    if (activePlayers && activePlayers[currentPlayer] === 'brinkOfDeath') {
+                        if (healths[dyingPlayer].current > 0) {
+                            G.dyingPlayer = undefined;
+                            events.setActivePlayers(JSON.parse(JSON.stringify(storedActivePlayers)));
+                        } else if (Object.keys(passedPlayers).length === Object.keys(isAlive).length) {
+                            // everyone passed; the player dies
+                            G.dyingPlayer = undefined;
+                            isAlive[dyingPlayer] = false;
+                            events.setActivePlayers(JSON.parse(JSON.stringify(storedActivePlayers)));
+                        }
+                    }
+                },
                 stages: {
                     play: {
                         moves: { playCard, selectPlayer, miscAction },
+                    },
+
+                    brinkOfDeath: {
+                        moves: { playPeach, pass },
                     },
 
                     discard: {

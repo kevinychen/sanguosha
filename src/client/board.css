@@ -18,6 +18,13 @@ body {
     position: absolute;
 }
 
+.save-me {
+    background-color: red;
+    font-size: 16px;
+    border-radius: 8px;
+    color: white;
+}
+
 .game-label {
     position: absolute;
     color: white;

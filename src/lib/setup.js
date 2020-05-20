@@ -41,6 +41,7 @@ export default function setup(ctx) {
         [player, allCharacterChoices.slice(NUM_CHARACTER_CHOICES * i, NUM_CHARACTER_CHOICES * (i + 1))]));
     const characters = {};
     const healths = {};
+    const isAlive = Object.fromEntries(playOrder.map(player => [player, true]));
 
     const unshuffledDeck = [];
     // TODO add all the cards!?!?
@@ -76,6 +77,7 @@ export default function setup(ctx) {
         characterChoices,
         characters,
         healths,
+        isAlive,
         deck,
         discard,
         hands,

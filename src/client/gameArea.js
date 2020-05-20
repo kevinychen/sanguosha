@@ -32,7 +32,8 @@ function canPlayCard(G, ctx, playerID, card) {
 
 export default props => {
     const { G, ctx, moves, events, playerID, clientRect } = props;
-    const { roles, characterChoices, characters, healths, discard, hands, activeCardType, activeCardData, targets } = G;
+    const { roles, characterChoices, characters, healths, discard, hands} = G;
+    const { activeCardType, activeCardData, targets, dyingPlayer, passedPlayers } = G;
     const { activePlayers, numPlayers, playOrder } = ctx;
 
     const { width, height } = clientRect;
@@ -69,7 +70,7 @@ export default props => {
             }}
         />);
         if (character) {
-            const canSelect = stage !== undefined && canSelectPlayer(G, ctx, playerID, player);
+            const canSelect = ['play'].includes(stage) && canSelectPlayer(G, ctx, playerID, player);
             characterCards.push({
                 key: character ? `character-${character.name}` : `character-back-${i}`,
                 name: character ? character.name : 'Character Back',
@@ -92,6 +93,24 @@ export default props => {
                     height: scaledHeight * 0.05,
                 });
             }
+        }
+
+        // Render "Save me!" if the player is dying
+        if (stage === 'brinkOfDeath' && player === dyingPlayer) {
+            const SAVE_ME_WIDTH = 100; // pixels
+            const SAVE_ME_HEIGHT = 25; // pixels
+            frontNodes.push(<button
+                key='save-me'
+                className='positioned save-me'
+                style={{
+                    left: playerArea.x + (scaledWidth - SAVE_ME_WIDTH) / 2,
+                    top: playerArea.y + (scaledHeight - SAVE_ME_HEIGHT) / 2,
+                    width: SAVE_ME_WIDTH,
+                    height: SAVE_ME_HEIGHT,
+                }}
+            >
+                {'Save me!'}
+            </button>);
         }
 
         // Ratio of role card size in top right of character card, to character card size
@@ -211,49 +230,63 @@ export default props => {
     // render my cards
     const myHand = hands[playerID];
     if (myHand) {
-        const move = stage === 'play' ? moves.playCard : moves.discardCard;
         hands[playerID].forEach((card, i) => {
-            const canPlay = stage !== undefined && canPlayCard(G, ctx, playerID, card);
+            let onClick = undefined;
+            if (stage === 'play' && canPlayCard(G, ctx, playerID, card)) {
+                onClick = () => moves.playCard(i);
+            } else if (stage === 'brinkOfDeath' && card.type === 'Peach') {
+                onClick = () => moves.playPeach();
+            } else if (stage === 'discard') {
+                onClick = () => moves.discardCard(i);
+            }
             playerCards.push({
                 key: `card-${card.id}`,
                 name: card.type,
-                opacity: canPlay ? 1 : 0.3,
+                opacity: onClick !== undefined ? 1 : 0.3,
                 left: (scaledWidth + DELTA) * i,
                 top: height - scaledHeight - DELTA,
                 width: scaledWidth,
                 height: scaledHeight,
-                onClick: canPlay ? () => move(i) : undefined,
+                onClick: onClick,
             });
         })
     }
 
     // render an "action button" to do something
     let actionButton = undefined;
-    if (stage !== undefined && activeCardType !== undefined) {
-        const { text, miscAction } = CARD_TYPES[activeCardType].current(activeCardData);
-        if (miscAction) {
-            actionButton = {
-                text,
-                type: 'selectable warn',
-                onClick: () => moves.miscAction(),
-            };
+    if (stage === 'play') {
+        if (activeCardType !== undefined) {
+            const { text, miscAction } = CARD_TYPES[activeCardType].current(activeCardData);
+            if (miscAction) {
+                actionButton = {
+                    text,
+                    type: 'selectable warn',
+                    onClick: () => moves.miscAction(),
+                };
+            } else {
+                actionButton = {
+                    text,
+                    type: 'disabled',
+                };
+            }
         } else {
             actionButton = {
-                text,
-                type: 'disabled',
-            };
-        }
-    } else if (stage === 'play') {
-        actionButton = {
-            text: 'End turn',
-            type: 'selectable warn',
-            onClick: () => {
-                events.setStage('discard')
+                text: 'End turn',
+                type: 'selectable warn',
+                onClick: () => {
+                    events.setStage('discard')
 
-                // endIf is only checked after move, so do a no-op
-                moves.doNothing();
-            },
+                    // endIf is only checked after move, so do a no-op
+                    moves.doNothing();
+                },
+            }
         }
+    } else if (stage === 'brinkOfDeath' && !passedPlayers[playerID]) {
+        actionButton = {
+            text: 'Pass',
+            type: 'selectable warn',
+            onClick: () => moves.pass(),
+        };
     } else if (stage === 'discard') {
         actionButton = {
             text: 'Discard cards',
