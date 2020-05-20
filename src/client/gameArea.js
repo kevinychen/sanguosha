@@ -232,6 +232,7 @@ export default props => {
     // render my cards
     const myHand = hands[playerID];
     if (myHand) {
+        const spacing = Math.min(scaledWidth + DELTA, (width - 2 * scaledWidth - 3 * DELTA) / (hands[playerID].length - 1));
         hands[playerID].forEach((card, i) => {
             let onClick = undefined;
             if (stage === 'play' && canPlayCard(G, ctx, playerID, card)) {
@@ -245,7 +246,7 @@ export default props => {
                 key: `card-${card.id}`,
                 name: card.type,
                 opacity: onClick !== undefined ? 1 : 0.3,
-                left: (scaledWidth + DELTA) * i,
+                left: spacing * i,
                 top: height - scaledHeight - DELTA,
                 width: scaledWidth,
                 height: scaledHeight,

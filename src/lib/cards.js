@@ -175,4 +175,12 @@ export const CARD_TYPES = {
             prepareNextPlay(G, ctx);
         },
     },
+    'Draw Two': {
+        canPlayCard: () => true,
+        playCard: (G, ctx) => {
+            const { currentPlayer } = ctx;
+            drawCards(G, ctx, currentPlayer, 2);
+            prepareNextPlay(G, ctx);
+        },
+    },
 };
