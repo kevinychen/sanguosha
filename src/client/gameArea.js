@@ -296,7 +296,7 @@ export default props => {
             type: 'disabled',
         };
     }
-    if (actionButton !== undefined) {
+    if (isAlive[playerID] && actionButton !== undefined) {
         const ACTION_BUTTON_WIDTH = 160; // pixels
         const ACTION_BUTTON_HEIGHT = 30; // pixels
         const { text, type, onClick } = actionButton;

@@ -62,14 +62,14 @@ function roundRobinAttack(defendingCard) {
     return {
         canPlayCard: () => true,
         playCard: (G, ctx) => {
-            const { activeCardData, targets } = G;
-            const { currentPlayer, numPlayers, playOrder, playOrderPos } = ctx;
+            const { isAlive, activeCardData, targets } = G;
+            const { currentPlayer, playOrder, playOrderPos } = ctx;
             activeCardData.pos = nextAlivePlayerPos(G, ctx, playOrderPos);
-            targets.push(...[...Array(numPlayers - 1)]
-                .map((_, i) => {
+            targets.push(...playOrder.filter(player => player !== currentPlayer && isAlive[player])
+                .map(player => {
                     return {
                         targeter: currentPlayer,
-                        target: playOrder[(playOrderPos + i + 1) % numPlayers],
+                        target: player,
                     };
                 }));
             setActivePlayers(G, ctx, {
@@ -81,7 +81,7 @@ function roundRobinAttack(defendingCard) {
             const next = (G, ctx) => {
                 const { activeCardData, targets } = G;
                 const { playOrder, playOrderPos } = ctx;
-                targets.splice(0, 1);
+                targets.splice(targets.findIndex(target => target.target === playOrder[activeCardData.pos]), 1);
                 activeCardData.pos = nextAlivePlayerPos(G, ctx, activeCardData.pos);
                 if (activeCardData.pos === playOrderPos) {
                     prepareNextPlay(G, ctx);

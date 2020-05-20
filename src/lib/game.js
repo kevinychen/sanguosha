@@ -169,7 +169,7 @@ export const SanGuoSha = {
                         } else if (Object.keys(passedPlayers).length === Object.keys(isAlive).length) {
                             // everyone passed; the player dies
                             G.dyingPlayer = undefined;
-                            isAlive[dyingPlayer] = false;
+                            delete isAlive[dyingPlayer];
                             events.setActivePlayers(JSON.parse(JSON.stringify(storedActivePlayers)));
                         }
                     }
@@ -189,5 +189,11 @@ export const SanGuoSha = {
                 },
             },
         },
+    },
+
+    endIf: (G, ctx) => {
+        const { isAlive } = G;
+        const { playOrder } = ctx;
+        return playOrder.filter(player => isAlive[player]).length === 1;
     },
 };
