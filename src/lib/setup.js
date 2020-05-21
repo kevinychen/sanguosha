@@ -55,6 +55,13 @@ const CARDS = [
     { value: '2', suit: 'CLUB', type: 'Black Shield' },
     { value: '2', suit: 'SPADE', type: 'Wood Armor' },
     { value: 'A', suit: 'CLUB', type: 'Silver Helmet' },
+    { value: '5', suit: 'HEART', type: 'Red Hare' },
+    { value: 'K', suit: 'SPADE', type: 'Da Yuan' },
+    { value: 'K', suit: 'DIAMOND', type: 'Zi Xing' },
+    { value: '5', suit: 'CLUB', type: 'Di Lu' },
+    { value: '5', suit: 'SPADE', type: 'Shadow Runner' },
+    { value: 'K', suit: 'HEART', type: 'Storm Runner' },
+    { value: 'K', suit: 'DIAMOND', type: 'Hua Liu' },
 ];
 
 export default function setup(ctx) {
