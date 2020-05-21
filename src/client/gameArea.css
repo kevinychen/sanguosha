@@ -11,6 +11,16 @@ img {
     position: absolute;
 }
 
+.shadow {
+    box-shadow: 5px 5px 5px #666;
+    -webkit-box-shadow: 5px 5px 5px #666;
+}
+
+.small-shadow {
+    box-shadow: 2px 2px 2px #666;
+    -webkit-box-shadow: 2px 2px 2px #666;
+}
+
 .decrease-health {
     background-image: url('/health/health-red.png');
     background-size: cover;
@@ -35,12 +45,11 @@ img {
 
 .selectable > .item {
     cursor: pointer;
-    margin-left: -4px;
-    margin-top: -4px;
-    border: 4px solid rgba(255, 255, 255, 0);
 }
 
 .selectable > .item:hover {
+    margin-left: -4px;
+    margin-top: -4px;
     border: 4px solid orange;
 }
 

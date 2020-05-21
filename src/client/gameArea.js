@@ -1,3 +1,4 @@
+import * as classNames from 'classnames';
 import React from 'react';
 import { animated } from 'react-spring';
 import { MAX_DISCARDS_SHOWN } from '../lib/helper';
@@ -210,6 +211,7 @@ export default class GameArea extends React.Component {
                 hand.forEach(card => {
                     playerCards.push({
                         key: `card-${card.id}`,
+                        className: 'small-shadow',
                         name: card.type,
                         faceUp: false,
                         opacity: 1,
@@ -240,6 +242,7 @@ export default class GameArea extends React.Component {
             }
         });
 
+        // Render discarded cards
         if (discard !== undefined) {
             const DISCARD_RATIO = 0.7;
             const numCardsShown = Math.min(discard.length, MAX_DISCARDS_SHOWN);
@@ -248,6 +251,7 @@ export default class GameArea extends React.Component {
                 const card = discard[discard.length - 1 - i];
                 playerCards.push({
                     key: `card-${card.id}`,
+                    className: 'shadow',
                     name: card.type,
                     faceUp: true,
                     opacity: i === MAX_DISCARDS_SHOWN ? 0 : 1,
@@ -255,7 +259,7 @@ export default class GameArea extends React.Component {
                     top: (height - scaledHeight * DISCARD_RATIO) / 2,
                     width: scaledWidth * DISCARD_RATIO,
                     height: scaledHeight * DISCARD_RATIO,
-                    onClick: () => moves.pickUp(discard.length - 1 - i),
+                    onClick: i < MAX_DISCARDS_SHOWN ? () => moves.pickUp(discard.length - 1 - i) : undefined,
                 });
             }
         }
@@ -339,7 +343,7 @@ export default class GameArea extends React.Component {
                 update={item => { return { opacity: item.opacity, left: item.left, top: item.top } }}
                 clickable={true}
                 animated={(item, props) => <animated.img
-                    className='positioned item'
+                    className='positioned item shadow'
                     src={`./characters/${item.name}.jpg`}
                     alt={item.name}
                     style={{
@@ -375,7 +379,7 @@ export default class GameArea extends React.Component {
                 animated={(item, props) => {
                     const { faceUp, opacity, left, top, width, height } = props;
                     return <animated.img
-                        className='positioned item'
+                        className={classNames('positioned', 'item', item.className)}
                         src={faceUp.interpolate(faceUp => faceUp > 0.5 ? `./cards/${item.name}.jpg` : './cards/Card Back.jpg')}
                         alt={'card'}
                         style={{
