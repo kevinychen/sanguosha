@@ -255,6 +255,7 @@ export default class GameArea extends React.Component {
                     top: (height - scaledHeight * DISCARD_RATIO) / 2,
                     width: scaledWidth * DISCARD_RATIO,
                     height: scaledHeight * DISCARD_RATIO,
+                    onClick: () => moves.pickUp(discard.length - 1 - i),
                 });
             }
         }

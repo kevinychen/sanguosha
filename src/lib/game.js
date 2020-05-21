@@ -39,6 +39,13 @@ function play(G, ctx, index) {
     discard(G, ctx, card);
 }
 
+function pickUp(G, ctx, index) {
+    const { discard, hands } = G;
+    const { playerID } = ctx;
+    const [card] = discard.splice(index, 1);
+    hands[playerID].push(card);
+}
+
 function give(G, ctx, index, otherPlayerID) {
 
 }
@@ -176,7 +183,7 @@ export const SanGuoSha = {
                 },
                 stages: {
                     play: {
-                        moves: { draw, judgment, play, give, dismantle, steal, toggleChain, specialAction, updateHealth, die },
+                        moves: { draw, judgment, play, pickUp, give, dismantle, steal, toggleChain, specialAction, updateHealth, die },
                     },
                     discard: {
                         moves: { discardCard, doNothing },
