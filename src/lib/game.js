@@ -50,9 +50,14 @@ function give(G, ctx, index, otherPlayerID) {
 
 }
 
-/** { playerID, type: (index|'weapon'|'shield'|'+1'|'-1'|'starvation'|'capture'|'lightning') } */
+/** { playerID, type: ({otherPlayerID, index}|'weapon'|'shield'|'+1'|'-1'|'starvation'|'capture'|'lightning') } */
 function dismantle(G, ctx, target) {
-
+    const { hands } = G;
+    if (target.otherPlayerID !== undefined) {
+        const { otherPlayerID, index } = target;
+        const [card] = hands[otherPlayerID].splice(index, 1);
+        discard(G, ctx, card);
+    }
 }
 
 function steal(G, ctx, target) {

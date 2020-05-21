@@ -1,0 +1,32 @@
+.set-mode-panel {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+}
+
+.set-mode-panel button {
+    width: 80px;
+    height: 40px;
+    font-size: 14px;
+    background-color: rgba(128, 128, 128, 1.0);
+    margin-bottom: 10px;
+    display: block;
+    border-width: 0;
+    user-select: none;
+}
+
+.set-mode-panel button.selectable {
+    cursor: pointer;
+}
+
+.set-mode-panel button.selectable:active {
+    transform: scale(0.99);
+}
+
+.set-mode-panel button.selectable:hover {
+    background-color: rgba(128, 128, 128, 0.9);
+}
+
+.set-mode-panel button.toggled {
+    background-color: rgba(0, 128, 0, 1.0);
+}

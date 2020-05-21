@@ -2,6 +2,7 @@ import * as classNames from 'classnames';
 import React from 'react';
 import { animated } from 'react-spring';
 import { MAX_DISCARDS_SHOWN } from '../lib/helper';
+import SetModePanel from './setModePanel';
 import AnimatedItems from './animatedItems';
 import './gameArea.css';
 
@@ -19,12 +20,13 @@ export default class GameArea extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            mode: 'default',
+            mode: SetModePanel.DEFAULT_MODE,
         };
     }
 
     render() {
         const { G, ctx, moves, events, playerID, clientRect } = this.props;
+        const { mode } = this.state;
         const { roles, characterChoices, characters, healths, isAlive, deck, discard, hands } = G;
         const { activePlayers, currentPlayer, numPlayers, playOrder } = ctx;
 
@@ -64,6 +66,10 @@ export default class GameArea extends React.Component {
             const DECK_RATIO = 0.5;
             const MAX_CARDS_SHOWN = 10;
             deck.slice(-MAX_CARDS_SHOWN).forEach((card, j) => {
+                let onClick = undefined;
+                if (mode === SetModePanel.DEFAULT_MODE && card === deck[deck.length - 1]) {
+                    onClick = () => moves.draw();
+                }
                 playerCards.push({
                     key: `card-${card.id}`,
                     name: card.type,
@@ -73,7 +79,7 @@ export default class GameArea extends React.Component {
                     top: DELTA * (1.5 - j / MAX_CARDS_SHOWN),
                     width: scaledWidth * DECK_RATIO,
                     height: scaledHeight * DECK_RATIO,
-                    onClick: card.id === deck.slice(-1)[0].id ? () => moves.draw() : undefined,
+                    onClick,
                 });
             });
         }
@@ -83,7 +89,7 @@ export default class GameArea extends React.Component {
             const playerIndex = (myPlayerIndex + i) % numPlayers;
             const player = playOrder[playerIndex];
 
-            // Render each player's character
+            // Render each character back
             const character = characters[playerIndex];
             backNodes.push(<img
                 key={`character-back-${i}`}
@@ -97,11 +103,11 @@ export default class GameArea extends React.Component {
                     height: scaledHeight,
                 }}
             />);
-
             if (!character) {
                 return;
             }
 
+            // Render each player's character
             characterCards.push({
                 key: character ? `character-${character.name}` : `character-back-${i}`,
                 name: character ? character.name : 'Character Back',
@@ -211,6 +217,16 @@ export default class GameArea extends React.Component {
                 const hand = hands[player];
                 // Show the card backs
                 hand.forEach(card => {
+                    let onClick = undefined;
+                    if (mode === SetModePanel.DISMANTLE_MODE) {
+                        onClick = () => {
+                            moves.dismantle({
+                                otherPlayerID: player,
+                                index: Math.floor(Math.random() * hand.length),
+                            });
+                            this.setState({ mode: SetModePanel.DEFAULT_MODE });
+                        };
+                    }
                     playerCards.push({
                         key: `card-${card.id}`,
                         className: 'small-shadow',
@@ -221,6 +237,7 @@ export default class GameArea extends React.Component {
                         top: playerArea.y + (1 - CARD_RATIO) * scaledHeight - INFO_DELTA,
                         width: scaledWidth * CARD_RATIO,
                         height: scaledHeight * CARD_RATIO,
+                        onClick,
                     });
                 });
                 // Show the card count
@@ -251,6 +268,10 @@ export default class GameArea extends React.Component {
             const startX = (width - numCardsShown * scaledWidth * DISCARD_RATIO - (numCardsShown - 1) * DELTA) / 2;
             for (let i = 0; i < discard.length && i <= MAX_DISCARDS_SHOWN; i++) {
                 const card = discard[discard.length - 1 - i];
+                let onClick = undefined;
+                if (mode === SetModePanel.DEFAULT_MODE && i < MAX_DISCARDS_SHOWN) {
+                    onClick = () => moves.pickUp(discard.length - 1 - i);
+                }
                 playerCards.push({
                     key: `card-${card.id}`,
                     className: 'shadow',
@@ -261,7 +282,7 @@ export default class GameArea extends React.Component {
                     top: (height - scaledHeight * DISCARD_RATIO) / 2,
                     width: scaledWidth * DISCARD_RATIO,
                     height: scaledHeight * DISCARD_RATIO,
-                    onClick: i < MAX_DISCARDS_SHOWN ? () => moves.pickUp(discard.length - 1 - i) : undefined,
+                    onClick,
                 });
             }
         }
@@ -280,10 +301,8 @@ export default class GameArea extends React.Component {
             const spacing = Math.min(scaledWidth + DELTA, (width - 2 * scaledWidth - 3 * DELTA) / (hands[playerID].length - 1));
             hands[playerID].forEach((card, i) => {
                 let onClick = undefined;
-                if (stage === 'play') {
-                    onClick = () => moves.play(i);
-                } else if (stage === 'discard') {
-                    onClick = () => moves.discardCard(i);
+                if (mode === SetModePanel.DEFAULT_MODE) {
+                    onClick = () => (stage === 'play' ? moves.play : moves.discardCard)(i);
                 }
                 playerCards.push({
                     key: `card-${card.id}`,
@@ -337,6 +356,11 @@ export default class GameArea extends React.Component {
                 {text}
             </button>);
         }
+
+        backNodes.push(<SetModePanel
+            mode={mode}
+            setMode={mode => this.setState({ mode })}
+        />);
 
         return <div>
             {backNodes}

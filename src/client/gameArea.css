@@ -34,6 +34,7 @@ img {
 .game-label {
     position: absolute;
     color: white;
+    pointer-events: none;
 }
 
 .my-region {
