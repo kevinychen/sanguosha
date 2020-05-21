@@ -74,7 +74,9 @@ function updateHealth(G, ctx, change) {
 }
 
 function die(G, ctx) {
-
+    const { isAlive } = G;
+    const { playerID } = ctx;
+    delete isAlive[playerID];
 }
 
 function discardCard(G, ctx, index) {

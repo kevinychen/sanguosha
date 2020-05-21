@@ -17,13 +17,6 @@ body {
     background-size: cover;
 }
 
-.save-me {
-    background-color: red;
-    font-size: 16px;
-    border-radius: 8px;
-    color: white;
-}
-
 .game-label {
     position: absolute;
     color: white;
@@ -75,8 +68,16 @@ button.warn {
     background-color: rgba(255, 186, 0, 1.0);
 }
 
-button.warn:hover {
-    background-color: rgba(255, 186, 0, 0.8);
+button.warn.selectable:hover {
+    background-color: rgba(255, 186, 0, 0.7);
+}
+
+button.bad {
+    background-color: rgba(255, 0, 0, 1.0);
+}
+
+button.bad.selectable:hover {
+    background-color: rgba(255, 0, 0, 0.6);
 }
 
 button.selectable {
