@@ -21,6 +21,28 @@ const ROLE_DIST = {
 
 const NUM_CHARACTER_CHOICES = 3;
 
+const CARDS = [
+    { value: '10', suit: 'CLUB', type: 'Attack' },
+    { value: '7', suit: 'DIAMOND', type: 'Dodge' },
+    { value: 'Q', suit: 'HEART', type: 'Peach' },
+    { value: '4', suit: 'DIAMOND', type: 'Fire Attack' },
+    { value: '6', suit: 'CLUB', type: 'Lightning Attack' },
+    { value: '3', suit: 'CLUB', type: 'Wine' },
+    { value: '7', suit: 'CLUB', type: 'Barbarians' },
+    { value: 'A', suit: 'HEART', type: 'Hail of Arrows' },
+    { value: 'A', suit: 'HEART', type: 'Peach Garden' },
+    { value: '3', suit: 'HEART', type: 'Harvest' },
+    { value: '7', suit: 'HEART', type: 'Draw Two' },
+    { value: 'Q', suit: 'DIAMOND', type: 'Negate' },
+    { value: '4', suit: 'SPADE', type: 'Break' },
+    { value: 'A', suit: 'SPADE', type: 'Duel' },
+    { value: 'Q', suit: 'CLUB', type: 'Coerce' },
+    { value: '4', suit: 'DIAMOND', type: 'Steal' },
+    { value: '3', suit: 'HEART', type: 'Blaze' },
+    { value: 'K', suit: 'CLUB', type: 'Chains' },
+    { value: 'A', suit: 'CLUB', type: 'Crossbow' },
+];
+
 export default function setup(ctx) {
     const { numPlayers, playOrder, random } = ctx;
 
@@ -43,29 +65,7 @@ export default function setup(ctx) {
     const healths = {};
     const isAlive = Object.fromEntries(playOrder.map(player => [player, true]));
 
-    const unshuffledDeck = [];
-    // TODO add all the cards!?!?
-    for (let i = 0; i < 5; i++) {
-        unshuffledDeck.push({ value: '10', suit: 'CLUB', type: 'Attack' });
-    }
-    for (let i = 0; i < 5; i++) {
-        unshuffledDeck.push({ value: '7', suit: 'DIAMOND', type: 'Dodge' });
-    }
-    for (let i = 0; i < 5; i++) {
-        unshuffledDeck.push({ value: 'Q', suit: 'HEART', type: 'Peach' });
-    }
-    for (let i = 0; i < 5; i++) {
-        unshuffledDeck.push({ value: '7', suit: 'CLUB', type: 'Barbarians' });
-    }
-    for (let i = 0; i < 5; i++) {
-        unshuffledDeck.push({ value: 'A', suit: 'HEART', type: 'Hail of Arrows' });
-    }
-    for (let i = 0; i < 5; i++) {
-        unshuffledDeck.push({ value: 'A', suit: 'HEART', type: 'Peach Garden' });
-    }
-    for (let i = 0; i < 5; i++) {
-        unshuffledDeck.push({ value: '7', suit: 'HEART', type: 'Draw Two' });
-    }
+    const unshuffledDeck = CARDS.map(card => { return { ...card } });
     const deck = random.Shuffle(unshuffledDeck);
     for (let i = 0; i < deck.length; i++) {
         deck[i].id = `card-${i}`;
@@ -73,6 +73,7 @@ export default function setup(ctx) {
     const discard = [];
 
     const hands = Object.fromEntries(playOrder.map(player => [player, []]));
+    const equipment = Object.fromEntries(playOrder.map(player => [player, {}]));
 
     return {
         roles,
@@ -84,5 +85,6 @@ export default function setup(ctx) {
         deck,
         discard,
         hands,
+        equipment,
     };
 }

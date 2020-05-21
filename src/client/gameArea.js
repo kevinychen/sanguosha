@@ -27,7 +27,7 @@ export default class GameArea extends React.Component {
     render() {
         const { G, ctx, moves, events, playerID, clientRect } = this.props;
         const { mode } = this.state;
-        const { roles, characterChoices, characters, healths, isAlive, deck, discard, hands } = G;
+        const { roles, characterChoices, characters, healths, isAlive, deck, discard, hands, equipment } = G;
         const { activePlayers, currentPlayer, numPlayers, playOrder } = ctx;
 
         const { width, height } = clientRect;
@@ -211,8 +211,37 @@ export default class GameArea extends React.Component {
                 }}
             />);
 
-            // Show other player's hands
+            // Show player's equipment
             const CARD_RATIO = 0.3;
+            ['Weapon', 'Shield', '+1', '-1'].forEach((category, j) => {
+                const card = equipment[player][category];
+                if (card) {
+                    let onClick = undefined;
+                    if (mode === SetModePanel.DISMANTLE_MODE) {
+                        onClick = () => {
+                            moves.dismantle({
+                                playerID: player,
+                                category,
+                            });
+                            this.setState({ mode: SetModePanel.DEFAULT_MODE });
+                        };
+                    }
+                    playerCards.push({
+                        key: `card-${card.id}`,
+                        className: 'small-shadow',
+                        name: card.type,
+                        faceUp: true,
+                        opacity: 1,
+                        left: playerArea.x + (scaledWidth - (CARD_RATIO * scaledWidth + INFO_DELTA) * (2 - j % 2)),
+                        top: playerArea.y + (scaledHeight - (CARD_RATIO * scaledHeight + INFO_DELTA) * (2 - Math.floor(j / 2))),
+                        width: scaledWidth * CARD_RATIO,
+                        height: scaledHeight * CARD_RATIO,
+                        onClick,
+                    });
+                }
+            });
+
+            // Show other player's hands
             if (player !== playerID) {
                 const hand = hands[player];
                 // Show the card backs
@@ -221,7 +250,7 @@ export default class GameArea extends React.Component {
                     if (mode === SetModePanel.DISMANTLE_MODE) {
                         onClick = () => {
                             moves.dismantle({
-                                otherPlayerID: player,
+                                playerID: player,
                                 index: Math.floor(Math.random() * hand.length),
                             });
                             this.setState({ mode: SetModePanel.DEFAULT_MODE });

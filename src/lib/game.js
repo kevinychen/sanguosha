@@ -1,3 +1,4 @@
+import CARD_CATEGORIES from './cardCategories.js';
 import setup from './setup.js';
 import { drawCard, drawCards, discard, nextAlivePlayerPos } from './helper.js';
 
@@ -33,10 +34,18 @@ function judgment(G, ctx) {
 }
 
 function play(G, ctx, index) {
-    const { hands } = G;
+    const { hands, equipment } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
-    discard(G, ctx, card);
+    const category = CARD_CATEGORIES[card.type];
+    if (category) {
+        if (equipment[playerID][category]) {
+            discard(G, ctx, equipment[playerID][category]);
+        }
+        equipment[playerID][category] = card;
+    } else {
+        discard(G, ctx, card);
+    }
 }
 
 function pickUp(G, ctx, index) {
@@ -50,12 +59,14 @@ function give(G, ctx, index, otherPlayerID) {
 
 }
 
-/** { playerID, type: ({otherPlayerID, index}|'weapon'|'shield'|'+1'|'-1'|'starvation'|'capture'|'lightning') } */
 function dismantle(G, ctx, target) {
-    const { hands } = G;
-    if (target.otherPlayerID !== undefined) {
-        const { otherPlayerID, index } = target;
-        const [card] = hands[otherPlayerID].splice(index, 1);
+    const { hands, equipment } = G;
+    if (target.index) {
+        const [card] = hands[target.playerID].splice(target.index, 1);
+        discard(G, ctx, card);
+    } else {
+        const card = equipment[target.playerID][target.category];
+        equipment[target.playerID][target.category] = undefined;
         discard(G, ctx, card);
     }
 }
@@ -176,7 +187,7 @@ export const SanGuoSha = {
                     const { currentPlayer, events } = ctx;
                     drawCards(G, ctx, currentPlayer, 2);
 
-                    // TODO everyone can play cards in freeform mode
+                    // everyone can play cards in freeform mode
                     events.setActivePlayers({ all: 'play' });
                 },
                 endIf: (G, ctx) => {
