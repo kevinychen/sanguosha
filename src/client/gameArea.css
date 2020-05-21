@@ -7,6 +7,16 @@ body {
     position: absolute;
 }
 
+.decrease-health {
+    background-image: url('/health/health-red.png');
+    background-size: cover;
+}
+
+.increase-health {
+    background-image: url('/health/health-green.png');
+    background-size: cover;
+}
+
 .save-me {
     background-color: red;
     font-size: 16px;
@@ -41,6 +51,20 @@ body {
     transform: scale(0.99);
 }
 
+div.selectable {
+    cursor: pointer;
+}
+
+div.selectable:hover {
+    margin-left: -4px;
+    margin-top: -4px;
+    border: 4px solid orange;
+}
+
+div.selectable:active {
+    transform: scale(0.99);
+}
+
 button {
     font-size: 16px;
     border-radius: 8px;
@@ -57,9 +81,6 @@ button.warn:hover {
 
 button.selectable {
     cursor: pointer;
-    margin-left: -4px;
-    margin-top: -4px;
-    border: 4px solid rgba(255, 255, 255, 0);
 }
 
 button.selectable:active {

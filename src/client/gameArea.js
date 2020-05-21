@@ -120,6 +120,32 @@ export default class GameArea extends React.Component {
                 });
             }
 
+            // Render buttons to increase or decrease my own health
+            if (player == playerID) {
+                frontNodes.push(<div
+                    key='decrease-health'
+                    className='positioned selectable decrease-health'
+                    style={{
+                        left: playerArea.x + scaledWidth * 0.23,
+                        top: playerArea.y + scaledHeight * 0.1,
+                        width: scaledWidth * 0.12,
+                        height: scaledHeight * 0.1,
+                    }}
+                    onClick={() => moves.updateHealth(-1)}
+                />);
+                frontNodes.push(<div
+                    key='increase-health'
+                    className='positioned selectable increase-health'
+                    style={{
+                        left: playerArea.x + scaledWidth * 0.39,
+                        top: playerArea.y + scaledHeight * 0.1,
+                        width: scaledWidth * 0.12,
+                        height: scaledHeight * 0.1,
+                    }}
+                    onClick={() => moves.updateHealth(+1)}
+                />);
+            }
+
             // Render "Save me!" if the player is dying
             if (isAlive[player] && healths[player].current <= 0) {
                 const SAVE_ME_WIDTH = 100; // pixels
