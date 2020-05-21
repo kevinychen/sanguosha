@@ -41,6 +41,20 @@ const CARDS = [
     { value: '3', suit: 'HEART', type: 'Blaze' },
     { value: 'K', suit: 'CLUB', type: 'Chains' },
     { value: 'A', suit: 'CLUB', type: 'Crossbow' },
+    { value: '6', suit: 'SPADE', type: 'Black Pommel' },
+    { value: '2', suit: 'SPADE', type: 'Ice Sword' },
+    { value: '2', suit: 'SPADE', type: 'Gender Swords' },
+    { value: '5', suit: 'SPADE', type: 'Green Dragon Blade' },
+    { value: 'Q', suit: 'SPADE', type: 'Serpent Spear' },
+    { value: '5', suit: 'DIAMOND', type: 'Axe' },
+    { value: 'Q', suit: 'DIAMOND', type: 'Sky Scorcher' },
+    { value: '5', suit: 'HEART', type: 'Longbow' },
+    { value: 'A', suit: 'SPADE', type: 'Ancient Simitar' },
+    { value: 'A', suit: 'DIAMOND', type: 'Fire Fan' },
+    { value: '2', suit: 'SPADE', type: 'Eight Trigrams' },
+    { value: '2', suit: 'CLUB', type: 'Black Shield' },
+    { value: '2', suit: 'SPADE', type: 'Wood Armor' },
+    { value: 'A', suit: 'CLUB', type: 'Silver Helmet' },
 ];
 
 export default function setup(ctx) {
