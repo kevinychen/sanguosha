@@ -1,7 +1,6 @@
 import * as classNames from 'classnames';
 import React from 'react';
 import { animated } from 'react-spring';
-import { MAX_DISCARDS_SHOWN } from '../lib/helper';
 import SetModePanel from './setModePanel';
 import AnimatedItems from './animatedItems';
 import './gameArea.css';
@@ -62,8 +61,8 @@ export default class GameArea extends React.Component {
 
         // Render the deck
         const playerCards = [];
+        const DECK_RATIO = 0.5;
         if (deck.length > 0) {
-            const DECK_RATIO = 0.5;
             const MAX_CARDS_SHOWN = 10;
             deck.slice(-MAX_CARDS_SHOWN).forEach((card, j) => {
                 let onClick = undefined;
@@ -75,8 +74,8 @@ export default class GameArea extends React.Component {
                     name: card.type,
                     faceUp: false,
                     opacity: 1,
-                    left: DELTA * (1.5 - j / MAX_CARDS_SHOWN),
-                    top: DELTA * (1.5 - j / MAX_CARDS_SHOWN),
+                    left: DELTA * (1 - j / MAX_CARDS_SHOWN),
+                    top: height - scaledHeight * DECK_RATIO - DELTA * (j / MAX_CARDS_SHOWN),
                     width: scaledWidth * DECK_RATIO,
                     height: scaledHeight * DECK_RATIO,
                     onClick,
@@ -217,7 +216,7 @@ export default class GameArea extends React.Component {
                 const card = equipment[player][category];
                 if (card) {
                     let onClick = undefined;
-                    if (mode === SetModePanel.DISMANTLE_MODE) {
+                    if (player === playerID || mode === SetModePanel.DISMANTLE_MODE) {
                         onClick = () => {
                             moves.dismantle({
                                 playerID: player,
@@ -292,6 +291,7 @@ export default class GameArea extends React.Component {
 
         // Render discarded cards
         if (discard !== undefined) {
+            const MAX_DISCARDS_SHOWN = 4;
             const DISCARD_RATIO = 0.7;
             const numCardsShown = Math.min(discard.length, MAX_DISCARDS_SHOWN);
             const startX = (width - numCardsShown * scaledWidth * DISCARD_RATIO - (numCardsShown - 1) * DELTA) / 2;
@@ -327,18 +327,26 @@ export default class GameArea extends React.Component {
         // render my cards
         const myHand = hands[playerID];
         if (myHand) {
-            const spacing = Math.min(scaledWidth + DELTA, (width - 2 * scaledWidth - 3 * DELTA) / (hands[playerID].length - 1));
+            const spacing = Math.min(scaledWidth + DELTA, (width - (2 + DECK_RATIO) * scaledWidth - 5 * DELTA) / (hands[playerID].length - 1));
             hands[playerID].forEach((card, i) => {
                 let onClick = undefined;
                 if (mode === SetModePanel.DEFAULT_MODE) {
                     onClick = () => (stage === 'play' ? moves.play : moves.discardCard)(i);
+                } else if (mode === SetModePanel.DISMANTLE_MODE) {
+                    onClick = () => {
+                        moves.dismantle({
+                            playerID,
+                            index: i,
+                        });
+                        this.setState({ mode: SetModePanel.DEFAULT_MODE });
+                    };
                 }
                 playerCards.push({
                     key: `card-${card.id}`,
                     name: card.type,
                     faceUp: true,
                     opacity: onClick !== undefined ? 1 : 0.3,
-                    left: spacing * i,
+                    left: DECK_RATIO * scaledWidth + 2 * DELTA + spacing * i,
                     top: height - scaledHeight - DELTA,
                     width: scaledWidth,
                     height: scaledHeight,

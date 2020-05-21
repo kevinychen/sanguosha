@@ -1,5 +1,3 @@
-export const MAX_DISCARDS_SHOWN = 4;
-
 export function drawCard(G, ctx) {
     const { deck, discard } = G;
     const { random } = ctx;
@@ -7,7 +5,7 @@ export function drawCard(G, ctx) {
     const card = deck.pop();
     if (deck.length === 0) {
         // shuffle cards in discard back into the deck
-        deck.push(...random.Shuffle(discard.splice(0, discard.length - MAX_DISCARDS_SHOWN)));
+        deck.push(...random.Shuffle(discard.splice(0, discard.length)));
     }
     return card;
 }
@@ -26,7 +24,7 @@ export function discard(G, ctx, card) {
 
     discard.push(card);
     if (deck.length === 0) {
-        deck.push(...random.Shuffle(discard.splice(0, discard.length - MAX_DISCARDS_SHOWN)));
+        deck.push(...random.Shuffle(discard.splice(0, discard.length)));
     }
 }
 
