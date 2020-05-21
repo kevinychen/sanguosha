@@ -18,7 +18,9 @@ export default class GameArea extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            mode: 'default',
+        };
     }
 
     render() {
@@ -122,7 +124,7 @@ export default class GameArea extends React.Component {
             }
 
             // Render buttons to increase or decrease my own health
-            if (player == playerID) {
+            if (player === playerID) {
                 if (healths[playerID].current > 0) {
                     frontNodes.push(<div
                         key='decrease-health'
@@ -135,7 +137,7 @@ export default class GameArea extends React.Component {
                         }}
                         onClick={() => moves.updateHealth(-1)}
                     />);
-                } else {
+                } else if (isAlive[playerID]) {
                     const DIE_BUTTON_WIDTH = 180;
                     const DIE_BUTTON_HEIGHT = 30;
                     frontNodes.push(<button

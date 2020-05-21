@@ -90,7 +90,7 @@ function discardCard(G, ctx, index) {
     const { hands } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
-    discard(card);
+    discard(G, ctx, card);
 }
 
 function doNothing() {}
