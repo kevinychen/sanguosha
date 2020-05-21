@@ -1,6 +1,6 @@
 import React from 'react';
-import './board.css';
 import GameArea from './gameArea.js';
+import './board.css';
 
 export class SanGuoShaBoard extends React.Component {
 
@@ -20,7 +20,7 @@ export class SanGuoShaBoard extends React.Component {
 
     render() {
         const { clientRect } = this.state;
-        return <div id='board' ref={el => this.el = el}>
+        return <div className='board' ref={el => this.el = el}>
             {clientRect ? <GameArea clientRect={clientRect} {...this.props} /> : undefined}
         </div>;
     }

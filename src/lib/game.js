@@ -1,5 +1,5 @@
 import setup from './setup.js';
-import { prepareNextPlay, drawCards, CARD_TYPES, nextAlivePlayerPos } from './cards.js';
+import { drawCards, nextAlivePlayerPos, drawCard } from './helper.js';
 
 /* Moves */
 
@@ -20,36 +20,62 @@ function selectCharacter(G, ctx, index) {
     };
 }
 
-function playCard(G, ctx, index) {
-    const { discard, hands, activeCardType, activeCardData } = G;
+function drawFromDeck(G, ctx) {
+    const { hands } = G;
+    const { playerID } = ctx;
+    const card = drawCard(G, ctx);
+    hands[playerID].push(card);
+}
+
+function judgment(G, ctx) {
+    const { discard } = G;
+    const card = drawCard(G, ctx);
+    discard.push(card);
+}
+
+function play(G, ctx, index) {
+    const { discard, hands } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
     discard.push(card);
+}
 
-    if (activeCardType === undefined) {
-        G.activeCardType = card.type;
-        CARD_TYPES[card.type].playCard(G, ctx);
-    } else {
-        CARD_TYPES[activeCardType].current(activeCardData).playCard(G, ctx, card);
+function give(G, ctx, index, otherPlayerID) {
+
+}
+
+/** { playerID, type: (index|'weapon'|'shield'|'+1'|'-1'|'starvation'|'capture'|'lightning') } */
+function dismantle(G, ctx, target) {
+
+}
+
+function steal(G, ctx, target) {
+
+}
+
+function toggleChain(G, ctx, playerID) {
+
+}
+
+/** Special card types: Harvest, Lightning (move to next player) */
+function specialAction(G, ctx, cardType) {
+    
+}
+
+function updateHealth(G, ctx, change) {
+    const { healths } = G;
+    const { playerID } = ctx;
+    healths[playerID].current += change;
+    if (healths[playerID].current > healths[playerID].max) {
+        healths[playerID].current = healths[playerID].max;
+    }
+    if (healths[playerID].current < 0) {
+        healths[playerID].current = 0;
     }
 }
 
-function playPeach(G, ctx, index) {
-    const { healths, discard, hands, dyingPlayer } = G;
-    const { playerID } = ctx;
-    const [card] = hands[playerID].splice(index, 1);
-    discard.push(card);
-    healths[dyingPlayer].current++;
-}
+function die(G, ctx) {
 
-function selectPlayer(G, ctx, selectedPlayer) {
-    const { activeCardType, activeCardData } = G;
-    CARD_TYPES[activeCardType].current(activeCardData).selectPlayer(G, ctx, selectedPlayer);
-}
-
-function miscAction(G, ctx) {
-    const { activeCardType, activeCardData } = G;
-    CARD_TYPES[activeCardType].current(activeCardData).miscAction(G, ctx);
 }
 
 function discardCard(G, ctx, index) {
@@ -57,12 +83,6 @@ function discardCard(G, ctx, index) {
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
     discard.push(card);
-}
-
-function pass(G, ctx) {
-    const { passedPlayers } = G;
-    const { playerID } = ctx;
-    passedPlayers[playerID] = true;
 }
 
 function doNothing() {}
@@ -113,7 +133,7 @@ export const SanGuoSha = {
 
                 // make character choices automatically for easier testing
                 // TODO remove
-                ctx.playOrder.forEach(player => selectCharacter(G, {...ctx, playerID: player}, 0));
+                playOrder.forEach(player => selectCharacter(G, {...ctx, playerID: player}, 0));
             },
 
             // end select characters phase if everyone has made a character choice
@@ -140,17 +160,11 @@ export const SanGuoSha = {
             turn: {
                 order: turnOrder,
                 onBegin: (G, ctx) => {
-                    const { currentPlayer } = ctx;
-
-                    // TODO run begin phase powers
-                    // TODO run judgment
-
+                    const { currentPlayer, events } = ctx;
                     drawCards(G, ctx, currentPlayer, 2);
 
-                    prepareNextPlay(G, ctx);
-                },
-                onEnd: () => {
-                    // TODO run end phase powers
+                    // TODO everyone can play cards in freeform mode
+                    events.setActivePlayers({ all: 'play' });
                 },
                 endIf: (G, ctx) => {
                     const { healths, hands } = G;
@@ -159,30 +173,10 @@ export const SanGuoSha = {
                         && activePlayers[currentPlayer] === 'discard'
                         && hands[currentPlayer].length <= healths[currentPlayer].current;
                 },
-                onMove: (G, ctx) => {
-                    const { healths, isAlive, dyingPlayer, passedPlayers, storedActivePlayers } = G;
-                    const { activePlayers, currentPlayer, events } = ctx;
-                    if (activePlayers && activePlayers[currentPlayer] === 'brinkOfDeath') {
-                        if (healths[dyingPlayer].current > 0) {
-                            G.dyingPlayer = undefined;
-                            events.setActivePlayers(JSON.parse(JSON.stringify(storedActivePlayers)));
-                        } else if (Object.keys(passedPlayers).length === Object.keys(isAlive).length) {
-                            // everyone passed; the player dies
-                            G.dyingPlayer = undefined;
-                            delete isAlive[dyingPlayer];
-                            events.setActivePlayers(JSON.parse(JSON.stringify(storedActivePlayers)));
-                        }
-                    }
-                },
                 stages: {
                     play: {
-                        moves: { playCard, selectPlayer, miscAction },
+                        moves: { drawFromDeck, judgment, play, give, dismantle, steal, toggleChain, specialAction, updateHealth, die },
                     },
-
-                    brinkOfDeath: {
-                        moves: { playPeach, pass },
-                    },
-
                     discard: {
                         moves: { discardCard, doNothing },
                     },

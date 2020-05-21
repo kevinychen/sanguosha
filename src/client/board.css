@@ -1,9 +1,4 @@
-body {
-    margin: 0;
-    background-color: black;
-}
-
-#board {
+.board {
     position: relative;
     width: 100vw;
     max-width: 1300px;
@@ -12,84 +7,4 @@ body {
     height: calc(100vh - 10px);
     background-color: #ffebd0;
     border: 3px solid #2B1A15;
-}
-
-.positioned {
-    position: absolute;
-}
-
-.save-me {
-    background-color: red;
-    font-size: 16px;
-    border-radius: 8px;
-    color: white;
-}
-
-.game-label {
-    position: absolute;
-    color: white;
-}
-
-.my-region {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background-color: #2B1A15;
-}
-
-.selectable > .item {
-    cursor: pointer;
-    margin-left: -4px;
-    margin-top: -4px;
-    border: 4px solid rgba(255, 255, 255, 0);
-}
-
-.selectable > .item:hover {
-    border: 4px solid orange;
-}
-
-.selectable > .item:active {
-    transform: scale(0.99);
-}
-
-.target-line {
-    /* should be at most size of #board */
-    width: 100vw;
-    max-width: 1300px;
-    height: calc(100vh - 10px);
-    pointer-events: none;
-}
-
-.target-line > .item {
-    stroke: orange;
-    stroke-width: 2;
-}
-
-button {
-    font-size: 16px;
-    border-radius: 8px;
-    color: white;
-}
-
-button.warn {
-    background-color: rgba(255, 186, 0, 1.0);
-}
-
-button.warn:hover {
-    background-color: rgba(255, 186, 0, 0.8);
-}
-
-button.selectable {
-    cursor: pointer;
-    margin-left: -4px;
-    margin-top: -4px;
-    border: 4px solid rgba(255, 255, 255, 0);
-}
-
-button.selectable:active {
-    transform: scale(0.99);
-}
-
-button.disabled {
-    background-color: gray;
 }
