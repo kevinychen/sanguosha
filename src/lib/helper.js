@@ -1,15 +1,15 @@
+export const MAX_DISCARDS_SHOWN = 4;
+
 export function drawCard(G, ctx) {
     const { deck, discard } = G;
     const { random } = ctx;
 
+    const card = deck.pop();
     if (deck.length === 0) {
         // shuffle cards in discard back into the deck
-        if (discard.length === 0) {
-            console.error('No cards left!');
-        }
-        deck.push(...random.Shuffle(discard.splice(0, discard.length)));
+        deck.push(...random.Shuffle(discard.splice(0, discard.length - MAX_DISCARDS_SHOWN)));
     }
-    return deck.pop();
+    return card;
 }
 
 export function drawCards(G, ctx, playerID, count) {
@@ -17,6 +17,16 @@ export function drawCards(G, ctx, playerID, count) {
     for (let i = 0; i < count; i++) {
         const card = drawCard(G, ctx);
         hands[playerID].push(card);
+    }
+}
+
+export function discard(G, ctx, card) {
+    const { deck, discard } = G;
+    const { random } = ctx;
+
+    discard.push(card);
+    if (deck.length === 0) {
+        deck.push(...random.Shuffle(discard.splice(0, discard.length - MAX_DISCARDS_SHOWN)));
     }
 }
 

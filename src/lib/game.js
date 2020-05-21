@@ -1,5 +1,5 @@
 import setup from './setup.js';
-import { drawCards, nextAlivePlayerPos, drawCard } from './helper.js';
+import { drawCard, drawCards, discard, nextAlivePlayerPos } from './helper.js';
 
 /* Moves */
 
@@ -20,7 +20,7 @@ function selectCharacter(G, ctx, index) {
     };
 }
 
-function drawFromDeck(G, ctx) {
+function draw(G, ctx) {
     const { hands } = G;
     const { playerID } = ctx;
     const card = drawCard(G, ctx);
@@ -28,16 +28,15 @@ function drawFromDeck(G, ctx) {
 }
 
 function judgment(G, ctx) {
-    const { discard } = G;
     const card = drawCard(G, ctx);
-    discard.push(card);
+    discard(G, ctx, card);
 }
 
 function play(G, ctx, index) {
-    const { discard, hands } = G;
+    const { hands } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
-    discard.push(card);
+    discard(G, ctx, card);
 }
 
 function give(G, ctx, index, otherPlayerID) {
@@ -79,10 +78,10 @@ function die(G, ctx) {
 }
 
 function discardCard(G, ctx, index) {
-    const { discard, hands } = G;
+    const { hands } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
-    discard.push(card);
+    discard(card);
 }
 
 function doNothing() {}
@@ -175,7 +174,7 @@ export const SanGuoSha = {
                 },
                 stages: {
                     play: {
-                        moves: { drawFromDeck, judgment, play, give, dismantle, steal, toggleChain, specialAction, updateHealth, die },
+                        moves: { draw, judgment, play, give, dismantle, steal, toggleChain, specialAction, updateHealth, die },
                     },
                     discard: {
                         moves: { discardCard, doNothing },

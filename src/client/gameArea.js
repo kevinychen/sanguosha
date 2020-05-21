@@ -1,5 +1,6 @@
 import React from 'react';
 import { animated } from 'react-spring';
+import { MAX_DISCARDS_SHOWN } from '../lib/helper';
 import AnimatedItems from './animatedItems';
 import './gameArea.css';
 
@@ -21,7 +22,7 @@ export default class GameArea extends React.Component {
 
     render() {
         const { G, ctx, moves, events, playerID, clientRect } = this.props;
-        const { roles, characterChoices, characters, healths, isAlive, discard, hands } = G;
+        const { roles, characterChoices, characters, healths, isAlive, deck, discard, hands } = G;
         const { activePlayers, currentPlayer, numPlayers, playOrder } = ctx;
 
         const { width, height } = clientRect;
@@ -54,7 +55,26 @@ export default class GameArea extends React.Component {
             }
         }
 
+        // Render the deck
         const playerCards = [];
+        if (deck.length > 0) {
+            const DECK_RATIO = 0.5;
+            const MAX_CARDS_SHOWN = 10;
+            deck.slice(-MAX_CARDS_SHOWN).forEach((card, j) => {
+                playerCards.push({
+                    key: `card-${card.id}`,
+                    name: card.type,
+                    faceUp: false,
+                    opacity: 1,
+                    left: DELTA * (1.5 - j / MAX_CARDS_SHOWN),
+                    top: DELTA * (1.5 - j / MAX_CARDS_SHOWN),
+                    width: scaledWidth * DECK_RATIO,
+                    height: scaledHeight * DECK_RATIO,
+                    onClick: card.id === deck.slice(-1)[0].id ? () => moves.draw() : undefined,
+                });
+            });
+        }
+
         const healthPoints = [];
         playerAreas.forEach((playerArea, i) => {
             const playerIndex = (myPlayerIndex + i) % numPlayers;
@@ -143,7 +163,8 @@ export default class GameArea extends React.Component {
                 hand.forEach(card => {
                     playerCards.push({
                         key: `card-${card.id}`,
-                        name: 'Card Back',
+                        name: card.type,
+                        faceUp: false,
                         opacity: 1,
                         left: playerArea.x + INFO_DELTA,
                         top: playerArea.y + (1 - CARD_RATIO) * scaledHeight - INFO_DELTA,
@@ -173,7 +194,6 @@ export default class GameArea extends React.Component {
         });
 
         if (discard !== undefined) {
-            const MAX_DISCARDS_SHOWN = 4;
             const DISCARD_RATIO = 0.7;
             const numCardsShown = Math.min(discard.length, MAX_DISCARDS_SHOWN);
             const startX = (width - numCardsShown * scaledWidth * DISCARD_RATIO - (numCardsShown - 1) * DELTA) / 2;
@@ -182,6 +202,7 @@ export default class GameArea extends React.Component {
                 playerCards.push({
                     key: `card-${card.id}`,
                     name: card.type,
+                    faceUp: true,
                     opacity: i === MAX_DISCARDS_SHOWN ? 0 : 1,
                     left: startX + (scaledWidth * DISCARD_RATIO + DELTA) * i,
                     top: (height - scaledHeight * DISCARD_RATIO) / 2,
@@ -213,6 +234,7 @@ export default class GameArea extends React.Component {
                 playerCards.push({
                     key: `card-${card.id}`,
                     name: card.type,
+                    faceUp: true,
                     opacity: onClick !== undefined ? 1 : 0.3,
                     left: spacing * i,
                     top: height - scaledHeight - DELTA,
@@ -266,7 +288,6 @@ export default class GameArea extends React.Component {
             {backNodes}
             <AnimatedItems
                 items={characterCards}
-                from={_ => { return { opacity: 0, left: (width - scaledWidth) / 2, top: (height - scaledHeight) / 2 } }}
                 update={item => { return { opacity: item.opacity, left: item.left, top: item.top } }}
                 clickable={true}
                 animated={(item, props) => <animated.img
@@ -301,21 +322,24 @@ export default class GameArea extends React.Component {
             />
             <AnimatedItems
                 items={playerCards}
-                from={_ => { return { opacity: 0, left: width / 2, top: height / 2, width: 0, height: 0 } }}
-                update={item => { return { opacity: item.opacity, left: item.left, top: item.top, width: item.width, height: item.height } }}
+                update={item => { return { faceUp: item.faceUp ? 1 : 0, opacity: item.opacity, left: item.left, top: item.top, width: item.width, height: item.height } }}
                 clickable={true}
-                animated={(item, props) => <animated.img
-                    className='positioned item'
-                    src={`./cards/${item.name}.jpg`}
-                    alt={item.name}
-                    style={{
-                        opacity: props.opacity,
-                        left: props.left,
-                        top: props.top,
-                        width: props.width,
-                        height: props.height,
-                    }}
-                />}
+                animated={(item, props) => {
+                    const { faceUp, opacity, left, top, width, height } = props;
+                    return <animated.img
+                        className='positioned item'
+                        src={faceUp.interpolate(faceUp => faceUp > 0.5 ? `./cards/${item.name}.jpg` : './cards/Card Back.jpg')}
+                        alt={'card'}
+                        style={{
+                            transform: faceUp.interpolate(faceUp => `rotateY(${faceUp * 180 - (faceUp > 0.5 ? 180 : 0)}deg)`),
+                            opacity,
+                            left,
+                            top,
+                            width,
+                            height,
+                        }}
+                    />
+                }}
             />
             {frontNodes}
         </div>;
