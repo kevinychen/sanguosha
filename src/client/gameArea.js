@@ -125,7 +125,7 @@ export default class GameArea extends React.Component {
                 if (healths[playerID].current > 0) {
                     frontNodes.push(<div
                         key='decrease-health'
-                        className='positioned selectable decrease-health'
+                        className='positioned image-div selectable decrease-health'
                         style={{
                             left: playerArea.x + scaledWidth * 0.23,
                             top: playerArea.y + scaledHeight * 0.1,
@@ -135,8 +135,8 @@ export default class GameArea extends React.Component {
                         onClick={() => moves.updateHealth(-1)}
                     />);
                 } else {
-                    const DIE_BUTTON_WIDTH = 70;
-                    const DIE_BUTTON_HEIGHT = 70;
+                    const DIE_BUTTON_WIDTH = 180;
+                    const DIE_BUTTON_HEIGHT = 30;
                     frontNodes.push(<button
                         key='die'
                         className={`positioned selectable bad`}
@@ -148,13 +148,13 @@ export default class GameArea extends React.Component {
                         }}
                         onClick={() => moves.die()}
                     >
-                        {'DIE'}
+                        {'Die and leave game'}
                     </button>);
                 }
                 if (healths[playerID].current < healths[playerID].max) {
                     frontNodes.push(<div
                         key='increase-health'
-                        className='positioned selectable increase-health'
+                        className='positioned image-div selectable increase-health'
                         style={{
                             left: playerArea.x + scaledWidth * 0.39,
                             top: playerArea.y + scaledHeight * 0.1,

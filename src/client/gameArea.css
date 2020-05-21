@@ -3,6 +3,10 @@ body {
     background-color: black;
 }
 
+img {
+    user-select: none;
+}
+
 .positioned {
     position: absolute;
 }
@@ -44,17 +48,17 @@ body {
     transform: scale(0.99);
 }
 
-div.selectable {
+.image-div.selectable {
     cursor: pointer;
 }
 
-div.selectable:hover {
+.image-div.selectable:hover {
     margin-left: -4px;
     margin-top: -4px;
     border: 4px solid orange;
 }
 
-div.selectable:active {
+.image-div.selectable:active {
     transform: scale(0.99);
 }
 
@@ -62,6 +66,7 @@ button {
     font-size: 16px;
     border-radius: 8px;
     color: white;
+    user-select: none;
 }
 
 button.warn {
