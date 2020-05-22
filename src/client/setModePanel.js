@@ -4,6 +4,7 @@ import './setModePanel.css';
 export default class SetModePanel extends React.Component {
 
     static DEFAULT_MODE = 'Default';
+    static GIVE_MODE = 'Give';
     static DISMANTLE_MODE = 'Dismantle';
     static STEAL_MODE = 'Steal';
 
@@ -12,6 +13,7 @@ export default class SetModePanel extends React.Component {
         return <div className='set-mode-panel'>
             <div className='section'>
                 {this.renderButton(SetModePanel.DEFAULT_MODE)}
+                {this.renderButton(SetModePanel.GIVE_MODE)}
                 {this.renderButton(SetModePanel.DISMANTLE_MODE)}
                 {this.renderButton(SetModePanel.STEAL_MODE)}
             </div>

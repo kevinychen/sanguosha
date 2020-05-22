@@ -56,7 +56,10 @@ function pickUp(G, ctx, index) {
 }
 
 function give(G, ctx, index, otherPlayerID) {
-
+    const { hands } = G;
+    const { playerID } = ctx;
+    const [card] = hands[playerID].splice(index, 1);
+    hands[otherPlayerID].push(card);
 }
 
 function dismantle(G, ctx, target) {

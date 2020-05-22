@@ -21,6 +21,7 @@ export default class GameArea extends React.Component {
         super(props);
         this.state = {
             mode: SetModePanel.DEFAULT_MODE,
+            selectedIndex: undefined,
         };
     }
 
@@ -119,8 +120,16 @@ export default class GameArea extends React.Component {
     }
 
     addCharacterCard(playerArea, character, player, characterCards) {
-        const { G, scaledWidth, scaledHeight } = this.props;
+        const { G, moves, playerID, scaledWidth, scaledHeight } = this.props;
+        const { mode, selectedIndex } = this.state;
         const { isAlive } = G;
+        let onClick = undefined;
+        if (mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined) {
+            onClick = () => {
+                moves.give(selectedIndex, player);
+                this.setState({ mode: SetModePanel.DEFAULT_MODE, selectedIndex: undefined });
+            };
+        }
         characterCards.push({
             key: character ? `character-${character.name}` : `character-back-${player}`,
             name: character ? character.name : 'Character Back',
@@ -129,6 +138,7 @@ export default class GameArea extends React.Component {
             top: playerArea.y,
             width: scaledWidth,
             height: scaledHeight,
+            onClick,
         });
     }
 
@@ -324,7 +334,7 @@ export default class GameArea extends React.Component {
 
     addMyHand(normalCards) {
         const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
-        const { mode } = this.state;
+        const { mode, selectedIndex } = this.state;
         const { hands } = G;
         const myHand = hands[playerID];
         if (myHand) {
@@ -333,6 +343,8 @@ export default class GameArea extends React.Component {
                 let onClick = undefined;
                 if (mode === SetModePanel.DEFAULT_MODE) {
                     onClick = () => (this.stage() === 'play' ? moves.play : moves.discardCard)(i);
+                } else if (mode === SetModePanel.GIVE_MODE && selectedIndex === undefined) {
+                    onClick = () => this.setState({ selectedIndex: i });
                 } else if (mode === SetModePanel.DISMANTLE_MODE) {
                     onClick = () => {
                         moves.dismantle({
@@ -436,12 +448,18 @@ export default class GameArea extends React.Component {
 
     renderActionButton() {
         const { G, ctx, moves, events, playerID, width, height, scaledHeight } = this.props;
+        const { mode, selectedIndex } = this.state;
         const { isAlive } = G;
         const { currentPlayer } = ctx;
         const ACTION_BUTTON_WIDTH = 160;
         const ACTION_BUTTON_HEIGHT = 30;
         let actionButton = undefined;
-        if (this.stage() === 'play' && currentPlayer === playerID) {
+        if (mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined) {
+            actionButton = {
+                text: 'Select player',
+                type: 'disabled',
+            };
+        } else if (this.stage() === 'play' && currentPlayer === playerID) {
             actionButton = {
                 text: 'End turn',
                 type: 'selectable warn',
