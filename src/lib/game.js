@@ -61,7 +61,7 @@ function give(G, ctx, index, otherPlayerID) {
 
 function dismantle(G, ctx, target) {
     const { hands, equipment } = G;
-    if (target.index) {
+    if (target.index !== undefined) {
         const [card] = hands[target.playerID].splice(target.index, 1);
         discard(G, ctx, card);
     } else {
@@ -79,9 +79,24 @@ function toggleChain(G, ctx, playerID) {
 
 }
 
-/** Special card types: Harvest, Lightning (move to next player) */
-function specialAction(G, ctx, cardType) {
-    
+function harvest(G, ctx) {
+    const { isAlive, harvest } = G;
+    const { playOrder } = ctx;
+    if (harvest.length > 0) {
+        return;
+    }
+    const numPlayers = playOrder.filter(player => isAlive[player]).length;
+    for (let i = 0; i < numPlayers; i++) {
+        const card = drawCard(G, ctx);
+        harvest.push(card);
+    }
+}
+
+function pickUpHarvest(G, ctx, index) {
+    const { hands, harvest } = G;
+    const { playerID } = ctx;
+    const [card] = harvest.splice(index, 1);
+    hands[playerID].push(card);
 }
 
 function updateHealth(G, ctx, change) {
@@ -199,7 +214,20 @@ export const SanGuoSha = {
                 },
                 stages: {
                     play: {
-                        moves: { draw, judgment, play, pickUp, give, dismantle, steal, toggleChain, specialAction, updateHealth, die },
+                        moves: {
+                            draw,
+                            judgment,
+                            play,
+                            pickUp,
+                            give,
+                            dismantle,
+                            steal,
+                            toggleChain,
+                            harvest,
+                            pickUpHarvest,
+                            updateHealth,
+                            die,
+                         },
                     },
                     discard: {
                         moves: { discardCard, doNothing },

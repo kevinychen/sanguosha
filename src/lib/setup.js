@@ -95,6 +95,7 @@ export default function setup(ctx) {
 
     const hands = Object.fromEntries(playOrder.map(player => [player, []]));
     const equipment = Object.fromEntries(playOrder.map(player => [player, {}]));
+    const harvest = [];
 
     return {
         roles,
@@ -107,5 +108,6 @@ export default function setup(ctx) {
         discard,
         hands,
         equipment,
+        harvest,
     };
 }

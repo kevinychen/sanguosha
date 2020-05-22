@@ -26,7 +26,7 @@ export default class GameArea extends React.Component {
     render() {
         const { G, ctx, moves, events, playerID, clientRect } = this.props;
         const { mode } = this.state;
-        const { roles, characterChoices, characters, healths, isAlive, deck, discard, hands, equipment } = G;
+        const { roles, characterChoices, characters, healths, isAlive, deck, discard, hands, equipment, harvest } = G;
         const { activePlayers, currentPlayer, numPlayers, playOrder } = ctx;
 
         const { width, height } = clientRect;
@@ -298,7 +298,7 @@ export default class GameArea extends React.Component {
             for (let i = 0; i < discard.length && i <= MAX_DISCARDS_SHOWN; i++) {
                 const card = discard[discard.length - 1 - i];
                 let onClick = undefined;
-                if (mode === SetModePanel.DEFAULT_MODE && i < MAX_DISCARDS_SHOWN) {
+                if (mode === SetModePanel.DEFAULT_MODE && i < MAX_DISCARDS_SHOWN && harvest.length === 0) {
                     onClick = () => moves.pickUp(discard.length - 1 - i);
                 }
                 playerCards.push({
@@ -306,7 +306,7 @@ export default class GameArea extends React.Component {
                     className: 'shadow',
                     name: card.type,
                     faceUp: true,
-                    opacity: i === MAX_DISCARDS_SHOWN ? 0 : 1,
+                    opacity: i === MAX_DISCARDS_SHOWN || harvest.length > 0 ? 0 : 1,
                     left: startX + (scaledWidth * DISCARD_RATIO + DELTA) * i,
                     top: (height - scaledHeight * DISCARD_RATIO) / 2,
                     width: scaledWidth * DISCARD_RATIO,
@@ -314,6 +314,28 @@ export default class GameArea extends React.Component {
                     onClick,
                 });
             }
+        }
+        if (harvest !== undefined) {
+            const HARVEST_RATIO = 0.7;
+            const startX = (width - harvest.length * scaledWidth * HARVEST_RATIO - (harvest.length - 1) * DELTA) / 2;
+            harvest.forEach((card, i) => {
+                let onClick = undefined;
+                if (mode === SetModePanel.DEFAULT_MODE) {
+                    onClick = () => moves.pickUpHarvest(i);
+                }
+                playerCards.push({
+                    key: `card-${card.id}`,
+                    className: 'shadow',
+                    name: card.type,
+                    faceUp: true,
+                    opacity: 1,
+                    left: startX + (scaledWidth * HARVEST_RATIO + DELTA) * i,
+                    top: (height - scaledHeight * HARVEST_RATIO) / 2,
+                    width: scaledWidth * HARVEST_RATIO,
+                    height: scaledHeight * HARVEST_RATIO,
+                    onClick,
+                });
+            });
         }
 
         // render my player area
@@ -395,8 +417,10 @@ export default class GameArea extends React.Component {
         }
 
         backNodes.push(<SetModePanel
+            key='set-mode-panel'
             mode={mode}
             setMode={mode => this.setState({ mode })}
+            harvest={() => moves.harvest()}
         />);
 
         return <div>

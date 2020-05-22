@@ -4,11 +4,14 @@
     top: 20px;
 }
 
+.set-mode-panel .section {
+    margin-bottom: 20px;
+}
+
 .set-mode-panel button {
     width: 80px;
     height: 40px;
     font-size: 14px;
-    background-color: rgba(128, 128, 128, 1.0);
     margin-bottom: 10px;
     display: block;
     border-width: 0;
@@ -17,6 +20,7 @@
 
 .set-mode-panel button.selectable {
     cursor: pointer;
+    background-color: rgba(128, 128, 128, 1.0);
 }
 
 .set-mode-panel button.selectable:active {
@@ -29,4 +33,13 @@
 
 .set-mode-panel button.toggled {
     background-color: rgba(0, 128, 0, 1.0);
+}
+
+.set-mode-panel button.clickable {
+    cursor: pointer;
+    background-color: rgba(128, 80, 0, 1.0);
+}
+
+.set-mode-panel button.clickable:hover {
+    background-color: rgba(128, 80, 0, 0.8);
 }
