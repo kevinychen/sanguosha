@@ -31,6 +31,12 @@ export default class SetModePanel extends React.Component {
                 >
                     {'Harvest'}
                 </button>
+                <button
+                    className='clickable'
+                    onClick={() => moves.passLightning()}
+                >
+                    {'Lightning'}
+                </button>
             </div>
         </div>
     }

@@ -118,6 +118,19 @@ function pickUpHarvest(G, ctx, index) {
     hands[playerID].push(card);
 }
 
+function passLightning(G, ctx) {
+    const { equipment } = G;
+    const { numPlayers, playOrder } = ctx;
+    for (let i = 0; i < numPlayers; i++) {
+        if (equipment[playOrder[i]]['Lightning'] !== undefined) {
+            const newPos = nextAlivePlayerPos(G, ctx, i);
+            equipment[playOrder[newPos]]['Lightning'] = equipment[playOrder[i]]['Lightning'];
+            equipment[playOrder[i]]['Lightning'] = undefined;
+            return;
+        }
+    }
+}
+
 function updateHealth(G, ctx, change) {
     const { healths } = G;
     const { playerID } = ctx;
@@ -244,6 +257,7 @@ export const SanGuoSha = {
                             toggleChain,
                             harvest,
                             pickUpHarvest,
+                            passLightning,
                             updateHealth,
                             die,
                          },
