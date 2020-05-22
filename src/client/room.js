@@ -6,13 +6,13 @@ import logger from 'redux-logger';
 import { applyMiddleware } from 'redux';
 import { SocketIO } from 'boardgame.io/multiplayer';
 
-const MULTIPLAYER = false;
+const MULTIPLAYER = true;
 
 const SanGuoShaClient = Client({
     game: SanGuoSha,
     board: SanGuoShaBoard,
     numPlayers: 3,
-    multiplayer: MULTIPLAYER ? SocketIO({ server: 'http://localhost:8000/' }) : undefined,
+    multiplayer: MULTIPLAYER ? SocketIO({ server: document.location.toString() }) : undefined,
     enhancer: applyMiddleware(logger),
 });
 

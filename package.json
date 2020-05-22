@@ -16,8 +16,9 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "server": "node -r esm src/server/server.js"
+    "server": "PORT=8098 node -r esm src/server/server.js"
   },
+  "proxy": "http://localhost:8098",
   "browserslist": {
     "production": [
       ">0.2%",

@@ -4,7 +4,7 @@ import { SanGuoSha } from '../lib/game';
 import { SanGuoShaBoard } from './board';
 import './lobby.css';
 
-const SERVER = `http://${window.location.hostname}:8000`;
+const SERVER = document.location.toString();
 const GAMES = [{ game: SanGuoSha, board: SanGuoShaBoard }];
 
 export default class SanGuoShaLobby extends React.Component {
