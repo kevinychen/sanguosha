@@ -5,6 +5,7 @@ export default class SetModePanel extends React.Component {
 
     static DEFAULT_MODE = 'Default';
     static DISMANTLE_MODE = 'Dismantle';
+    static STEAL_MODE = 'Steal';
 
     render() {
         const { harvest } = this.props;
@@ -12,6 +13,7 @@ export default class SetModePanel extends React.Component {
             <div className='section'>
                 {this.renderButton(SetModePanel.DEFAULT_MODE)}
                 {this.renderButton(SetModePanel.DISMANTLE_MODE)}
+                {this.renderButton(SetModePanel.STEAL_MODE)}
             </div>
             <div className='section'>
                 <button

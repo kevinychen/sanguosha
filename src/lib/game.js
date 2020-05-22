@@ -72,7 +72,16 @@ function dismantle(G, ctx, target) {
 }
 
 function steal(G, ctx, target) {
-
+    const { hands, equipment } = G;
+    const { playerID } = ctx;
+    if (target.index !== undefined) {
+        const [card] = hands[target.playerID].splice(target.index, 1);
+        hands[playerID].push(card);
+    } else {
+        const card = equipment[target.playerID][target.category];
+        equipment[target.playerID][target.category] = undefined;
+        hands[playerID].push(card);
+    }
 }
 
 function toggleChain(G, ctx, playerID) {

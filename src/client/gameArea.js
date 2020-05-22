@@ -221,9 +221,11 @@ export default class GameArea extends React.Component {
             const card = equipment[player][category];
             if (card) {
                 let onClick = undefined;
-                if (player === playerID || mode === SetModePanel.DISMANTLE_MODE) {
+                if (player === playerID
+                    || mode === SetModePanel.DISMANTLE_MODE
+                    || (mode === SetModePanel.STEAL_MODE && player !== playerID)) {
                     onClick = () => {
-                        moves.dismantle({
+                        (player === playerID || mode === SetModePanel.DISMANTLE_MODE ? moves.dismantle : moves.steal)({
                             playerID: player,
                             category,
                         });
@@ -254,9 +256,9 @@ export default class GameArea extends React.Component {
         // Show the card backs
         hand.forEach(card => {
             let onClick = undefined;
-            if (mode === SetModePanel.DISMANTLE_MODE) {
+            if (mode === SetModePanel.DISMANTLE_MODE || mode === SetModePanel.STEAL_MODE) {
                 onClick = () => {
-                    moves.dismantle({
+                    (mode === SetModePanel.DISMANTLE_MODE ? moves.dismantle : moves.steal)({
                         playerID: player,
                         index: Math.floor(Math.random() * hand.length),
                     });
