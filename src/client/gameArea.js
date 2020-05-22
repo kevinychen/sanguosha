@@ -5,9 +5,6 @@ import SetModePanel from './setModePanel';
 import AnimatedItems from './animatedItems';
 import './gameArea.css';
 
-const PLAYER_AREA_WIDTH = 200;
-const PLAYER_AREA_HEIGHT = 300;
-
 // Standard margin between objects
 const DELTA = 10;
 
@@ -24,15 +21,11 @@ export default class GameArea extends React.Component {
     }
 
     render() {
-        const { G, ctx, moves, events, playerID, clientRect } = this.props;
+        const { G, ctx, moves, events, playerID, width, height, playerAreas, scaledWidth, scaledHeight } = this.props;
         const { mode } = this.state;
-        const { roles, characterChoices, characters, healths, isAlive, deck, discard, hands, equipment, harvest } = G;
+        const { roles, characters, healths, isAlive, deck, discard, hands, equipment, harvest } = G;
         const { activePlayers, currentPlayer, numPlayers, playOrder } = ctx;
 
-        const { width, height } = clientRect;
-        const { playerAreas, scale } = this.findPlayerAreas(numPlayers, clientRect);
-        const scaledWidth = PLAYER_AREA_WIDTH * scale;
-        const scaledHeight = PLAYER_AREA_HEIGHT * scale;
         const myPlayerIndex = Math.max(playOrder.indexOf(playerID), 0);
         const stage = activePlayers && activePlayers[playerID];
 
@@ -43,20 +36,7 @@ export default class GameArea extends React.Component {
         // render the three starting characters (select one)
         const characterCards = [];
         if (stage === 'selectCharacter') {
-            const choices = characterChoices[playerID];
-            if (choices !== undefined) {
-                const startX = (width - choices.length * scaledWidth - (choices.length - 1) * DELTA) / 2;
-                choices.forEach((choice, i) => {
-                    characterCards.push({
-                        key: `character-${choice.name}`,
-                        name: choice.name,
-                        opacity: 1,
-                        left: startX + (scaledWidth + DELTA) * i,
-                        top: (height - scaledHeight) / 2,
-                        onClick: () => moves.selectCharacter(i),
-                    });
-                });
-            }
+            this.addCharacterChoices(characterCards);
         }
 
         // Render the deck
@@ -427,6 +407,7 @@ export default class GameArea extends React.Component {
             {backNodes}
             <AnimatedItems
                 items={characterCards}
+                from={_ => { return { opacity: 0 }; }}
                 update={item => { return { opacity: item.opacity, left: item.left, top: item.top } }}
                 clickable={true}
                 animated={(item, props) => <animated.img
@@ -484,59 +465,22 @@ export default class GameArea extends React.Component {
         </div>;
     }
 
-    /**
-     * Find the player areas (given by their top left coordinates, and their scale) that look the
-     * most uniform around the screen.
-     */
-    findPlayerAreas(numPlayers, { width, height }) {
-        // find maximum scale of player areas so that they still fit
-        let maxScale = 0.1;
-        let bestLayout = undefined;
-        for (var numSide = 0; numSide <= (numPlayers - 1) / 3; numSide++) {
-            const numTop = numPlayers - 1 - 2 * numSide;
-
-            let scale = 1;
-            scale = Math.min(scale, (width - 4 * DELTA) / 6 / PLAYER_AREA_WIDTH);
-            scale = Math.min(scale, (height - 4 * DELTA) / 3.5 / PLAYER_AREA_HEIGHT);
-            scale = Math.min(scale, (width - (numTop + 3) * DELTA) / (numTop + 1) / PLAYER_AREA_WIDTH);
-            scale = Math.min(scale, (height - (numSide + 2) * DELTA) / (numSide + 1) / PLAYER_AREA_HEIGHT);
-            if (scale >= maxScale) {
-                maxScale = scale;
-                bestLayout = { numTop, numSide };
-            }
-        }
-        return this.findPlayerAreasGivenLayout(maxScale, bestLayout, { width, height });
-    }
-
-    findPlayerAreasGivenLayout(scale, { numTop, numSide }, { width, height }) {
-        const scaledWidth = PLAYER_AREA_WIDTH * scale;
-        const scaledHeight = PLAYER_AREA_HEIGHT * scale;
-        const sideSpacing = (height - (numSide + 1) * scaledHeight) / (numSide + 1);
-        const topSpacing = (width - 2 * DELTA - (numTop + 2) * scaledWidth) / (numTop + 1);
-
-        const playerAreas = [];
-        playerAreas.push({
-            x: width - DELTA - scaledWidth,
-            y: height - DELTA - scaledHeight,
-        });
-        for (let i = 0; i < numSide; i++) {
-            playerAreas.push({
-                x: width - scaledWidth - DELTA,
-                y: sideSpacing + (scaledHeight + sideSpacing) * (numSide - i - 1),
+    addCharacterChoices(characterCards) {
+        const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
+        const { characterChoices } = G;
+        const choices = characterChoices[playerID];
+        if (choices !== undefined) {
+            const startX = (width - choices.length * scaledWidth - (choices.length - 1) * DELTA) / 2;
+            choices.forEach((choice, i) => {
+                characterCards.push({
+                    key: `character-${choice.name}`,
+                    name: choice.name,
+                    opacity: 1,
+                    left: startX + (scaledWidth + DELTA) * i,
+                    top: (height - scaledHeight) / 2,
+                    onClick: () => moves.selectCharacter(i),
+                });
             });
         }
-        for (let i = 0; i < numTop; i++) {
-            playerAreas.push({
-                x: width - DELTA - scaledWidth - (scaledWidth + topSpacing) * (i + 1),
-                y: DELTA,
-            });
-        }
-        for (let i = 0; i < numSide; i++) {
-            playerAreas.push({
-                x: DELTA,
-                y: sideSpacing + (scaledHeight + sideSpacing) * i,
-            });
-        }
-        return { playerAreas, scale };
     }
 }
