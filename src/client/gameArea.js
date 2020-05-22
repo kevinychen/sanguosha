@@ -1,5 +1,6 @@
 import * as classNames from 'classnames';
 import React from 'react';
+import CARD_CATEGORIES from '../lib/cardCategories.js';
 import SetModePanel from './setModePanel';
 import AnimatedBoard from './animatedBoard';
 import './gameArea.css';
@@ -124,7 +125,7 @@ export default class GameArea extends React.Component {
     }
 
     addCharacterCard(playerArea, character, player, characterCards) {
-        const { G, moves, playerID, scaledWidth, scaledHeight } = this.props;
+        const { G, moves, scaledWidth, scaledHeight } = this.props;
         const { mode, selectedIndex } = this.state;
         const { isAlive } = G;
         let onClick = undefined;
@@ -132,6 +133,11 @@ export default class GameArea extends React.Component {
             onClick = () => {
                 moves.give(selectedIndex, player);
                 this.setState({ mode: SetModePanel.DEFAULT_MODE, selectedIndex: undefined });
+            };
+        } else if (mode === SetModePanel.JUDGMENT_MODE) {
+            onClick = () => {
+                moves.play(selectedIndex, player);
+                this.setState({ mode: SetModePanel.DEFAULT_MODE });
             };
         }
         characterCards.push({
@@ -253,7 +259,7 @@ export default class GameArea extends React.Component {
         const { G, moves, playerID, scaledWidth, scaledHeight } = this.props;
         const { mode } = this.state;
         const { equipment } = G;
-        ['Weapon', 'Shield', '+1', '-1'].forEach((category, i) => {
+        ['Weapon', 'Shield', '+1', '-1', 'Lightning', 'Capture', 'Starvation'].forEach((category, i) => {
             const card = equipment[player][category];
             if (card) {
                 let onClick = undefined;
@@ -268,18 +274,36 @@ export default class GameArea extends React.Component {
                         this.setState({ mode: SetModePanel.DEFAULT_MODE });
                     };
                 }
-                normalCards.push({
-                    key: `card-${card.id}`,
-                    className: 'small-shadow',
-                    name: card.type,
-                    faceUp: true,
-                    opacity: 1,
-                    left: playerArea.x + (scaledWidth - (CARD_RATIO * scaledWidth + INFO_DELTA) * (2 - i % 2)),
-                    top: playerArea.y + (scaledHeight - (CARD_RATIO * scaledHeight + INFO_DELTA) * (2 - Math.floor(i / 2))),
-                    width: scaledWidth * CARD_RATIO,
-                    height: scaledHeight * CARD_RATIO,
-                    onClick,
-                });
+                if (i < 4) {
+                    // Equipment cards
+                    normalCards.push({
+                        key: `card-${card.id}`,
+                        className: 'small-shadow',
+                        name: card.type,
+                        faceUp: true,
+                        opacity: 1,
+                        left: playerArea.x + (scaledWidth - (CARD_RATIO * scaledWidth + INFO_DELTA) * (2 - i % 2)),
+                        top: playerArea.y + (scaledHeight - (CARD_RATIO * scaledHeight + INFO_DELTA) * (2 - Math.floor(i / 2))),
+                        width: scaledWidth * CARD_RATIO,
+                        height: scaledHeight * CARD_RATIO,
+                        onClick,
+                    });
+                } else {
+                    // Judgment cards
+                    normalCards.push({
+                        key: `card-${card.id}`,
+                        className: 'small-shadow',
+                        name: card.type,
+                        faceUp: true,
+                        sideways: true,
+                        opacity: 1,
+                        left: playerArea.x - scaledWidth * 0.03,
+                        top: playerArea.y + scaledHeight * (0.10 + 0.18 * (i - 4)),
+                        width: scaledWidth * CARD_RATIO,
+                        height: scaledHeight * CARD_RATIO,
+                        onClick,
+                    });
+                }
             }
         });
     }
@@ -305,7 +329,6 @@ export default class GameArea extends React.Component {
                 key: `card-${card.id}`,
                 className: 'small-shadow',
                 name: card.type,
-                faceUp: false,
                 opacity: 1,
                 left: playerArea.x + INFO_DELTA,
                 top: playerArea.y + (1 - CARD_RATIO) * scaledHeight - INFO_DELTA,
@@ -347,7 +370,6 @@ export default class GameArea extends React.Component {
             normalCards.push({
                 key: `card-${card.id}`,
                 name: card.type,
-                faceUp: false,
                 opacity: 1,
                 left: DELTA * (1 - i / MAX_CARDS_SHOWN),
                 top: height - scaledHeight * DECK_RATIO - DELTA * (i / MAX_CARDS_SHOWN),
@@ -367,8 +389,14 @@ export default class GameArea extends React.Component {
             const spacing = Math.min(scaledWidth + DELTA, (width - (2 + DECK_RATIO) * scaledWidth - 5 * DELTA) / (hands[playerID].length - 1));
             hands[playerID].forEach((card, i) => {
                 let onClick = undefined;
-                if (mode === SetModePanel.DEFAULT_MODE) {
-                    onClick = () => (this.stage() === 'play' ? moves.play : moves.discardCard)(i);
+                if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'play') {
+                    if (['Lightning', 'Capture', 'Starvation'].includes(CARD_CATEGORIES[card.type])) {
+                        onClick = () => this.setState({ mode: SetModePanel.JUDGMENT_MODE, selectedIndex: i });
+                    } else {
+                        onClick = () => moves.play(i);
+                    }
+                } else if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'discard') {
+                    onClick = () => moves.discardCard(i);
                 } else if (mode === SetModePanel.GIVE_MODE && selectedIndex === undefined) {
                     onClick = () => this.setState({ selectedIndex: i });
                 } else if (mode === SetModePanel.DISMANTLE_MODE) {
@@ -457,7 +485,7 @@ export default class GameArea extends React.Component {
             key='set-mode-panel'
             mode={mode}
             setMode={mode => this.setState({ mode })}
-            harvest={() => moves.harvest()}
+            moves={moves}
         />;
     }
 
@@ -480,7 +508,8 @@ export default class GameArea extends React.Component {
         const ACTION_BUTTON_WIDTH = 160;
         const ACTION_BUTTON_HEIGHT = 30;
         let actionButton = undefined;
-        if (mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined) {
+        if ((mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined)
+            || mode === SetModePanel.JUDGMENT_MODE) {
             actionButton = {
                 text: 'Select player',
                 type: 'disabled',

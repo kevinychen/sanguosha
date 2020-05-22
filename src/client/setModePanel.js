@@ -7,9 +7,10 @@ export default class SetModePanel extends React.Component {
     static GIVE_MODE = 'Give';
     static DISMANTLE_MODE = 'Dismantle';
     static STEAL_MODE = 'Steal';
+    static JUDGMENT_MODE = 'Judgment';
 
     render() {
-        const { harvest } = this.props;
+        const { moves } = this.props;
         return <div className='set-mode-panel'>
             <div className='section'>
                 {this.renderButton(SetModePanel.DEFAULT_MODE)}
@@ -20,7 +21,13 @@ export default class SetModePanel extends React.Component {
             <div className='section'>
                 <button
                     className='clickable'
-                    onClick={() => harvest()}
+                    onClick={() => moves.judgment()}
+                >
+                    {'Judgment'}
+                </button>
+                <button
+                    className='clickable'
+                    onClick={() => moves.harvest()}
                 >
                     {'Harvest'}
                 </button>

@@ -33,16 +33,19 @@ function judgment(G, ctx) {
     discard(G, ctx, card);
 }
 
-function play(G, ctx, index) {
+function play(G, ctx, index, targetPlayerID) {
     const { hands, equipment } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
     const category = CARD_CATEGORIES[card.type];
     if (category) {
-        if (equipment[playerID][category]) {
-            discard(G, ctx, equipment[playerID][category]);
+        if (targetPlayerID === undefined) {
+            targetPlayerID = playerID;
         }
-        equipment[playerID][category] = card;
+        if (equipment[targetPlayerID][category]) {
+            discard(G, ctx, equipment[targetPlayerID][category]);
+        }
+        equipment[targetPlayerID][category] = card;
     } else {
         discard(G, ctx, card);
     }
@@ -94,15 +97,17 @@ function toggleChain(G, ctx) {
 }
 
 function harvest(G, ctx) {
-    const { isAlive, harvest } = G;
+    const { isAlive, deck, harvest } = G;
     const { playOrder } = ctx;
-    if (harvest.length > 0) {
-        return;
-    }
     const numPlayers = playOrder.filter(player => isAlive[player]).length;
-    for (let i = 0; i < numPlayers; i++) {
-        const card = drawCard(G, ctx);
-        harvest.push(card);
+    if (harvest.length === numPlayers) {
+        // undo
+        deck.push(...harvest.splice(0, numPlayers));
+    } else if (harvest.length === 0) {
+        for (let i = 0; i < numPlayers; i++) {
+            const card = drawCard(G, ctx);
+            harvest.push(card);
+        }
     }
 }
 

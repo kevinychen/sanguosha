@@ -2,7 +2,7 @@ import React from 'react';
 import GameArea from './gameArea.js';
 import './board.css';
 
-const CARD_WIDTH = 200;
+const CARD_WIDTH = 210;
 const CARD_HEIGHT = 300;
 const DELTA = 10;
 

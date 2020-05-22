@@ -1,5 +1,8 @@
 
 export default {
+    'Lightning': 'Lightning',
+    'Capture': 'Capture',
+    'Starvation': 'Starvation',
     'Crossbow': 'Weapon',
     'Black Pommel': 'Weapon',
     'Ice Sword': 'Weapon',

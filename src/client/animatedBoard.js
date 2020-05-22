@@ -1,6 +1,6 @@
 import * as classNames from 'classnames';
 import React from 'react';
-import { animated } from 'react-spring';
+import { animated, interpolate } from 'react-spring';
 import AnimatedItems from './animatedItems';
 
 export default class AnimatedBoard extends React.Component {
@@ -45,16 +45,26 @@ export default class AnimatedBoard extends React.Component {
             />
             <AnimatedItems
                 items={normalCards}
-                update={item => { return { faceUp: item.faceUp ? 1 : 0, opacity: item.opacity, left: item.left, top: item.top, width: item.width, height: item.height } }}
+                update={item => {
+                    return {
+                        faceUp: item.faceUp ? 1 : 0,
+                        sideways: item.sideways ? 1 : 0,
+                        opacity: item.opacity,
+                        left: item.left,
+                        top: item.top,
+                        width: item.width,
+                        height: item.height,
+                    };
+                }}
                 clickable={true}
                 animated={(item, props) => {
-                    const { faceUp, opacity, left, top, width, height } = props;
+                    const { faceUp, sideways, opacity, left, top, width, height } = props;
                     return <animated.img
                         className={classNames('positioned', 'item', item.className)}
                         src={faceUp.interpolate(faceUp => faceUp > 0.5 ? `./cards/${item.name}.jpg` : './cards/Card Back.jpg')}
                         alt={'card'}
                         style={{
-                            transform: faceUp.interpolate(faceUp => `rotateY(${faceUp * 180 - (faceUp > 0.5 ? 180 : 0)}deg)`),
+                            transform: interpolate([faceUp, sideways], (faceUp, sideways) => `rotateY(${faceUp * 180 - (faceUp > 0.5 ? 180 : 0)}deg) rotateZ(${sideways * 90}deg)`),
                             opacity,
                             left,
                             top,
