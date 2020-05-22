@@ -270,6 +270,10 @@ export const SanGuoSha = {
         },
     },
 
+    minPlayers: 2,
+
+    maxPlayers: 8,
+
     endIf: (G, ctx) => {
         const { isAlive } = G;
         const { playOrder } = ctx;

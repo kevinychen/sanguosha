@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import Lobby from './client/lobby';
 import Room from './client/room';
 
-const START_IN_LOBBY = false;
+const START_IN_LOBBY = true;
 
 class App extends React.Component {
     render() {

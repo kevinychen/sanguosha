@@ -2,13 +2,19 @@ import React from 'react';
 import { Lobby } from 'boardgame.io/react';
 import { SanGuoSha } from '../lib/game';
 import { SanGuoShaBoard } from './board';
+import './lobby.css';
 
-const server = `http://${window.location.hostname}:8000`;
-const importedGames = [{ game: SanGuoSha, board: SanGuoShaBoard }];
+const SERVER = `http://${window.location.hostname}:8000`;
+const GAMES = [{ game: SanGuoSha, board: SanGuoShaBoard }];
 
-export default () => (
-    <div>
-        <h1>Lobby</h1>
-        <Lobby gameServer={server} lobbyServer={server} gameComponents={importedGames} />
-    </div>
-);
+export default class SanGuoShaLobby extends React.Component {
+
+    render() {
+        return <div className='lobby'>
+            <div className='title'>
+                <img src='./name.png' alt='sanguosha' />
+            </div>
+            <Lobby gameServer={SERVER} lobbyServer={SERVER} gameComponents={GAMES} />
+        </div>;
+    }
+}

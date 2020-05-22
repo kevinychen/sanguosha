@@ -1,0 +1,49 @@
+.lobby {
+    text-align: center;
+    color: lightgray;
+    font-size: 18px;
+}
+
+.lobby .title {
+    width: 100vw;
+}
+
+.lobby .title img {
+    max-height: 50vh;
+    margin: 0 auto;
+    display: block;
+}
+
+.lobby #lobby-view {
+    padding: 0px !important;
+}
+
+.lobby .hidden {
+    display: none;
+}
+
+.lobby button {
+    color: black;
+}
+
+.lobby #instances table {
+    margin: 0 auto;
+    border-spacing: 5px;
+}
+
+.lobby #instances td {
+    border: 1px solid lightgray;
+    padding: 5px;
+}
+
+.lobby .phase-title > * > * {
+    padding: 10px;
+}
+
+.lobby .bgio-client {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 100vh;
+}
