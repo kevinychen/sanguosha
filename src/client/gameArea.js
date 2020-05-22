@@ -1,3 +1,4 @@
+import * as classNames from 'classnames';
 import React from 'react';
 import SetModePanel from './setModePanel';
 import AnimatedBoard from './animatedBoard';
@@ -9,11 +10,14 @@ const DELTA = 10;
 // Number of pixels between info objects inside the character card to the character card's border
 const INFO_DELTA = 4;
 
-// Ratio of cards in the deck to normal cards
-const DECK_RATIO = 0.5;
+// Ratio of ratio card to normal cards
+const ROLE_RATIO = 0.25;
 
 // Ratio of other player hand cards and equipment cards to normal cards
 const CARD_RATIO = 0.3;
+
+// Ratio of cards in the deck to normal cards
+const DECK_RATIO = 0.5;
 
 export default class GameArea extends React.Component {
 
@@ -51,6 +55,7 @@ export default class GameArea extends React.Component {
             }
 
             this.addHealth(playerArea, player, healthPoints, nodes);
+            this.addChain(playerArea, player, nodes);
             this.addPlayerEquipment(playerArea, player, normalCards);
             if (player !== playerID) {
                 this.addOtherPlayerHand(playerArea, player, normalCards, nodes);
@@ -102,7 +107,6 @@ export default class GameArea extends React.Component {
     addCharacterRole(playerArea, playerIndex, nodes) {
         const { G, scaledWidth, scaledHeight } = this.props;
         const { roles } = G;
-        const ROLE_RATIO = 0.25;
         const role = roles[playerIndex];
         const roleName = role.name || 'Role Back';
         nodes.push(<img
@@ -223,6 +227,28 @@ export default class GameArea extends React.Component {
         }
     }
 
+    addChain(playerArea, player, nodes) {
+        const { G, moves, playerID, scaledWidth, scaledHeight } = this.props;
+        const { isChained } = G;
+        let onClick = undefined;
+        if (player === playerID) {
+            onClick = () => moves.toggleChain();
+        }
+        if (player === playerID || isChained[player]) {
+            nodes.push(<div
+                key={`chain-${player}`}
+                className={classNames('positioned image-div selectable chain', {'gray': !isChained[player]})}
+                style={{
+                    left: playerArea.x + (1 - ROLE_RATIO) * scaledWidth - 2 * INFO_DELTA,
+                    top: playerArea.y + scaledHeight * 0.2,
+                    width: scaledWidth * ROLE_RATIO + 2 * INFO_DELTA,
+                    height: scaledHeight * 0.16,
+            }}
+                onClick={onClick}
+            />);
+        }
+    }
+
     addPlayerEquipment(playerArea, player, normalCards) {
         const { G, moves, playerID, scaledWidth, scaledHeight } = this.props;
         const { mode } = this.state;
@@ -231,11 +257,11 @@ export default class GameArea extends React.Component {
             const card = equipment[player][category];
             if (card) {
                 let onClick = undefined;
-                if (player === playerID
+                if ((mode === SetModePanel.DEFAULT_MODE && player === playerID)
                     || mode === SetModePanel.DISMANTLE_MODE
                     || (mode === SetModePanel.STEAL_MODE && player !== playerID)) {
                     onClick = () => {
-                        (player === playerID || mode === SetModePanel.DISMANTLE_MODE ? moves.dismantle : moves.steal)({
+                        (mode === SetModePanel.DEFAULT_MODE || mode === SetModePanel.DISMANTLE_MODE ? moves.dismantle : moves.steal)({
                             playerID: player,
                             category,
                         });

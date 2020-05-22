@@ -21,6 +21,11 @@ img {
     -webkit-box-shadow: 2px 2px 2px #666;
 }
 
+.gray {
+    filter: grayscale(100%);
+    opacity: 0.5;
+}
+
 .decrease-health {
     background-image: url('/health/health-red.png');
     background-size: cover;
@@ -28,6 +33,11 @@ img {
 
 .increase-health {
     background-image: url('/health/health-green.png');
+    background-size: cover;
+}
+
+.chain {
+    background-image: url('/chain.png');
     background-size: cover;
 }
 

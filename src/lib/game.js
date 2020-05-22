@@ -87,8 +87,10 @@ function steal(G, ctx, target) {
     }
 }
 
-function toggleChain(G, ctx, playerID) {
-
+function toggleChain(G, ctx) {
+    const { isChained } = G;
+    const { playerID } = ctx;
+    isChained[playerID] = !isChained[playerID];
 }
 
 function harvest(G, ctx) {
@@ -184,7 +186,7 @@ export const SanGuoSha = {
 
                 // make character choices automatically for easier testing
                 // TODO remove
-                //playOrder.forEach(player => selectCharacter(G, {...ctx, playerID: player}, 0));
+                playOrder.forEach(player => selectCharacter(G, {...ctx, playerID: player}, 0));
             },
 
             // end select characters phase if everyone has made a character choice
