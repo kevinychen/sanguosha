@@ -10,6 +10,14 @@ export default class SetModePanel extends React.Component {
     static HELP_MODE = 'Help';
     static JUDGMENT_MODE = 'Judgment';
 
+    componentDidMount() {
+        document.addEventListener('keydown', this.handleHotkey);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleHotkey);
+    }
+
     render() {
         const { moves } = this.props;
         return <div className='set-mode-panel'>
@@ -53,4 +61,52 @@ export default class SetModePanel extends React.Component {
             {targetMode}
         </button>
     }
+
+    handleHotkey = e => {
+        const { mode, moves, setMode, setSelectedIndex } = this.props;
+        if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
+            return;
+        }
+        switch (e.key) {
+            case "Escape":
+                setMode(SetModePanel.DEFAULT_MODE);
+                break;
+            case "g":
+                setMode(SetModePanel.GIVE_MODE);
+                break;
+            case "d":
+                setMode(SetModePanel.DISMANTLE_MODE);
+                break;
+            case "s":
+                setMode(SetModePanel.STEAL_MODE);
+                break;
+            case "h":
+                setMode(SetModePanel.HELP_MODE);
+                break;
+            case "j":
+                moves.judgment();
+                break;
+            case "l":
+                moves.passLightning();
+                break;
+            case "c":
+                moves.draw();
+                break;
+            case "e":
+                moves.endPlay();
+                break;
+            default:
+                break;
+        }
+        if (e.keyCode >= 49 && e.keyCode <= 57) {
+            const index = e.keyCode - 49;
+            if (mode === SetModePanel.DEFAULT_MODE) {
+                moves.play(index);
+            } else if (mode === SetModePanel.GIVE_MODE) {
+                setSelectedIndex(index);
+            } else if (mode === SetModePanel.DISMANTLE_MODE) {
+                moves.discardCard(index);
+            }
+        }
+    };
 }

@@ -276,7 +276,7 @@ export default class GameArea extends React.Component {
                 let onClick = undefined;
                 if ((mode === SetModePanel.DEFAULT_MODE && player === playerID)
                     || mode === SetModePanel.DISMANTLE_MODE
-                    || (mode === SetModePanel.STEAL_MODE && player !== playerID)) {
+                    || mode === SetModePanel.STEAL_MODE) {
                     onClick = () => {
                         (mode === SetModePanel.DEFAULT_MODE || mode === SetModePanel.DISMANTLE_MODE ? moves.dismantle : moves.steal)({
                             playerID: player,
@@ -496,7 +496,8 @@ export default class GameArea extends React.Component {
         return <SetModePanel
             key='set-mode-panel'
             mode={mode}
-            setMode={mode => this.setState({ mode })}
+            setMode={mode => this.setState({ mode, selectedIndex: undefined })}
+            setSelectedIndex={selectedIndex => this.setState({ selectedIndex })}
             moves={moves}
         />;
     }

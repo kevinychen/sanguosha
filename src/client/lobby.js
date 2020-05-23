@@ -11,11 +11,11 @@ export default class SanGuoShaLobby extends React.Component {
 
     componentDidMount() {
         // Mobile requires explicit user action to play audio
-        document.querySelector('#lobby-view').addEventListener('click', () => this.props.audio.play());
+        document.querySelector('#lobby-view').addEventListener('click', this.playAudio);
     }
 
     componentWillUnmount() {
-        document.querySelector('#lobby-view').removeEventListener('click');
+        document.querySelector('#lobby-view').removeEventListener('click', this.playAudio);
     }
 
     render() {
@@ -31,4 +31,8 @@ export default class SanGuoShaLobby extends React.Component {
             <Lobby gameServer={SERVER} lobbyServer={SERVER} gameComponents={GAMES} />
         </div>;
     }
+
+    playAudio = () => {
+        this.props.audio.play();
+    };
 }
