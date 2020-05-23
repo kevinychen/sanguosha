@@ -149,14 +149,24 @@ function die(G, ctx) {
     delete isAlive[playerID];
 }
 
-function discardCard(G, ctx, index) {
-    const { hands } = G;
-    const { playerID } = ctx;
-    const [card] = hands[playerID].splice(index, 1);
-    discard(G, ctx, card);
+function endPlay(G, ctx) {
+    const { healths, hands } = G;
+    const { events, playerID } = ctx;
+    events.setStage('discard');
+    if (hands[playerID].length <= healths[playerID].current) {
+        events.endTurn();
+    }
 }
 
-function doNothing() {}
+function discardCard(G, ctx, index) {
+    const { healths, hands } = G;
+    const { events, playerID } = ctx;
+    const [card] = hands[playerID].splice(index, 1);
+    discard(G, ctx, card);
+    if (hands[playerID].length <= healths[playerID].current) {
+        events.endTurn();
+    }
+}
 
 /* Game object */
 
@@ -237,13 +247,6 @@ export const SanGuoSha = {
                     // everyone can play cards in freeform mode
                     events.setActivePlayers({ all: 'play' });
                 },
-                endIf: (G, ctx) => {
-                    const { healths, hands } = G;
-                    const { currentPlayer, activePlayers } = ctx;
-                    return activePlayers
-                        && activePlayers[currentPlayer] === 'discard'
-                        && hands[currentPlayer].length <= healths[currentPlayer].current;
-                },
                 stages: {
                     play: {
                         moves: {
@@ -260,10 +263,11 @@ export const SanGuoSha = {
                             passLightning,
                             updateHealth,
                             die,
+                            endPlay,
                          },
                     },
                     discard: {
-                        moves: { discardCard, doNothing },
+                        moves: { discardCard },
                     },
                 },
             },

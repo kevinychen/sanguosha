@@ -501,7 +501,7 @@ export default class GameArea extends React.Component {
     }
 
     renderActionButton() {
-        const { G, ctx, moves, events, playerID, width, height, scaledHeight } = this.props;
+        const { G, ctx, moves, playerID, width, height, scaledHeight } = this.props;
         const { mode, selectedIndex } = this.state;
         const { isAlive } = G;
         const { currentPlayer } = ctx;
@@ -518,12 +518,7 @@ export default class GameArea extends React.Component {
             actionButton = {
                 text: 'End turn',
                 type: 'selectable warn',
-                onClick: () => {
-                    events.setStage('discard')
-
-                    // endIf is only checked after move, so do a no-op
-                    moves.doNothing();
-                },
+                onClick: () => moves.endPlay(),
             }
         } else if (this.stage() === 'discard') {
             actionButton = {
