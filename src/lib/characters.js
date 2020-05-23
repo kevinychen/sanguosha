@@ -26,6 +26,12 @@ export default [
         gender: 'M',
     },
     {
+        name: 'Zhao Yun',
+        country: 'Shu',
+        health: 4,
+        gender: 'M',
+    },
+    {
         name: 'Ma Chao',
         country: 'Shu',
         health: 4,
