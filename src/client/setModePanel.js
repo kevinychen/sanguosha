@@ -7,6 +7,7 @@ export default class SetModePanel extends React.Component {
     static GIVE_MODE = 'Give';
     static DISMANTLE_MODE = 'Dismantle';
     static STEAL_MODE = 'Steal';
+    static HELP_MODE = 'Help';
     static JUDGMENT_MODE = 'Judgment';
 
     render() {
@@ -17,6 +18,7 @@ export default class SetModePanel extends React.Component {
                 {this.renderButton(SetModePanel.GIVE_MODE)}
                 {this.renderButton(SetModePanel.DISMANTLE_MODE)}
                 {this.renderButton(SetModePanel.STEAL_MODE)}
+                {this.renderButton(SetModePanel.HELP_MODE)}
             </div>
             <div className='section'>
                 <button

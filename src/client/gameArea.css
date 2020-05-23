@@ -54,6 +54,36 @@ img {
     background-color: #2B1A15;
 }
 
+.help-panel {
+    position: relative;
+    top: 30vh;
+    width: 35vw;
+    height: 30vh;
+    background-color: white;
+    border: 1px solid black;
+    margin: 0 auto;
+}
+
+.help-panel > img {
+    height: 100%;
+    float: left;
+    margin-right: 3px;
+}
+
+.help-panel > div {
+    padding: 20px;
+    height: calc(100% - 40px);
+    overflow: auto;
+}
+
+.help-panel > button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+}
+
 .selectable > .item {
     cursor: pointer;
 }

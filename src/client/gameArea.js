@@ -1,6 +1,7 @@
 import * as classNames from 'classnames';
 import React from 'react';
 import CARD_CATEGORIES from '../lib/cardCategories.js';
+import RULES from '../lib/rules.json';
 import SetModePanel from './setModePanel';
 import AnimatedBoard from './animatedBoard';
 import './gameArea.css';
@@ -87,6 +88,7 @@ export default class GameArea extends React.Component {
                 normalCards={normalCards}
             />
             {this.renderActionButton()}
+            {this.renderHelp()}
             {nodes}
         </div>;
     }
@@ -410,6 +412,8 @@ export default class GameArea extends React.Component {
                         });
                         this.setState({ mode: SetModePanel.DEFAULT_MODE });
                     };
+                } else if (mode === SetModePanel.HELP_MODE) {
+                    onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
                 }
                 normalCards.push({
                     key: `card-${card.id}`,
@@ -541,6 +545,24 @@ export default class GameArea extends React.Component {
             >
                 {text}
             </button>;
+        }
+    }
+
+    renderHelp() {
+        const { mode, helpCard } = this.state;
+        if (mode === SetModePanel.HELP_MODE && helpCard !== undefined) {
+            return <div
+                className='help-panel'
+            >
+                <img src={helpCard.src} alt='card' />
+                <div dangerouslySetInnerHTML={{ __html: RULES[helpCard.key] }} />
+                <button
+                    className='selectable bad exit-help'
+                    onClick={() => this.setState({ mode: SetModePanel.DEFAULT_MODE, helpCard: undefined })}
+                >
+                    {'X'}
+                </button>
+            </div>;
         }
     }
 
