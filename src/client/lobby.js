@@ -4,7 +4,7 @@ import { SanGuoSha } from '../lib/game';
 import { SanGuoShaBoard } from './board';
 import './lobby.css';
 
-const SERVER = document.location.toString();
+const SERVER = document.location.toString().replace(/\/$/, '');
 const GAMES = [{ game: SanGuoSha, board: SanGuoShaBoard }];
 
 export default class SanGuoShaLobby extends React.Component {

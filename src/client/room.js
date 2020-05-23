@@ -6,7 +6,7 @@ import logger from 'redux-logger';
 import { applyMiddleware } from 'redux';
 import { SocketIO } from 'boardgame.io/multiplayer';
 
-const MULTIPLAYER = true;
+const MULTIPLAYER = false;
 
 const SanGuoShaClient = Client({
     game: SanGuoSha,
@@ -17,28 +17,11 @@ const SanGuoShaClient = Client({
 });
 
 export default class Room extends React.Component {
-    state = { playerID: null };
 
     render() {
-        if (this.state.playerID === null && MULTIPLAYER) {
-            return (
-                <div>
-                    <p>Play as</p>
-                    <button onClick={() => this.setState({ playerID: "0" })}>
-                        Player 0
-                    </button>
-                    <button onClick={() => this.setState({ playerID: "1" })}>
-                        Player 1
-                    </button>
-                    <button onClick={() => this.setState({ playerID: "2" })}>
-                        Player 2
-                    </button>
-                </div>
-            );
-        }
         return (
             <div>
-                <SanGuoShaClient playerID={MULTIPLAYER ? this.state.playerID : "0"} />
+                <SanGuoShaClient playerID={"0"} />
             </div>
         );
     }
