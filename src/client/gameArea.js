@@ -538,14 +538,17 @@ export default class GameArea extends React.Component {
     }
 
     renderSetModePanel() {
-        const { moves } = this.props;
+        const { G, ctx, moves, playerID } = this.props;
         const { mode } = this.state;
         return <SetModePanel
             key='set-mode-panel'
+            G={G}
+            ctx={ctx}
+            moves={moves}
+            playerID={playerID}
             mode={mode}
             setMode={mode => this.setState({ mode, selectedIndex: undefined, helpCard: undefined })}
             setSelectedIndex={selectedIndex => this.setState({ selectedIndex })}
-            moves={moves}
         />;
     }
 

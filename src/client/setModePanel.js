@@ -49,6 +49,7 @@ export default class SetModePanel extends React.Component {
                 >
                     {'Lightning'}
                 </button>
+                {this.renderSpecialButton()}
             </div>
         </div>
     }
@@ -62,6 +63,21 @@ export default class SetModePanel extends React.Component {
         >
             {targetMode}
         </button>
+    }
+
+    renderSpecialButton() {
+        const { G, ctx, moves, playerID } = this.props;
+        const { characters } = G;
+        const { currentPlayer } = ctx;
+        const character = characters[playerID];
+        if (character && character.name === 'Lu Meng' && currentPlayer === playerID) {
+            return <button
+                className='clickable'
+                onClick={() => moves.forceEndPlay()}
+            >
+                {'No discard'}
+            </button>;
+        }
     }
 
     handleHotkey = e => {

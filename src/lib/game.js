@@ -188,6 +188,11 @@ function discardCard(G, ctx, index) {
     }
 }
 
+function forceEndPlay(G, ctx) {
+    const { events } = ctx;
+    events.endTurn();
+}
+
 /* Game object */
 
 const turnOrder = {
@@ -286,10 +291,11 @@ export const SanGuoSha = {
                             updateHealth,
                             die,
                             endPlay,
+                            forceEndPlay,
                          },
                     },
                     discard: {
-                        moves: { discardCard },
+                        moves: { pickUp, discardCard, forceEndPlay },
                     },
                 },
             },
