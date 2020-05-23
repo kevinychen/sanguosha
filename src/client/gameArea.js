@@ -36,7 +36,7 @@ export default class GameArea extends React.Component {
     }
 
     render() {
-        const { G, ctx, playerID, width, height, playerAreas } = this.props;
+        const { G, ctx, playerID, width, height, playerAreas, scaledWidth, scaledHeight } = this.props;
         const { characters } = G;
         const { numPlayers, playOrder } = ctx;
 
@@ -80,6 +80,8 @@ export default class GameArea extends React.Component {
             <AnimatedBoard
                 width={width}
                 height={height}
+                scaledWidth={scaledWidth}
+                scaledHeight={scaledHeight}
                 characterCards={characterCards}
                 healthPoints={healthPoints}
                 normalCards={normalCards}
@@ -284,13 +286,12 @@ export default class GameArea extends React.Component {
                     normalCards.push({
                         key: `card-${card.id}`,
                         className: 'small-shadow',
-                        name: card.type,
+                        card,
                         faceUp: true,
                         opacity: 1,
                         left: playerArea.x + (scaledWidth - (CARD_RATIO * scaledWidth + INFO_DELTA) * (2 - i % 2)),
                         top: playerArea.y + (scaledHeight - (CARD_RATIO * scaledHeight + INFO_DELTA) * (2 - Math.floor(i / 2))),
-                        width: scaledWidth * CARD_RATIO,
-                        height: scaledHeight * CARD_RATIO,
+                        scale: CARD_RATIO,
                         onClick,
                     });
                 } else {
@@ -298,14 +299,13 @@ export default class GameArea extends React.Component {
                     normalCards.push({
                         key: `card-${card.id}`,
                         className: 'small-shadow',
-                        name: card.type,
+                        card,
                         faceUp: true,
                         sideways: true,
                         opacity: 1,
-                        left: playerArea.x - scaledWidth * 0.03,
-                        top: playerArea.y + scaledHeight * (0.10 + 0.18 * (i - 4)),
-                        width: scaledWidth * CARD_RATIO,
-                        height: scaledHeight * CARD_RATIO,
+                        left: playerArea.x + scaledWidth * 0.33,
+                        top: playerArea.y + scaledHeight * (0.16 + 0.18 * (i - 4)),
+                        scale: CARD_RATIO,
                         onClick,
                     });
                 }
@@ -333,12 +333,11 @@ export default class GameArea extends React.Component {
             normalCards.push({
                 key: `card-${card.id}`,
                 className: 'small-shadow',
-                name: card.type,
+                card,
                 opacity: 1,
                 left: playerArea.x + INFO_DELTA,
                 top: playerArea.y + (1 - CARD_RATIO) * scaledHeight - INFO_DELTA,
-                width: scaledWidth * CARD_RATIO,
-                height: scaledHeight * CARD_RATIO,
+                scale: CARD_RATIO,
                 onClick,
             });
         });
@@ -363,7 +362,7 @@ export default class GameArea extends React.Component {
     }
 
     addDeck(normalCards) {
-        const { G, moves, height, scaledWidth, scaledHeight } = this.props;
+        const { G, moves, height, scaledHeight } = this.props;
         const { mode } = this.state;
         const { deck } = G;
         const MAX_CARDS_SHOWN = 10;
@@ -374,12 +373,11 @@ export default class GameArea extends React.Component {
             }
             normalCards.push({
                 key: `card-${card.id}`,
-                name: card.type,
+                card,
                 opacity: 1,
                 left: DELTA * (1 - i / MAX_CARDS_SHOWN),
                 top: height - scaledHeight * DECK_RATIO - DELTA * (i / MAX_CARDS_SHOWN),
-                width: scaledWidth * DECK_RATIO,
-                height: scaledHeight * DECK_RATIO,
+                scale: DECK_RATIO,
                 onClick,
             });
         });
@@ -415,13 +413,12 @@ export default class GameArea extends React.Component {
                 }
                 normalCards.push({
                     key: `card-${card.id}`,
-                    name: card.type,
+                    card,
                     faceUp: true,
                     opacity: onClick !== undefined ? 1 : 0.3,
                     left: DECK_RATIO * scaledWidth + 2 * DELTA + spacing * i,
                     top: height - scaledHeight - DELTA,
-                    width: scaledWidth,
-                    height: scaledHeight,
+                    scale: 1,
                     onClick: onClick,
                 });
             })
@@ -445,13 +442,12 @@ export default class GameArea extends React.Component {
             normalCards.push({
                 key: `card-${card.id}`,
                 className: 'shadow',
-                name: card.type,
+                card,
                 faceUp: true,
                 opacity: i === MAX_DISCARDS_SHOWN || harvest.length > 0 ? 0 : 1,
                 left: startX + (scaledWidth * DISCARD_RATIO + DELTA) * i,
                 top: (height - scaledHeight * DISCARD_RATIO) / 2,
-                width: scaledWidth * DISCARD_RATIO,
-                height: scaledHeight * DISCARD_RATIO,
+                scale: DISCARD_RATIO,
                 onClick,
             });
         }
@@ -471,13 +467,12 @@ export default class GameArea extends React.Component {
             normalCards.push({
                 key: `card-${card.id}`,
                 className: 'shadow',
-                name: card.type,
+                card,
                 faceUp: true,
                 opacity: 1,
                 left: startX + (scaledWidth * HARVEST_RATIO + DELTA) * i,
                 top: (height - scaledHeight * HARVEST_RATIO) / 2,
-                width: scaledWidth * HARVEST_RATIO,
-                height: scaledHeight * HARVEST_RATIO,
+                scale: HARVEST_RATIO,
                 onClick,
             });
         });
