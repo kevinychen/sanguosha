@@ -6,6 +6,7 @@ export default [
         country: 'Shu',
         health: 4,
         gender: 'M',
+        isMonarch: true,
     },
     {
         name: 'Guan Yu',
@@ -48,6 +49,7 @@ export default [
         country: 'Wu',
         health: 4,
         gender: 'M',
+        isMonarch: true,
     },
     {
         name: 'Gan Ning',
@@ -96,6 +98,7 @@ export default [
         country: 'Wei',
         health: 4,
         gender: 'M',
+        isMonarch: true,
     },
     {
         name: 'Sima Yi',

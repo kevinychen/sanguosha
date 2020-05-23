@@ -46,8 +46,6 @@ export default class GameArea extends React.Component {
         const normalCards = [];
         const nodes = [];
 
-        this.addCharacterChoices(characterCards);
-
         const myPlayerIndex = Math.max(playOrder.indexOf(playerID), 0);
         playerAreas.forEach((playerArea, i) => {
             const playerIndex = (myPlayerIndex + i) % numPlayers;
@@ -68,6 +66,8 @@ export default class GameArea extends React.Component {
                 this.addOtherPlayerHand(playerArea, player, normalCards, nodes);
             }
         });
+
+        this.addCharacterChoices(characterCards);
 
         this.addDeck(normalCards);
         this.addMyHand(normalCards);

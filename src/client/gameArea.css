@@ -89,9 +89,7 @@ img {
 }
 
 .selectable > .item:hover {
-    margin-left: -4px;
-    margin-top: -4px;
-    border: 4px solid orange;
+    outline: 4px solid orange;
 }
 
 .selectable > .item:active {
@@ -103,9 +101,7 @@ img {
 }
 
 .image-div.selectable:hover {
-    margin-left: -4px;
-    margin-top: -4px;
-    border: 4px solid orange;
+    outline: 4px solid orange;
 }
 
 .image-div.selectable:active {

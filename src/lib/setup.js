@@ -199,9 +199,10 @@ export default function setup(ctx) {
     }
     const startPlayerIndex = roles.findIndex(role => role.name === 'King');
 
-    const allCharacterChoices = random.Shuffle(CHARACTERS);
+    const normalCharacters = random.Shuffle(CHARACTERS.filter(c => !c.isMonarch));
     const characterChoices = Object.fromEntries(playOrder.map((player, i) =>
-        [player, allCharacterChoices.slice(NUM_CHARACTER_CHOICES * i, NUM_CHARACTER_CHOICES * (i + 1))]));
+        [player, normalCharacters.slice(NUM_CHARACTER_CHOICES * i, NUM_CHARACTER_CHOICES * (i + 1))]));
+    characterChoices[playOrder[startPlayerIndex]].push(...CHARACTERS.filter(c => c.isMonarch));
     const characters = {};
     const healths = {};
     const isAlive = Object.fromEntries(playOrder.map(player => [player, true]));
