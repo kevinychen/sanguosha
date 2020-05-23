@@ -148,6 +148,8 @@ export default class GameArea extends React.Component {
                 moves.play(selectedIndex, player);
                 this.setState({ mode: SetModePanel.DEFAULT_MODE });
             };
+        } else if (mode === SetModePanel.HELP_MODE) {
+            onClick = () => this.setState({ helpCard: { key: character.name, src: `./characters/${character.name}.jpg` } });
         }
         characterCards.push({
             key: character ? `character-${character.name}` : `character-back-${player}`,
@@ -282,6 +284,8 @@ export default class GameArea extends React.Component {
                         });
                         this.setState({ mode: SetModePanel.DEFAULT_MODE });
                     };
+                } else if (mode === SetModePanel.HELP_MODE) {
+                    onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
                 }
                 if (i < 4) {
                     // Equipment cards
@@ -442,6 +446,8 @@ export default class GameArea extends React.Component {
             let onClick = undefined;
             if (mode === SetModePanel.DEFAULT_MODE && i < MAX_DISCARDS_SHOWN && harvest.length === 0) {
                 onClick = () => moves.pickUp(discard.length - 1 - i);
+            } else if (mode === SetModePanel.HELP_MODE) {
+                onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
             }
             normalCards.push({
                 key: `card-${card.id}`,
@@ -467,6 +473,8 @@ export default class GameArea extends React.Component {
             let onClick = undefined;
             if (mode === SetModePanel.DEFAULT_MODE) {
                 onClick = () => moves.pickUpHarvest(i);
+            } else if (mode === SetModePanel.HELP_MODE) {
+                onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
             }
             normalCards.push({
                 key: `card-${card.id}`,
