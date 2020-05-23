@@ -30,6 +30,11 @@ export default class GameArea extends React.Component {
         };
     }
 
+    componentDidUpdate() {
+        const { G, ctx, events, moves } = this.props;
+        window.sanguosha = { G, ctx, events, moves };
+    }
+
     render() {
         const { G, ctx, playerID, width, height, playerAreas } = this.props;
         const { characters } = G;
