@@ -14,11 +14,11 @@
     "redux-logger": "^3.0.6"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "REACT_APP_LOCAL=true react-scripts start",
     "build": "react-scripts build",
+    "client": "REACT_APP_PROXY=http://localhost:8098 react-scripts start",
     "server": "PORT=8098 node -r esm src/server/server.js"
   },
-  "proxy": "http://localhost:8098",
   "browserslist": {
     "production": [
       ">0.2%",
