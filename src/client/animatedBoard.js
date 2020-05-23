@@ -53,6 +53,7 @@ export default class AnimatedBoard extends React.Component {
             />
             <AnimatedItems
                 items={normalCards}
+                from={_ => { return { opacity: 0 } }}
                 update={item => {
                     return {
                         faceUp: item.faceUp ? 1 : 0,

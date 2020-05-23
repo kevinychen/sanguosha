@@ -67,16 +67,36 @@ export default class SetModePanel extends React.Component {
 
     renderSpecialButton() {
         const { G, ctx, moves, playerID } = this.props;
-        const { characters } = G;
+        const { characters, privateZone } = G;
         const { currentPlayer } = ctx;
         const character = characters[playerID];
-        if (character && character.name === 'Lu Meng' && currentPlayer === playerID) {
+        if (character === undefined) {
+            return;
+        }
+        if (character.name === 'Lu Meng' && currentPlayer === playerID) {
             return <button
                 className='clickable'
-                onClick={() => moves.forceEndPlay()}
+                onClick={() => moves.restraint()}
             >
-                {'No discard'}
+                {'Restraint'}
             </button>;
+        } else if (character.name === 'Zhuge Liang' && currentPlayer === playerID) {
+            const hasStarted = privateZone.filter(item => item.source.deck).length > 0;
+            if (hasStarted) {
+                return <button
+                    className='clickable'
+                    onClick={() => moves.finishAstrology()}
+                >
+                    {'Finish'}
+                </button>;
+            } else {
+                return <button
+                    className='clickable'
+                    onClick={() => moves.astrology()}
+                >
+                    {'Astrology'}
+                </button>;
+            }
         }
     }
 

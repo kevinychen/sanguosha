@@ -453,26 +453,26 @@ export default class GameArea extends React.Component {
         const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
         const { mode } = this.state;
         const { privateZone } = G;
-        const startX = (width - privateZone.length * scaledWidth * MIDDLE_CARD_RATIO - (privateZone.length - 1) * DELTA) / 2;
+        const privateCards = privateZone.filter(item => item.visibleTo.includes(playerID));
+        const startX = (width - privateCards.length * scaledWidth * MIDDLE_CARD_RATIO - (privateCards.length - 1) * DELTA) / 2;
         const normalCards = [];
-        privateZone.forEach(({ card, visibleTo }, i) => {
+        privateCards.forEach(({ card, visibleTo }, i) => {
             let onClick = undefined;
             if (mode === SetModePanel.DEFAULT_MODE) {
                 onClick = () => moves.returnCard(card.id);
             } else if (mode === SetModePanel.HELP_MODE) {
                 onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
             }
-            const visible = visibleTo.includes(playerID);
             normalCards.push({
                 key: `card-${card.id}`,
                 className: 'shadow',
                 card,
-                faceUp: visible,
+                faceUp: true,
                 opacity: middleCardsFound ? 0 : 1,
                 left: startX + (scaledWidth * MIDDLE_CARD_RATIO + DELTA) * i,
                 top: (height - scaledHeight * MIDDLE_CARD_RATIO) / 2,
                 scale: MIDDLE_CARD_RATIO,
-                onClick: middleCardsFound || !visible ? undefined : onClick,
+                onClick: middleCardsFound ? undefined : onClick,
             });
         });
         return normalCards;
@@ -566,7 +566,7 @@ export default class GameArea extends React.Component {
     renderActionButton() {
         const { G, ctx, moves, playerID, width, height, scaledHeight } = this.props;
         const { mode, selectedIndex } = this.state;
-        const { isAlive } = G;
+        const { isAlive, privateZone } = G;
         const { currentPlayer } = ctx;
         const ACTION_BUTTON_WIDTH = 160;
         const ACTION_BUTTON_HEIGHT = 30;
@@ -578,7 +578,7 @@ export default class GameArea extends React.Component {
                 text: 'Select player',
                 type: 'disabled',
             };
-        } else if (this.stage() === 'play' && currentPlayer === playerID) {
+        } else if (this.stage() === 'play' && currentPlayer === playerID && privateZone.length === 0) {
             actionButton = {
                 text: 'End turn',
                 type: 'selectable warn',

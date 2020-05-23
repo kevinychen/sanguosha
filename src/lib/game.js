@@ -108,11 +108,13 @@ function reveal(G, ctx, index, otherPlayerID) {
 }
 
 function returnCard(G, _ctx, id) {
-    const { hands, privateZone } = G;
-    const index = privateZone.find(item => item.card.id === id);
+    const { deck, hands, privateZone } = G;
+    const index = privateZone.findIndex(item => item.card.id === id);
     const [{ card, source }] = privateZone.splice(index, 1);
     if (source.playerID !== undefined) {
         hands[source.playerID].push(card);
+    } else if (source.deck) {
+        deck.push(card);
     }
 }
 
@@ -151,6 +153,32 @@ function passLightning(G, ctx) {
     }
 }
 
+function restraint(_G, ctx) {
+    const { events } = ctx;
+    events.endTurn();
+}
+
+function astrology(G, ctx) {
+    const { isAlive, privateZone } = G;
+    const { playerID, playOrder } = ctx;
+    const numCards = Math.min(playOrder.filter(player => isAlive[player]).length, 5);
+    for (let i = 0; i < numCards; i++) {
+        const card = drawCard(G, ctx);
+        privateZone.push({
+            card,
+            source: { deck: true },
+            visibleTo: [playerID],
+        });
+    }
+}
+
+function finishAstrology(G) {
+    const { deck, privateZone } = G;
+    const remainingCards = privateZone.filter(item => item.source.deck);
+    deck.splice(0, 0, ...remainingCards);
+    G.privateZone = privateZone.filter(item => !item.source.deck);
+}
+
 function updateHealth(G, ctx, change) {
     const { healths } = G;
     const { playerID } = ctx;
@@ -186,11 +214,6 @@ function discardCard(G, ctx, index) {
     if (hands[playerID].length <= healths[playerID].current) {
         events.endTurn();
     }
-}
-
-function forceEndPlay(G, ctx) {
-    const { events } = ctx;
-    events.endTurn();
 }
 
 /* Game object */
@@ -265,10 +288,8 @@ export const SanGuoSha = {
 
             turn: {
                 order: turnOrder,
-                onBegin: (G, ctx) => {
-                    const { currentPlayer, events } = ctx;
-                    drawCards(G, ctx, currentPlayer, 2);
-
+                onBegin: (_G, ctx) => {
+                    const { events } = ctx;
                     // everyone can play cards in freeform mode
                     events.setActivePlayers({ all: 'play' });
                 },
@@ -288,14 +309,16 @@ export const SanGuoSha = {
                             harvest,
                             pickUpHarvest,
                             passLightning,
+                            restraint,
+                            astrology,
+                            finishAstrology,
                             updateHealth,
                             die,
                             endPlay,
-                            forceEndPlay,
                          },
                     },
                     discard: {
-                        moves: { pickUp, discardCard, forceEndPlay },
+                        moves: { pickUp, discardCard, restraint },
                     },
                 },
             },
