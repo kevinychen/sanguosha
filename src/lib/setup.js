@@ -218,6 +218,7 @@ export default function setup(ctx) {
     const equipment = Object.fromEntries(playOrder.map(player => [player, {}]));
     const isChained = {};
     const harvest = [];
+    const privateZone = [];
 
     return {
         roles,
@@ -232,5 +233,6 @@ export default function setup(ctx) {
         equipment,
         isChained,
         harvest,
+        privateZone,
     };
 }

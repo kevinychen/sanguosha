@@ -7,8 +7,9 @@ export default class SetModePanel extends React.Component {
     static GIVE_MODE = 'Give';
     static DISMANTLE_MODE = 'Dismantle';
     static STEAL_MODE = 'Steal';
+    static REVEAL_MODE = 'Reveal';
     static HELP_MODE = 'Help';
-    static JUDGMENT_MODE = 'Judgment';
+    static GIVE_JUDGMENT_MODE = 'Give Judgment';
 
     componentDidMount() {
         document.addEventListener('keydown', this.handleHotkey);
@@ -26,6 +27,7 @@ export default class SetModePanel extends React.Component {
                 {this.renderButton(SetModePanel.GIVE_MODE)}
                 {this.renderButton(SetModePanel.DISMANTLE_MODE)}
                 {this.renderButton(SetModePanel.STEAL_MODE)}
+                {this.renderButton(SetModePanel.REVEAL_MODE)}
                 {this.renderButton(SetModePanel.HELP_MODE)}
             </div>
             <div className='section'>
@@ -79,6 +81,9 @@ export default class SetModePanel extends React.Component {
                 break;
             case "s":
                 setMode(SetModePanel.STEAL_MODE);
+                break;
+            case "r":
+                setMode(SetModePanel.REVEAL_MODE);
                 break;
             case "h":
                 setMode(SetModePanel.HELP_MODE);

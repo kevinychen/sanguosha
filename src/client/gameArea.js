@@ -21,6 +21,9 @@ const CARD_RATIO = 0.3;
 // Ratio of cards in the deck to normal cards
 const DECK_RATIO = 0.5;
 
+// Ratio of cards in the middle to normal cards
+const MIDDLE_CARD_RATIO = 0.7;
+
 export default class GameArea extends React.Component {
 
     constructor(props) {
@@ -28,6 +31,7 @@ export default class GameArea extends React.Component {
         this.state = {
             mode: SetModePanel.DEFAULT_MODE,
             selectedIndex: undefined,
+            helpCard: undefined,
         };
     }
 
@@ -72,8 +76,13 @@ export default class GameArea extends React.Component {
         this.addDeck(normalCards);
         this.addMyHand(normalCards);
 
-        this.addDiscardCards(normalCards);
-        this.addHarvestCards(normalCards);
+        // Once cards of some type are found, remaining cards are rendered transparently.
+        // We splice from the beginning so that these transparent cards don't block existing ones.
+        const middleCards = [];
+        middleCards.splice(0, 0, ...this.getPrivateZoneCards(middleCards.length > 0));
+        middleCards.splice(0, 0, ...this.getHarvestCards(middleCards.length > 0));
+        middleCards.splice(0, 0, ...this.getDiscardCards(middleCards.length > 0));
+        normalCards.push(...middleCards);
 
         return <div>
             {this.renderSetModePanel()}
@@ -143,9 +152,14 @@ export default class GameArea extends React.Component {
                 moves.give(selectedIndex, player);
                 this.setState({ mode: SetModePanel.DEFAULT_MODE, selectedIndex: undefined });
             };
-        } else if (mode === SetModePanel.JUDGMENT_MODE) {
+        } else if (mode === SetModePanel.GIVE_JUDGMENT_MODE) {
             onClick = () => {
                 moves.play(selectedIndex, player);
+                this.setState({ mode: SetModePanel.DEFAULT_MODE });
+            };
+        } else if (mode === SetModePanel.REVEAL_MODE && selectedIndex !== undefined) {
+            onClick = () => {
+                moves.reveal(selectedIndex, player);
                 this.setState({ mode: SetModePanel.DEFAULT_MODE });
             };
         } else if (mode === SetModePanel.HELP_MODE) {
@@ -400,7 +414,7 @@ export default class GameArea extends React.Component {
                 let onClick = undefined;
                 if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'play') {
                     if (['Lightning', 'Capture', 'Starvation'].includes(CARD_CATEGORIES[card.type])) {
-                        onClick = () => this.setState({ mode: SetModePanel.JUDGMENT_MODE, selectedIndex: i });
+                        onClick = () => this.setState({ mode: SetModePanel.GIVE_JUDGMENT_MODE, selectedIndex: i });
                     } else {
                         onClick = () => moves.play(i);
                     }
@@ -416,6 +430,8 @@ export default class GameArea extends React.Component {
                         });
                         this.setState({ mode: SetModePanel.DEFAULT_MODE });
                     };
+                } else if (mode === SetModePanel.REVEAL_MODE && selectedIndex === undefined) {
+                    onClick = () => this.setState({ selectedIndex: i });
                 } else if (mode === SetModePanel.HELP_MODE) {
                     onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
                 }
@@ -433,42 +449,41 @@ export default class GameArea extends React.Component {
         }
     }
  
-    addDiscardCards(normalCards) {
-        const { G, moves, width, height, scaledWidth, scaledHeight } = this.props;
+    getPrivateZoneCards(middleCardsFound) {
+        const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
         const { mode } = this.state;
-        const { discard, harvest } = G;
-        const MAX_DISCARDS_SHOWN = 4;
-        const DISCARD_RATIO = 0.7;
-        const numCardsShown = Math.min(discard.length, MAX_DISCARDS_SHOWN);
-        const startX = (width - numCardsShown * scaledWidth * DISCARD_RATIO - (numCardsShown - 1) * DELTA) / 2;
-        for (let i = 0; i < discard.length && i <= MAX_DISCARDS_SHOWN; i++) {
-            const card = discard[discard.length - 1 - i];
+        const { privateZone } = G;
+        const startX = (width - privateZone.length * scaledWidth * MIDDLE_CARD_RATIO - (privateZone.length - 1) * DELTA) / 2;
+        const normalCards = [];
+        privateZone.forEach(({ card, visibleTo }, i) => {
             let onClick = undefined;
-            if (mode === SetModePanel.DEFAULT_MODE && i < MAX_DISCARDS_SHOWN && harvest.length === 0) {
-                onClick = () => moves.pickUp(discard.length - 1 - i);
+            if (mode === SetModePanel.DEFAULT_MODE) {
+                onClick = () => moves.returnCard(card.id);
             } else if (mode === SetModePanel.HELP_MODE) {
                 onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
             }
+            const visible = visibleTo.includes(playerID);
             normalCards.push({
                 key: `card-${card.id}`,
                 className: 'shadow',
                 card,
-                faceUp: true,
-                opacity: i === MAX_DISCARDS_SHOWN || harvest.length > 0 ? 0 : 1,
-                left: startX + (scaledWidth * DISCARD_RATIO + DELTA) * i,
-                top: (height - scaledHeight * DISCARD_RATIO) / 2,
-                scale: DISCARD_RATIO,
-                onClick,
+                faceUp: visible,
+                opacity: middleCardsFound ? 0 : 1,
+                left: startX + (scaledWidth * MIDDLE_CARD_RATIO + DELTA) * i,
+                top: (height - scaledHeight * MIDDLE_CARD_RATIO) / 2,
+                scale: MIDDLE_CARD_RATIO,
+                onClick: middleCardsFound || !visible ? undefined : onClick,
             });
-        }
+        });
+        return normalCards;
     }
 
-    addHarvestCards(normalCards) {
+    getHarvestCards(middleCardsFound) {
         const { G, moves, width, height, scaledWidth, scaledHeight } = this.props;
         const { mode } = this.state;
         const { harvest } = G;
-        const HARVEST_RATIO = 0.7;
-        const startX = (width - harvest.length * scaledWidth * HARVEST_RATIO - (harvest.length - 1) * DELTA) / 2;
+        const startX = (width - harvest.length * scaledWidth * MIDDLE_CARD_RATIO - (harvest.length - 1) * DELTA) / 2;
+        const normalCards = [];
         harvest.forEach((card, i) => {
             let onClick = undefined;
             if (mode === SetModePanel.DEFAULT_MODE) {
@@ -481,13 +496,45 @@ export default class GameArea extends React.Component {
                 className: 'shadow',
                 card,
                 faceUp: true,
-                opacity: 1,
-                left: startX + (scaledWidth * HARVEST_RATIO + DELTA) * i,
-                top: (height - scaledHeight * HARVEST_RATIO) / 2,
-                scale: HARVEST_RATIO,
-                onClick,
+                opacity: middleCardsFound ? 0 : 1,
+                left: startX + (scaledWidth * MIDDLE_CARD_RATIO + DELTA) * i,
+                top: (height - scaledHeight * MIDDLE_CARD_RATIO) / 2,
+                scale: MIDDLE_CARD_RATIO,
+                onClick: middleCardsFound ? undefined : onClick,
             });
         });
+        return normalCards;
+    }
+
+    getDiscardCards(middleCardsFound) {
+        const { G, moves, width, height, scaledWidth, scaledHeight } = this.props;
+        const { mode } = this.state;
+        const { discard } = G;
+        const MAX_DISCARDS_SHOWN = 4;
+        const numCardsShown = Math.min(discard.length, MAX_DISCARDS_SHOWN);
+        const startX = (width - numCardsShown * scaledWidth * MIDDLE_CARD_RATIO - (numCardsShown - 1) * DELTA) / 2;
+        const normalCards = [];
+        for (let i = 0; i < discard.length && i <= MAX_DISCARDS_SHOWN; i++) {
+            const card = discard[discard.length - 1 - i];
+            let onClick = undefined;
+            if (mode === SetModePanel.DEFAULT_MODE && i < MAX_DISCARDS_SHOWN) {
+                onClick = () => moves.pickUp(discard.length - 1 - i);
+            } else if (mode === SetModePanel.HELP_MODE) {
+                onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
+            }
+            normalCards.push({
+                key: `card-${card.id}`,
+                className: 'shadow',
+                card,
+                faceUp: true,
+                opacity: i === MAX_DISCARDS_SHOWN || middleCardsFound ? 0 : 1,
+                left: startX + (scaledWidth * MIDDLE_CARD_RATIO + DELTA) * i,
+                top: (height - scaledHeight * MIDDLE_CARD_RATIO) / 2,
+                scale: MIDDLE_CARD_RATIO,
+                onClick: middleCardsFound ? undefined : onClick,
+            });
+        }
+        return normalCards;
     }
 
     renderSetModePanel() {
@@ -496,7 +543,7 @@ export default class GameArea extends React.Component {
         return <SetModePanel
             key='set-mode-panel'
             mode={mode}
-            setMode={mode => this.setState({ mode, selectedIndex: undefined })}
+            setMode={mode => this.setState({ mode, selectedIndex: undefined, helpCard: undefined })}
             setSelectedIndex={selectedIndex => this.setState({ selectedIndex })}
             moves={moves}
         />;
@@ -522,7 +569,8 @@ export default class GameArea extends React.Component {
         const ACTION_BUTTON_HEIGHT = 30;
         let actionButton = undefined;
         if ((mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined)
-            || mode === SetModePanel.JUDGMENT_MODE) {
+            || (mode === SetModePanel.REVEAL_MODE && selectedIndex !== undefined)
+            || mode === SetModePanel.GIVE_JUDGMENT_MODE) {
             actionButton = {
                 text: 'Select player',
                 type: 'disabled',

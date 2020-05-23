@@ -96,6 +96,26 @@ function toggleChain(G, ctx) {
     isChained[playerID] = !isChained[playerID];
 }
 
+function reveal(G, ctx, index, otherPlayerID) {
+    const { hands, privateZone } = G;
+    const { playerID } = ctx;
+    const [card] = hands[playerID].splice(index, 1);
+    privateZone.push({
+        card,
+        source: { playerID },
+        visibleTo: [playerID, otherPlayerID],
+    });
+}
+
+function returnCard(G, _ctx, id) {
+    const { hands, privateZone } = G;
+    const index = privateZone.find(item => item.card.id === id);
+    const [{ card, source }] = privateZone.splice(index, 1);
+    if (source.playerID !== undefined) {
+        hands[source.playerID].push(card);
+    }
+}
+
 function harvest(G, ctx) {
     const { isAlive, deck, harvest } = G;
     const { playOrder } = ctx;
@@ -258,6 +278,8 @@ export const SanGuoSha = {
                             dismantle,
                             steal,
                             toggleChain,
+                            reveal,
+                            returnCard,
                             harvest,
                             pickUpHarvest,
                             passLightning,
