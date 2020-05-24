@@ -295,7 +295,7 @@ export default class GameArea extends React.Component {
         if (player === playerID || isChained[player]) {
             nodes.push(<div
                 key={`chain-${player}`}
-                className={classNames('positioned image-div selectable chain', {'gray': !isChained[player]})}
+                className={classNames('positioned image-div chain', { 'gray': !isChained[player] }, { 'selectable': onClick !== undefined })}
                 style={{
                     left: playerArea.x + (1 - ROLE_RATIO) * scaledWidth - 2 * INFO_DELTA,
                     top: playerArea.y + scaledHeight * 0.2,
