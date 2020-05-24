@@ -607,7 +607,7 @@ export default class GameArea extends React.Component {
             };
         } else if (this.stage() === 'play' && currentPlayer === playerID && privateZone.length === 0) {
             actionButton = {
-                text: 'End turn',
+                text: 'End play',
                 type: 'selectable warn',
                 onClick: () => moves.endPlay(),
             }
