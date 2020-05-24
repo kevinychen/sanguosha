@@ -86,7 +86,6 @@ export default class GameArea extends React.Component {
         normalCards.push(...middleCards);
 
         return <div>
-            {this.renderSetModePanel()}
             {this.renderMyArea()}
             <AnimatedBoard
                 width={width}
@@ -99,6 +98,7 @@ export default class GameArea extends React.Component {
             />
             {this.renderActionButton()}
             {this.renderHelp()}
+            {this.renderSetModePanel()}
             {nodes}
         </div>;
     }
@@ -644,7 +644,7 @@ export default class GameArea extends React.Component {
                 <img src={helpCard.src} alt='card' />
                 <div dangerouslySetInnerHTML={{ __html: RULES[helpCard.key] }} />
                 <button
-                    className='selectable bad exit-help'
+                    className='selectable bad'
                     onClick={() => this.setState({ mode: SetModePanel.DEFAULT_MODE, helpCard: undefined })}
                 >
                     {'X'}

@@ -9,6 +9,7 @@ export default class SetModePanel extends React.Component {
     static STEAL_MODE = 'Steal';
     static REVEAL_MODE = 'Reveal';
     static HELP_MODE = 'Help';
+    static SHOW_HOTKEYS_MODE = 'Hotkeys';
     static GIVE_JUDGMENT_MODE = 'Give Judgment';
 
     componentDidMount() {
@@ -29,6 +30,7 @@ export default class SetModePanel extends React.Component {
                 {this.renderButton(SetModePanel.STEAL_MODE)}
                 {this.renderButton(SetModePanel.REVEAL_MODE)}
                 {this.renderButton(SetModePanel.HELP_MODE)}
+                {this.renderButton(SetModePanel.SHOW_HOTKEYS_MODE)}
             </div>
             <div className='section'>
                 <button
@@ -50,6 +52,7 @@ export default class SetModePanel extends React.Component {
                     {'Lightning'}
                 </button>
                 {this.renderSpecialButton()}
+                {this.renderHotkeys()}
             </div>
         </div>
     }
@@ -100,9 +103,91 @@ export default class SetModePanel extends React.Component {
         }
     }
 
+    renderHotkeys() {
+        const { mode, setMode } = this.props;
+        if (mode === SetModePanel.SHOW_HOTKEYS_MODE) {
+            return <div
+                className='hotkeys-panel'
+            >
+                <div>Modifier hotkeys: press the hotkey to modify what your next click will do.</div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>Esc</td>
+                            <td>Return to default mode</td>
+                        </tr>
+                        <tr>
+                            <td>G</td>
+                            <td>Give your next selected card to someone else</td>
+                        </tr>
+                        <tr>
+                            <td>D</td>
+                            <td>Discard/dismantle your next selected card</td>
+                        </tr>
+                        <tr>
+                            <td>S</td>
+                            <td>Steal your next selected card into your hand</td>
+                        </tr>
+                        <tr>
+                            <td>R</td>
+                            <td>Reveal your next selected card to someone else</td>
+                        </tr>
+                        <tr>
+                            <td>H</td>
+                            <td>Render help for the selected card</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div>Action hotkeys: press the hotkey to trigger an action immediately.</div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>1-9</td>
+                            <td>Play the Nth card in your hand</td>
+                        </tr>
+                        <tr>
+                            <td>J</td>
+                            <td>Flip over a judgment card from the deck</td>
+                        </tr>
+                        <tr>
+                            <td>L</td>
+                            <td>Pass lightning card to the next player</td>
+                        </tr>
+                        <tr>
+                            <td>C</td>
+                            <td>Draw a card into your hand</td>
+                        </tr>
+                        <tr>
+                            <td>Q</td>
+                            <td>Decrease your health by 1</td>
+                        </tr>
+                        <tr>
+                            <td>W</td>
+                            <td>Increase your health by 1</td>
+                        </tr>
+                        <tr>
+                            <td>E</td>
+                            <td>End your play phase (and start discard phase)</td>
+                        </tr>
+                        <tr>
+                            <td>?</td>
+                            <td>Open this menu</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button
+                    className='selectable'
+                    onClick={() => setMode(SetModePanel.DEFAULT_MODE)}
+                >
+                    {'X'}
+                </button>
+            </div>;
+        }
+    }
+
     handleHotkey = e => {
         const { mode, moves, setMode, setSelectedIndex } = this.props;
-        if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
+        if (e.altKey || e.ctrlKey || e.metaKey) {
             return;
         }
         switch (e.key) {
@@ -123,6 +208,10 @@ export default class SetModePanel extends React.Component {
                 break;
             case "h":
                 setMode(SetModePanel.HELP_MODE);
+                break;
+            case "/":
+            case "?":
+                setMode(SetModePanel.SHOW_HOTKEYS_MODE);
                 break;
             case "j":
                 moves.judgment();

@@ -43,3 +43,34 @@
 .set-mode-panel button.clickable:hover {
     background-color: rgba(128, 80, 0, 0.8);
 }
+
+.set-mode-panel .hotkeys-panel {
+    position: fixed;
+    top: 10vh;
+    left: 35vw;
+    width: calc(30vw - 40px);
+    height: 80vh;
+    background-color: white;
+    border: 2px solid black;
+    margin: 0 auto;
+    color: black;
+    padding: 20px;
+}
+
+.set-mode-panel .hotkeys-panel table {
+    border-spacing: 10px;
+    margin-bottom: 20px;
+}
+
+.set-mode-panel .hotkeys-panel > button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(255, 0, 0, 1.0);
+}
+
+.set-mode-panel .hotkeys-panel > button:hover {
+    background-color: rgba(255, 0, 0, 0.6);
+}
