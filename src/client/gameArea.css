@@ -29,6 +29,7 @@ img {
 .player-name {
     color: gray;
     text-align: center;
+    pointer-events: none;
     overflow: hidden;
 }
 
