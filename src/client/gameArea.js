@@ -104,11 +104,18 @@ export default class GameArea extends React.Component {
 
     addCharacterChoices(characterCards) {
         const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
+        const { mode } = this.state;
         const { characterChoices } = G;
         const choices = characterChoices[playerID];
         if (this.stage() === 'selectCharacter' && choices !== undefined) {
             const startX = (width - choices.length * scaledWidth - (choices.length - 1) * DELTA) / 2;
             choices.forEach((choice, i) => {
+                let onClick;
+                if (mode === SetModePanel.DEFAULT_MODE) {
+                    onClick = () => moves.selectCharacter(i);
+                } else if (mode === SetModePanel.HELP_MODE) {
+                    onClick = () => this.setState({ helpCard: { key: choice.name, src: `./characters/${choice.name}.jpg` } });
+                }
                 characterCards.push({
                     key: `character-${choice.name}`,
                     name: choice.name,
@@ -117,7 +124,7 @@ export default class GameArea extends React.Component {
                     top: (height - scaledHeight) / 2,
                     width: scaledWidth,
                     height: scaledHeight,
-                    onClick: () => moves.selectCharacter(i),
+                    onClick,
                 });
             });
         }
@@ -413,7 +420,7 @@ export default class GameArea extends React.Component {
             hands[playerID].forEach((card, i) => {
                 let onClick = undefined;
                 if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'play') {
-                    if (['Lightning', 'Capture', 'Starvation'].includes(CARD_CATEGORIES[card.type])) {
+                    if (['Capture', 'Starvation'].includes(CARD_CATEGORIES[card.type])) {
                         onClick = () => this.setState({ mode: SetModePanel.GIVE_JUDGMENT_MODE, selectedIndex: i });
                     } else {
                         onClick = () => moves.play(i);

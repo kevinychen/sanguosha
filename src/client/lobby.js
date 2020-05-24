@@ -23,7 +23,7 @@ export default class SanGuoShaLobby extends React.Component {
             <div
                 // TODO remove hack button to turn off sound if too loud
                 style={{ position: 'absolute', width: '100px', height: '100px' }}
-                onClick={() => this.props.audio.volume = 0.2 - this.props.audio.volume}
+                onClick={() => this.props.audio.volume = 0.1 - this.props.audio.volume}
             />
             <div className='title'>
                 <img src='./name.png' alt='sanguosha' />

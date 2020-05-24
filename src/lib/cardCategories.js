@@ -21,7 +21,7 @@ export default {
     'Red Hare': '-1',
     'Da Yuan': '-1',
     'Zi Xing': '-1',
-    'Di Lu': '-1',
+    'Di Lu': '+1',
     'Shadow Runner': '+1',
     'Storm Runner': '+1',
     'Hua Liu': '+1',

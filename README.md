@@ -1,4 +1,4 @@
-# San Guo Sha
+# San Guo Sha (三国杀)
 
 Online multiplayer card game
 
