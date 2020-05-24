@@ -84,8 +84,8 @@ export default class SetModePanel extends React.Component {
                 {'Restraint'}
             </button>;
         } else if (character.name === 'Zhuge Liang' && currentPlayer === playerID) {
-            const hasStarted = privateZone.filter(item => item.source.deck).length > 0;
-            if (hasStarted) {
+            const doingAstrology = privateZone.filter(item => item.source.deck).length > 0;
+            if (doingAstrology) {
                 return <button
                     className='clickable'
                     onClick={() => moves.finishAstrology()}
@@ -186,7 +186,7 @@ export default class SetModePanel extends React.Component {
     }
 
     handleHotkey = e => {
-        const { mode, moves, setMode, setSelectedIndex } = this.props;
+        const { mode, ctx, moves, playerID, setMode, setSelectedIndex } = this.props;
         if (e.altKey || e.ctrlKey || e.metaKey) {
             return;
         }
@@ -237,7 +237,11 @@ export default class SetModePanel extends React.Component {
         if (e.keyCode >= 49 && e.keyCode <= 57) {
             const index = e.keyCode - 49;
             if (mode === SetModePanel.DEFAULT_MODE) {
-                moves.play(index);
+                if (this.stage() === 'play') {
+                    moves.play(index);
+                } else if (this.stage() === 'discard') {
+                    moves.discardCard(index);
+                }
             } else if (mode === SetModePanel.GIVE_MODE) {
                 setSelectedIndex(index);
             } else if (mode === SetModePanel.DISMANTLE_MODE) {
@@ -245,4 +249,10 @@ export default class SetModePanel extends React.Component {
             }
         }
     };
+
+    stage() {
+        const { ctx, playerID } = this.props;
+        const { activePlayers } = ctx;
+        return activePlayers && activePlayers[playerID];
+    }
 }

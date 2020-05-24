@@ -411,12 +411,17 @@ export default class GameArea extends React.Component {
     addDeck(normalCards) {
         const { G, moves, height, scaledHeight } = this.props;
         const { mode } = this.state;
-        const { deck } = G;
+        const { deck, privateZone } = G;
         const MAX_CARDS_SHOWN = 10;
         deck.slice(-MAX_CARDS_SHOWN).forEach((card, i) => {
             let onClick = undefined;
             if (mode === SetModePanel.DEFAULT_MODE && card === deck[deck.length - 1]) {
-                onClick = () => moves.draw();
+                const doingAstrology = privateZone.filter(item => item.source.deck).length > 0;
+                if (doingAstrology) {
+                    onClick = () => moves.astrology(1);
+                } else {
+                    onClick = () => moves.draw();
+                }
             }
             normalCards.push({
                 key: `card-${card.id}`,

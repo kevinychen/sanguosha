@@ -161,11 +161,11 @@ function restraint(_G, ctx) {
     events.endTurn();
 }
 
-function astrology(G, ctx) {
+function astrology(G, ctx, numCards) {
     const { isAlive, privateZone } = G;
     const { playerID, playOrder } = ctx;
-    const numCards = Math.min(playOrder.filter(player => isAlive[player]).length, 5);
-    for (let i = 0; i < numCards; i++) {
+    const actualNumCards = numCards || Math.min(playOrder.filter(player => isAlive[player]).length, 5);
+    for (let i = 0; i < actualNumCards; i++) {
         const card = drawCard(G, ctx);
         privateZone.push({
             card,
