@@ -26,6 +26,12 @@ img {
     opacity: 0.5;
 }
 
+.player-name {
+    color: gray;
+    text-align: center;
+    overflow: hidden;
+}
+
 .decrease-health {
     background-image: url('/health/health-red.png');
     background-size: cover;
