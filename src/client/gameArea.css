@@ -33,6 +33,10 @@ img {
     overflow: hidden;
 }
 
+.player-name.current-player {
+    color: orange;
+}
+
 .decrease-health {
     background-image: url('/health/health-red.png');
     background-size: cover;

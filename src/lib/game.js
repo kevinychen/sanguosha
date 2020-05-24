@@ -177,8 +177,7 @@ function astrology(G, ctx) {
 
 function finishAstrology(G) {
     const { deck, privateZone } = G;
-    const remainingCards = privateZone.filter(item => item.source.deck);
-    deck.splice(0, 0, ...remainingCards);
+    deck.splice(0, 0, ...privateZone.filter(item => item.source.deck).map(item => item.card));
     G.privateZone = privateZone.filter(item => !item.source.deck);
 }
 
@@ -196,8 +195,11 @@ function updateHealth(G, ctx, change) {
 
 function die(G, ctx) {
     const { isAlive } = G;
-    const { playerID } = ctx;
+    const { currentPlayer, events, playerID } = ctx;
     delete isAlive[playerID];
+    if (currentPlayer === playerID) {
+        events.endTurn();
+    }
 }
 
 function endPlay(G, ctx) {

@@ -55,7 +55,7 @@ export default class GameArea extends React.Component {
             const playerIndex = (myPlayerIndex + i) % numPlayers;
             const player = playOrder[playerIndex];
 
-            this.addPlayerName(playerArea, playerIndex, nodes);
+            this.addPlayerName(playerArea, playerIndex, player, nodes);
             this.addCharacterRole(playerArea, playerIndex, nodes);
 
             const character = characters[playerIndex];
@@ -131,13 +131,13 @@ export default class GameArea extends React.Component {
         }
     }
 
-    addPlayerName(playerArea, playerIndex, nodes) {
+    addPlayerName(playerArea, playerIndex, player, nodes) {
         const { ctx, playerID, gameMetadata, scaledWidth, scaledHeight } = this.props;
-        const { playOrder } = ctx;
-        if (playOrder[playerIndex] !== playerID) {
+        const { currentPlayer } = ctx;
+        if (gameMetadata !== undefined && player !== playerID) {
             nodes.push(<div
                 key={`name-${playerIndex}`}
-                className='positioned player-name'
+                className={classNames('positioned player-name', { 'current-player': currentPlayer === player })}
                 style={{
                     left: playerArea.x + INFO_DELTA,
                     top: playerArea.y + scaledHeight + INFO_DELTA,
