@@ -12,7 +12,7 @@ export default {
     'Axe': 'Weapon',
     'Sky Scorcher': 'Weapon',
     'Longbow': 'Weapon',
-    'Ancient Simitar': 'Weapon',
+    'Ancient Scimitar': 'Weapon',
     'Fire Fan': 'Weapon',
     'Eight Trigrams': 'Shield',
     'Black Shield': 'Shield',

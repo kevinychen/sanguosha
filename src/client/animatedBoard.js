@@ -86,7 +86,7 @@ export default class AnimatedBoard extends React.Component {
                             alt={'card'}
                         />
                         <animated.div
-                            className={classNames('card-value', {'red': ['DIAMOND', 'HEART'].includes(item.card.suit)})}
+                            className={classNames('card-value', ['DIAMOND', 'HEART'].includes(item.card.suit) ? 'red' : 'black')}
                             style={{
                                 opacity: faceUp,
                             }}

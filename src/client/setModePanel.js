@@ -133,6 +133,12 @@ export default class SetModePanel extends React.Component {
             case "c":
                 moves.draw();
                 break;
+            case "q":
+                moves.updateHealth(-1);
+                break;
+            case "w":
+                moves.updateHealth(+1);
+                break;
             case "e":
                 moves.endPlay();
                 break;

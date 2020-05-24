@@ -37,6 +37,9 @@ function play(G, ctx, index, targetPlayerID) {
     const { hands, equipment } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
+    if (card === undefined) {
+        return;
+    }
     const category = CARD_CATEGORIES[card.type];
     if (category) {
         if (targetPlayerID === undefined) {
@@ -262,7 +265,7 @@ export const SanGuoSha = {
 
                 // make character choices automatically for easier testing
                 // TODO remove
-                playOrder.forEach(player => selectCharacter(G, { ...ctx, playerID: player }, 0));
+                //playOrder.forEach(player => selectCharacter(G, { ...ctx, playerID: player }, 0));
             },
 
             // end select characters phase if everyone has made a character choice
