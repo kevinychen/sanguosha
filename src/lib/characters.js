@@ -84,7 +84,7 @@ export default [
     {
         name: 'Lu Xun',
         country: 'Wu',
-        health: 4,
+        health: 3,
         gender: 'M',
     },
     {
@@ -145,7 +145,7 @@ export default [
     {
         name: 'Lu Bu',
         country: 'Kingdomless',
-        health: 5,
+        health: 4,
         gender: 'M',
     },
     {
