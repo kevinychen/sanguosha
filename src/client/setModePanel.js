@@ -186,7 +186,7 @@ export default class SetModePanel extends React.Component {
     }
 
     handleHotkey = e => {
-        const { mode, ctx, moves, playerID, setMode, setSelectedIndex } = this.props;
+        const { mode, moves, setMode, setSelectedIndex } = this.props;
         if (e.altKey || e.ctrlKey || e.metaKey) {
             return;
         }
