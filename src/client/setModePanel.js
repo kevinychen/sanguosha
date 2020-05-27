@@ -168,6 +168,10 @@ export default class SetModePanel extends React.Component {
                             <td>Flip over a judgment card from the deck</td>
                         </tr>
                         <tr>
+                            <td>V</td>
+                            <td>Turn over N cards from the deck for harvest</td>
+                        </tr>
+                        <tr>
                             <td>L</td>
                             <td>Pass lightning card to the next player</td>
                         </tr>
@@ -182,6 +186,10 @@ export default class SetModePanel extends React.Component {
                         <tr>
                             <td>W</td>
                             <td>Increase your health by 1</td>
+                        </tr>
+                        <tr>
+                            <td>T</td>
+                            <td>Toggle your chain state</td>
                         </tr>
                         <tr>
                             <td>E</td>
@@ -204,7 +212,8 @@ export default class SetModePanel extends React.Component {
     }
 
     handleHotkey = e => {
-        const { mode, moves, setMode, setSelectedIndex } = this.props;
+        const { G, mode, moves, setMode, setSelectedIndex } = this.props;
+        const { harvest } = G;
         if (e.altKey || e.ctrlKey || e.metaKey) {
             return;
         }
@@ -234,6 +243,9 @@ export default class SetModePanel extends React.Component {
             case "j":
                 moves.judgment();
                 break;
+            case "v":
+                (harvest.length === 0 ? moves.harvest : moves.finishHarvest)();
+                break;
             case "l":
                 moves.passLightning();
                 break;
@@ -245,6 +257,9 @@ export default class SetModePanel extends React.Component {
                 break;
             case "w":
                 moves.updateHealth(+1);
+                break;
+            case "t":
+                moves.toggleChain();
                 break;
             case "e":
                 moves.endPlay();
@@ -260,7 +275,7 @@ export default class SetModePanel extends React.Component {
                 } else if (this.stage() === 'discard') {
                     moves.discardCard(index);
                 }
-            } else if (mode === SetModePanel.GIVE_MODE) {
+            } else if (mode === SetModePanel.GIVE_MODE || mode === SetModePanel.REVEAL_MODE) {
                 setSelectedIndex(index);
             } else if (mode === SetModePanel.DISMANTLE_MODE) {
                 moves.discardCard(index);
