@@ -234,7 +234,7 @@ export const SanGuoSha = {
     setup,
 
     playerView: (G, ctx, playerID) => {
-        const { roles, isAlive } = G;
+        const { roles, characterChoices, characters, isAlive } = G;
         const { numPlayers, playOrder } = ctx;
 
         const newRoles = { ...roles };
@@ -243,9 +243,21 @@ export const SanGuoSha = {
                 newRoles[i] = {id: roles[i].id};
             }
         }
+
+        const newCharacters = { ...characters };
+        const areAllCharactersChosen = Object.values(characterChoices).every(choices => choices === undefined);
+        if (!areAllCharactersChosen) {
+            for (let i = 0; i < numPlayers; i++) {
+                if (playOrder[i] !== playerID && newRoles[i].name !== 'King') {
+                    delete newCharacters[playOrder[i]];
+                }
+            }
+        }
+
         return {
             ...G,
             roles: newRoles,
+            characters: newCharacters,
         };
     },
 
