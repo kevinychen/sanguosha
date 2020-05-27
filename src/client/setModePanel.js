@@ -1,4 +1,5 @@
 import React from 'react';
+import { ROLE_DIST } from '../lib/roles';
 import './setModePanel.css';
 
 export default class SetModePanel extends React.Component {
@@ -109,6 +110,8 @@ export default class SetModePanel extends React.Component {
             return <div
                 className='hotkeys-panel'
             >
+                {this.renderRoleDistribution()}
+                <table><tbody></tbody></table>
                 <div>Modifier hotkeys: press the hotkey to modify what your next click will do.</div>
                 <table>
                     <tbody>
@@ -249,6 +252,18 @@ export default class SetModePanel extends React.Component {
             }
         }
     };
+
+    renderRoleDistribution() {
+        const { ctx } = this.props;
+        const { numPlayers } = ctx;
+        const [numKings, numRebels, numLoyalists, numSpies] = ROLE_DIST[numPlayers];
+        return <div>
+            This game has {numKings} {numKings !== 1 ? 'kings' : 'king'},{' '}
+            {numRebels} {numRebels !== 1 ? 'rebels' : 'rebel'},{' '}
+            {numLoyalists} {numLoyalists !== 1 ? 'loyalists' : 'loyalist'}, and{' '}
+            {numSpies} {numSpies !== 1 ? 'spies' : 'spy'}.
+        </div>
+    }
 
     stage() {
         const { ctx, playerID } = this.props;
