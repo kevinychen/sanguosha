@@ -96,10 +96,10 @@ export default class GameArea extends React.Component {
                 healthPoints={healthPoints}
                 normalCards={normalCards}
             />
+            {nodes}
             {this.renderActionButton()}
             {this.renderHelp()}
             {this.renderSetModePanel()}
-            {nodes}
         </div>;
     }
 
