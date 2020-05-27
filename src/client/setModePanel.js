@@ -40,12 +40,7 @@ export default class SetModePanel extends React.Component {
                 >
                     {'Judgment'}
                 </button>
-                <button
-                    className='clickable'
-                    onClick={() => moves.harvest()}
-                >
-                    {'Harvest'}
-                </button>
+                {this.renderHarvestButton()}
                 <button
                     className='clickable'
                     onClick={() => moves.passLightning()}
@@ -67,6 +62,26 @@ export default class SetModePanel extends React.Component {
         >
             {targetMode}
         </button>
+    }
+
+    renderHarvestButton() {
+        const { G, moves } = this.props;
+        const { harvest } = G;
+        if (harvest.length === 0) {
+            return <button
+                className='clickable'
+                onClick={() => moves.harvest()}
+            >
+                {'Harvest'}
+            </button>;
+        } else {
+            return <button
+                className='clickable'
+                onClick={() => moves.finishHarvest()}
+            >
+                {'Finish'}
+            </button>;
+        }
     }
 
     renderSpecialButton() {

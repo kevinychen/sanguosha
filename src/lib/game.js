@@ -122,18 +122,20 @@ function returnCard(G, _ctx, id) {
 }
 
 function harvest(G, ctx) {
-    const { isAlive, deck, harvest } = G;
+    const { isAlive, harvest } = G;
     const { playOrder } = ctx;
     const numPlayers = playOrder.filter(player => isAlive[player]).length;
-    if (harvest.length === numPlayers) {
-        // undo
-        deck.push(...harvest.splice(0, numPlayers));
-    } else if (harvest.length === 0) {
-        for (let i = 0; i < numPlayers; i++) {
-            const card = drawCard(G, ctx);
-            harvest.push(card);
-        }
+    for (let i = 0; i < numPlayers; i++) {
+        const card = drawCard(G, ctx);
+        harvest.push(card);
     }
+}
+
+function putDownHarvest(G, ctx, index) {
+    const { hands, harvest } = G;
+    const { playerID } = ctx;
+    const [card] = hands[playerID].splice(index, 1);
+    harvest.push(card);
 }
 
 function pickUpHarvest(G, ctx, index) {
@@ -141,6 +143,11 @@ function pickUpHarvest(G, ctx, index) {
     const { playerID } = ctx;
     const [card] = harvest.splice(index, 1);
     hands[playerID].push(card);
+}
+
+function finishHarvest(G) {
+    const { discard, harvest } = G;
+    discard.push(...harvest.splice(0, harvest.length).reverse());
 }
 
 function passLightning(G, ctx) {
@@ -324,7 +331,9 @@ export const SanGuoSha = {
                             reveal,
                             returnCard,
                             harvest,
+                            putDownHarvest,
                             pickUpHarvest,
+                            finishHarvest,
                             passLightning,
                             restraint,
                             astrology,

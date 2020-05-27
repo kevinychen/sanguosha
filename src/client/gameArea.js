@@ -438,14 +438,16 @@ export default class GameArea extends React.Component {
     addMyHand(normalCards) {
         const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
         const { mode, selectedIndex } = this.state;
-        const { hands } = G;
+        const { hands, harvest } = G;
         const myHand = hands[playerID];
         if (myHand) {
             const spacing = Math.min(scaledWidth + DELTA, (width - (2 + DECK_RATIO) * scaledWidth - 5 * DELTA) / (hands[playerID].length - 1));
             hands[playerID].forEach((card, i) => {
                 let onClick = undefined;
                 if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'play') {
-                    if (['Capture', 'Starvation'].includes(CARD_CATEGORIES[card.type])) {
+                    if (harvest.length > 0) {
+                        onClick = () => moves.putDownHarvest(i);
+                    } else if (['Capture', 'Starvation'].includes(CARD_CATEGORIES[card.type])) {
                         onClick = () => this.setState({ mode: SetModePanel.GIVE_JUDGMENT_MODE, selectedIndex: i });
                     } else {
                         onClick = () => moves.play(i);
