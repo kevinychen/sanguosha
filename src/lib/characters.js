@@ -1,4 +1,3 @@
-// https://www.docdroid.net/U9J5Wgz/sanguosha-cards-ver-2-pdf
 
 export default [
     {
@@ -143,15 +142,15 @@ export default [
         gender: 'M',
     },
     {
-        name: 'Lu Bu',
-        country: 'Kingdomless',
-        health: 4,
-        gender: 'M',
-    },
-    {
         name: 'Diao Chan',
         country: 'Kingdomless',
         health: 3,
         gender: 'F',
+    },
+    {
+        name: 'Lu Bu',
+        country: 'Kingdomless',
+        health: 4,
+        gender: 'M',
     },
 ];
