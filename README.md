@@ -12,6 +12,8 @@ See the debut trailer [here](https://kevinychen.github.io/sanguosha).
 
 ## Quickstart
 
+Running this game requires npm v6+ and NodeJS v12+.
+
 Run:
 
     npm install
@@ -28,9 +30,9 @@ Then go to http://localhost:8098.
 
 ## Credits
 
-- [Becky Shi](https://shenlab.stanford.edu/people/rebecca-shi), for composing original music and the debut trailer
-- [boardgame.io](https://boardgame.io/), a very convenient framework for producing this game
+- [Becky Shi](https://shenlab.stanford.edu/people/rebecca-shi), for composing the original game background music and producing the debut trailer
+- [boardgame.io](https://boardgame.io/), a very convenient framework for producing online multiplayer games
 - [react-spring](https://www.react-spring.io/), an amazing library for easily producing animations
-- [English Sanguosha](http://sanguoshaenglish.blogspot.com/), for rules, resources, and translations
+- [English Sanguosha](http://www.englishsanguosha.com/), for rules, resources, and translations
 - Eva Yeung, Jeff Chen, Michael Wu, Natalle Yu, Tommy Zhang, and Yi-Shiuan Tung for playtesting
 
