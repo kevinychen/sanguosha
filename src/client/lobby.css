@@ -47,3 +47,22 @@
     width: 100vw;
     height: 100vh;
 }
+
+.toggle-sound {
+    background-size: cover;
+    position: fixed;
+    bottom: 5px;
+    left: 5px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    background-color: lightgray;
+}
+
+.toggle-sound.off {
+    background-image: url('/sound-off.png');
+}
+
+.toggle-sound.on {
+    background-image: url('/sound-on.png');
+}
