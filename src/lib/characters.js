@@ -203,16 +203,4 @@ export default [
         health: 3,
         gender: 'M',
     },
-    {
-        name: 'DG Guan Yu',
-        country: 'Demigod',
-        health: 5,
-        gender: 'M',
-    },
-    {
-        name: 'DG Lu Meng',
-        country: 'Demigod',
-        health: 3,
-        gender: 'M',
-    },
 ];
