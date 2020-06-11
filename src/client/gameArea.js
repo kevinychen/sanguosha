@@ -104,8 +104,8 @@ export default class GameArea extends React.Component {
     }
 
     addCharacterChoices(characterCards) {
-        const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
-        const { mode } = this.state;
+        const { G, playerID, width, height, scaledWidth, scaledHeight } = this.props;
+        const { mode, selectedIndex } = this.state;
         const { characterChoices } = G;
         const choices = characterChoices[playerID];
         if (this.stage() === 'selectCharacter' && choices !== undefined) {
@@ -113,7 +113,7 @@ export default class GameArea extends React.Component {
             choices.forEach((choice, i) => {
                 let onClick;
                 if (mode === SetModePanel.DEFAULT_MODE) {
-                    onClick = () => moves.selectCharacter(i);
+                    onClick = () => this.setState({ selectedIndex: i === selectedIndex ? undefined : i });
                 } else if (mode === SetModePanel.HELP_MODE) {
                     onClick = () => this.setState({ helpCard: { key: choice.name, src: `./characters/${choice.name}.jpg` } });
                 }
@@ -123,7 +123,7 @@ export default class GameArea extends React.Component {
                     faceUp: true,
                     opacity: 1,
                     left: startX + (scaledWidth + DELTA) * i,
-                    top: (height - scaledHeight) / 2,
+                    top: (height - scaledHeight) / 2 - (i === selectedIndex ? 20 : 0),
                     width: scaledWidth,
                     height: scaledHeight,
                     onClick,
@@ -626,7 +626,16 @@ export default class GameArea extends React.Component {
         const ACTION_BUTTON_WIDTH = 160;
         const ACTION_BUTTON_HEIGHT = 30;
         let actionButton = undefined;
-        if ((mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined)
+        if (this.stage() === 'selectCharacter' && selectedIndex !== undefined) {
+            actionButton = {
+                text: 'Select',
+                type: 'selectable warn',
+                onClick: () => {
+                    moves.selectCharacter(selectedIndex);
+                    this.setState({ selectedIndex: undefined });
+                },
+            }
+        } else if ((mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined)
             || (mode === SetModePanel.REVEAL_MODE && selectedIndex !== undefined)
             || mode === SetModePanel.GIVE_JUDGMENT_MODE) {
             actionButton = {
