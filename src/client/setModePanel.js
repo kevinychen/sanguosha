@@ -49,6 +49,7 @@ export default class SetModePanel extends React.Component {
                 >
                     {'Lightning'}
                 </button>
+                {this.renderFinishDiscardButton()}
                 {this.renderSpecialButton()}
                 {this.renderHotkeys()}
             </div>
@@ -86,6 +87,18 @@ export default class SetModePanel extends React.Component {
         }
     }
 
+    renderFinishDiscardButton() {
+        const { moves } = this.props;
+        if (this.stage() === 'discard') {
+            return <button
+                className='clickable'
+                onClick={() => moves.finishDiscard()}
+            >
+                {'No discard'}
+            </button>
+        }
+    }
+
     renderSpecialButton() {
         const { G, ctx, moves, playerID } = this.props;
         const { characters, privateZone } = G;
@@ -94,14 +107,7 @@ export default class SetModePanel extends React.Component {
         if (character === undefined) {
             return;
         }
-        if (character.name === 'Lu Meng' && currentPlayer === playerID) {
-            return <button
-                className='clickable'
-                onClick={() => moves.restraint()}
-            >
-                {'Restraint'}
-            </button>;
-        } else if (character.name === 'Zhuge Liang' && currentPlayer === playerID) {
+        if (character.name === 'Zhuge Liang' && currentPlayer === playerID) {
             const doingAstrology = privateZone.filter(item => item.source.deck).length > 0;
             if (doingAstrology) {
                 return <button
@@ -202,6 +208,10 @@ export default class SetModePanel extends React.Component {
                             <td>End your play phase (and start discard phase)</td>
                         </tr>
                         <tr>
+                            <td>N</td>
+                            <td>No discard (force end turn without discarding)</td>
+                        </tr>
+                        <tr>
                             <td>?</td>
                             <td>Open this menu</td>
                         </tr>
@@ -272,6 +282,9 @@ export default class SetModePanel extends React.Component {
                 break;
             case "e":
                 moves.endPlay();
+                break;
+            case "n":
+                moves.finishDiscard();
                 break;
             default:
                 break;

@@ -168,11 +168,6 @@ function passLightning(G, ctx) {
     }
 }
 
-function restraint(_G, ctx) {
-    const { events } = ctx;
-    events.endTurn();
-}
-
 function astrology(G, ctx, numCards) {
     const { isAlive, privateZone } = G;
     const { playerID, playOrder } = ctx;
@@ -216,10 +211,12 @@ function die(G, ctx) {
 
 function endPlay(G, ctx) {
     const { healths, hands } = G;
-    const { events, playerID } = ctx;
-    events.setStage('discard');
-    if (hands[playerID].length <= healths[playerID].current) {
-        events.endTurn();
+    const { currentPlayer, events, playerID } = ctx;
+    if (currentPlayer === playerID) {
+        events.setStage('discard');
+        if (hands[playerID].length <= healths[playerID].current) {
+            events.endTurn();
+        }
     }
 }
 
@@ -229,6 +226,13 @@ function discardCard(G, ctx, index) {
     const [card] = hands[playerID].splice(index, 1);
     discard(G, ctx, card);
     if (hands[playerID].length <= healths[playerID].current) {
+        events.endTurn();
+    }
+}
+
+function finishDiscard(_G, ctx) {
+    const { currentPlayer, events, playerID } = ctx;
+    if (currentPlayer === playerID) {
         events.endTurn();
     }
 }
@@ -341,7 +345,6 @@ export const SanGuoSha = {
                             pickUpHarvest,
                             finishHarvest,
                             passLightning,
-                            restraint,
                             astrology,
                             finishAstrology,
                             updateHealth,
@@ -350,7 +353,7 @@ export const SanGuoSha = {
                          },
                     },
                     discard: {
-                        moves: { pickUp, discardCard, restraint },
+                        moves: { pickUp, discardCard, finishDiscard },
                     },
                 },
             },
