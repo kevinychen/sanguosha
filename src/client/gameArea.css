@@ -96,15 +96,15 @@ img {
     height: 30px;
 }
 
-.selectable > .item {
+.selectable .item {
     cursor: pointer;
 }
 
-.selectable > .item:hover {
+.selectable .item:hover {
     outline: 4px solid orange;
 }
 
-.selectable > .item:active {
+.selectable .item:active {
     transform: scale(0.99);
 }
 

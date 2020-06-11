@@ -192,7 +192,7 @@ export default class GameArea extends React.Component {
             };
         } else if (mode === SetModePanel.FLIP_MODE) {
             onClick = () => {
-                moves.flipCharacter(player);
+                moves.flipObject(player);
                 this.setState({ mode: SetModePanel.DEFAULT_MODE });
             };
         } else if (mode === SetModePanel.HELP_MODE) {
@@ -317,7 +317,7 @@ export default class GameArea extends React.Component {
     addPlayerEquipment(playerArea, player, normalCards) {
         const { G, moves, playerID, scaledWidth, scaledHeight } = this.props;
         const { mode } = this.state;
-        const { equipment } = G;
+        const { equipment, isFlipped } = G;
         ['Weapon', 'Shield', '+1', '-1', 'Lightning', 'Capture', 'Starvation'].forEach((category, i) => {
             const card = equipment[player][category];
             if (card) {
@@ -341,7 +341,7 @@ export default class GameArea extends React.Component {
                         key: `card-${card.id}`,
                         className: 'small-shadow',
                         card,
-                        faceUp: true,
+                        faceUp: !isFlipped[card.id],
                         opacity: 1,
                         left: playerArea.x + (scaledWidth - (CARD_RATIO * scaledWidth + INFO_DELTA) * (2 - i % 2)),
                         top: playerArea.y + (scaledHeight - (CARD_RATIO * scaledHeight + INFO_DELTA) * (2 - Math.floor(i / 2))),
@@ -445,7 +445,7 @@ export default class GameArea extends React.Component {
     addMyHand(normalCards) {
         const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
         const { mode, selectedIndex } = this.state;
-        const { hands, harvest } = G;
+        const { hands, isFlipped, harvest } = G;
         const myHand = hands[playerID];
         if (myHand) {
             const spacing = Math.min(scaledWidth + DELTA, (width - (2 + DECK_RATIO) * scaledWidth - 5 * DELTA) / (hands[playerID].length - 1));
@@ -473,13 +473,18 @@ export default class GameArea extends React.Component {
                     };
                 } else if (mode === SetModePanel.REVEAL_MODE && selectedIndex === undefined) {
                     onClick = () => this.setState({ selectedIndex: i });
+                } else if (mode === SetModePanel.FLIP_MODE) {
+                    onClick = () => {
+                        moves.flipObject(card.id);
+                        this.setState({ mode: SetModePanel.DEFAULT_MODE });
+                    };
                 } else if (mode === SetModePanel.HELP_MODE) {
                     onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
                 }
                 normalCards.push({
                     key: `card-${card.id}`,
                     card,
-                    faceUp: true,
+                    faceUp: !isFlipped[card.id],
                     opacity: onClick !== undefined ? 1 : 0.3,
                     left: DECK_RATIO * scaledWidth + 2 * DELTA + spacing * i,
                     top: height - scaledHeight - DELTA,
@@ -550,7 +555,7 @@ export default class GameArea extends React.Component {
     getDiscardCards(middleCardsFound) {
         const { G, moves, width, height, scaledWidth, scaledHeight } = this.props;
         const { mode } = this.state;
-        const { discard } = G;
+        const { discard, isFlipped } = G;
         const MAX_DISCARDS_SHOWN = 4;
         const numCardsShown = Math.min(discard.length, MAX_DISCARDS_SHOWN);
         const startX = (width - numCardsShown * scaledWidth * MIDDLE_CARD_RATIO - (numCardsShown - 1) * DELTA) / 2;
@@ -560,6 +565,11 @@ export default class GameArea extends React.Component {
             let onClick = undefined;
             if (mode === SetModePanel.DEFAULT_MODE && i < MAX_DISCARDS_SHOWN) {
                 onClick = () => moves.pickUp(discard.length - 1 - i);
+            } else if (mode === SetModePanel.FLIP_MODE) {
+                onClick = () => {
+                    moves.flipObject(card.id);
+                    this.setState({ mode: SetModePanel.DEFAULT_MODE });
+                };
             } else if (mode === SetModePanel.HELP_MODE) {
                 onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
             }
@@ -567,7 +577,7 @@ export default class GameArea extends React.Component {
                 key: `card-${card.id}`,
                 className: 'shadow',
                 card,
-                faceUp: true,
+                faceUp: !isFlipped[card.id],
                 opacity: i === MAX_DISCARDS_SHOWN || middleCardsFound ? 0 : 1,
                 left: startX + (scaledWidth * MIDDLE_CARD_RATIO + DELTA) * i,
                 top: (height - scaledHeight * MIDDLE_CARD_RATIO) / 2,

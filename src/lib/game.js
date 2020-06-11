@@ -99,9 +99,9 @@ function toggleChain(G, ctx) {
     isChained[playerID] = !isChained[playerID];
 }
 
-function flipCharacter(G, _ctx, playerID) {
+function flipObject(G, _ctx, objectID) {
     const { isFlipped } = G;
-    isFlipped[playerID] = !isFlipped[playerID];
+    isFlipped[objectID] = !isFlipped[objectID];
 }
 
 function reveal(G, ctx, index, otherPlayerID) {
@@ -337,7 +337,7 @@ export const SanGuoSha = {
                             dismantle,
                             steal,
                             toggleChain,
-                            flipCharacter,
+                            flipObject,
                             reveal,
                             returnCard,
                             harvest,
