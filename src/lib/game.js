@@ -188,6 +188,22 @@ function finishAstrology(G) {
     G.privateZone = privateZone.filter(item => !item.source.deck);
 }
 
+function refusingDeath(G, ctx, change) {
+    const { healths, refusingDeath } = G;
+    const { playerID, random } = ctx;
+    if (change === -1) {
+        const newValue = random.Die(13);
+        refusingDeath.push(newValue);
+        healths[playerID].current = 0;
+    } else if (change === 1) {
+        refusingDeath.pop();
+        if (refusingDeath.length === 0) {
+            healths[playerID].current = 1;
+            refusingDeath.push(1);
+        }
+    }
+}
+
 function updateHealth(G, ctx, change) {
     const { healths } = G;
     const { playerID } = ctx;
@@ -347,6 +363,7 @@ export const SanGuoSha = {
                             passLightning,
                             astrology,
                             finishAstrology,
+                            refusingDeath,
                             updateHealth,
                             die,
                             endPlay,

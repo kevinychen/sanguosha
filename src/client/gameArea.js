@@ -58,7 +58,7 @@ export default class GameArea extends React.Component {
             this.addPlayerName(playerArea, playerIndex, player, nodes);
             this.addCharacterRole(playerArea, playerIndex, nodes);
 
-            const character = characters[playerIndex];
+            const character = characters[player];
             this.addCharacterCard(playerArea, character, player, characterCards);
             if (!character) {
                 return;
@@ -213,9 +213,13 @@ export default class GameArea extends React.Component {
 
     addHealth(playerArea, player, healthPoints, nodes) {
         const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
-        const { healths, isAlive } = G;
-        for (let i = 0; i < healths[player].max; i++) {
-            const color = i < healths[player].current ? 'green' : 'red';
+        const { characters, healths, isAlive, refusingDeath } = G;
+
+        const isRefusingDeath = characters[playerID] && characters[playerID].name === 'Zhou Tai' && healths[player].current <= 0;
+        const isDying = isRefusingDeath ? new Set(refusingDeath).size < refusingDeath.length : healths[player].current <= 0;
+
+        for (let i = 0; i < (isRefusingDeath ? refusingDeath.length : healths[player].max); i++) {
+            const color = !isRefusingDeath && i < healths[player].current ? 'green' : 'red';
             healthPoints.push({
                 key: `health-${player}-${i}-${color}`,
                 color,
@@ -226,7 +230,7 @@ export default class GameArea extends React.Component {
             });
         }
 
-        if (isAlive[player] && healths[player].current <= 0) {
+        if (isAlive[player] && isDying) {
             const SAVE_ME_WIDTH = 100; // pixels
             const SAVE_ME_HEIGHT = 25; // pixels
             nodes.push(<button
@@ -248,7 +252,7 @@ export default class GameArea extends React.Component {
             return;
         }
 
-        if (healths[playerID].current > 0) {
+        if (!isDying) {
             nodes.push(<div
                 key='decrease-health'
                 className='positioned image-div selectable decrease-health'
@@ -258,7 +262,7 @@ export default class GameArea extends React.Component {
                     width: scaledWidth * 0.12,
                     height: scaledHeight * 0.1,
                 }}
-                onClick={() => moves.updateHealth(-1)}
+                onClick={() => (isRefusingDeath ? moves.refusingDeath : moves.updateHealth)(-1)}
             />);
         } else if (isAlive[playerID]) {
             const DIE_BUTTON_WIDTH = 180;
@@ -287,7 +291,7 @@ export default class GameArea extends React.Component {
                     width: scaledWidth * 0.12,
                     height: scaledHeight * 0.1,
                 }}
-                onClick={() => moves.updateHealth(+1)}
+                onClick={() => (isRefusingDeath ? moves.refusingDeath : moves.updateHealth)(+1)}
             />);
         }
     }

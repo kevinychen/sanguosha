@@ -206,6 +206,7 @@ export default function setup(ctx) {
     const isFlipped = {};
     const harvest = [];
     const privateZone = [];
+    const refusingDeath = [1];
 
     return {
         roles,
@@ -222,5 +223,6 @@ export default function setup(ctx) {
         isFlipped,
         harvest,
         privateZone,
+        refusingDeath,
     };
 }
