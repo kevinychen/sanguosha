@@ -153,4 +153,66 @@ export default [
         health: 4,
         gender: 'M',
     },
+
+    // Wind Expansion
+    {
+        name: 'Wei Yan',
+        country: 'Shu',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Huang Zhong',
+        country: 'Shu',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Xiahou Yuan',
+        country: 'Wei',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Cao Ren',
+        country: 'Wei',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Zhou Tai',
+        country: 'Wu',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Xiao Qiao',
+        country: 'Wu',
+        health: 3,
+        gender: 'F',
+    },
+    {
+        name: 'Zhang Jiao',
+        country: 'Kingdomless',
+        health: 3,
+        gender: 'M',
+    },
+    {
+        name: 'Yu Ji',
+        country: 'Kingdomless',
+        health: 3,
+        gender: 'M',
+    },
+    {
+        name: 'DG Guan Yu',
+        country: 'Demigod',
+        health: 5,
+        gender: 'M',
+    },
+    {
+        name: 'DG Lu Meng',
+        country: 'Demigod',
+        health: 3,
+        gender: 'M',
+    },
 ];
