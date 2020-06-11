@@ -203,6 +203,7 @@ export default function setup(ctx) {
     const hands = Object.fromEntries(playOrder.map(player => [player, []]));
     const equipment = Object.fromEntries(playOrder.map(player => [player, {}]));
     const isChained = {};
+    const isFlipped = {};
     const harvest = [];
     const privateZone = [];
 
@@ -218,6 +219,7 @@ export default function setup(ctx) {
         hands,
         equipment,
         isChained,
+        isFlipped,
         harvest,
         privateZone,
     };

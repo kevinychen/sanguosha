@@ -19,19 +19,30 @@ export default class AnimatedBoard extends React.Component {
             <AnimatedItems
                 items={characterCards}
                 from={_ => { return { opacity: 0 }; }}
-                update={item => { return { opacity: item.opacity, left: item.left, top: item.top } }}
+                update={item => {
+                    return {
+                        faceUp: item.faceUp ? 1 : 0,
+                        opacity: item.opacity,
+                        left: item.left,
+                        top: item.top,
+                    };
+                }}
                 clickable={true}
-                animated={(item, props) => <animated.img
-                    className='positioned item shadow'
-                    src={`./characters/${item.name}.jpg`}
-                    alt={item.name}
-                    style={{
-                        opacity: props.opacity,
-                        left: props.left,
-                        top: props.top,
-                        width: item.width,
-                        height: item.height,
-                    }} />}
+                animated={(item, props) => {
+                    const { faceUp, opacity, left, top } = props;
+                    return <animated.img
+                        className='positioned item shadow'
+                        src={faceUp.interpolate(faceUp => faceUp > 0.5 ? `./characters/${item.name}.jpg` : './characters/Character Back.jpg')}
+                        alt={item.name}
+                        style={{
+                            transform: faceUp.interpolate(faceUp => `rotateY(${faceUp * 180 - (faceUp > 0.5 ? 180 : 0)}deg)`),
+                            opacity,
+                            left,
+                            top,
+                            width: item.width,
+                            height: item.height,
+                        }} />;
+                }}
             />
             <AnimatedItems
                 items={healthPoints}

@@ -120,6 +120,7 @@ export default class GameArea extends React.Component {
                 characterCards.push({
                     key: `character-${choice.name}`,
                     name: choice.name,
+                    faceUp: true,
                     opacity: 1,
                     left: startX + (scaledWidth + DELTA) * i,
                     top: (height - scaledHeight) / 2,
@@ -172,7 +173,7 @@ export default class GameArea extends React.Component {
     addCharacterCard(playerArea, character, player, characterCards) {
         const { G, moves, scaledWidth, scaledHeight } = this.props;
         const { mode, selectedIndex } = this.state;
-        const { isAlive } = G;
+        const { isAlive, isFlipped } = G;
         let onClick = undefined;
         if (mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined) {
             onClick = () => {
@@ -189,12 +190,18 @@ export default class GameArea extends React.Component {
                 moves.reveal(selectedIndex, player);
                 this.setState({ mode: SetModePanel.DEFAULT_MODE });
             };
+        } else if (mode === SetModePanel.FLIP_MODE) {
+            onClick = () => {
+                moves.flipCharacter(player);
+                this.setState({ mode: SetModePanel.DEFAULT_MODE });
+            };
         } else if (mode === SetModePanel.HELP_MODE) {
             onClick = () => this.setState({ helpCard: { key: character.name, src: `./characters/${character.name}.jpg` } });
         }
         characterCards.push({
             key: character ? `character-${character.name}` : `character-back-${player}`,
             name: character ? character.name : 'Character Back',
+            faceUp: character !== undefined && !isFlipped[player],
             opacity: isAlive[player] ? 1 : 0.5,
             left: playerArea.x,
             top: playerArea.y,

@@ -9,6 +9,7 @@ export default class SetModePanel extends React.Component {
     static DISMANTLE_MODE = 'Dismantle';
     static STEAL_MODE = 'Steal';
     static REVEAL_MODE = 'Reveal';
+    static FLIP_MODE = 'Flip';
     static HELP_MODE = 'Help';
     static SHOW_HOTKEYS_MODE = 'Hotkeys';
     static GIVE_JUDGMENT_MODE = 'Give Judgment';
@@ -30,6 +31,7 @@ export default class SetModePanel extends React.Component {
                 {this.renderButton(SetModePanel.DISMANTLE_MODE)}
                 {this.renderButton(SetModePanel.STEAL_MODE)}
                 {this.renderButton(SetModePanel.REVEAL_MODE)}
+                {this.renderButton(SetModePanel.FLIP_MODE)}
                 {this.renderButton(SetModePanel.HELP_MODE)}
                 {this.renderButton(SetModePanel.SHOW_HOTKEYS_MODE)}
             </div>
@@ -151,6 +153,10 @@ export default class SetModePanel extends React.Component {
                             <td>Reveal your next selected card to someone else</td>
                         </tr>
                         <tr>
+                            <td>F</td>
+                            <td>Flip your next selected card</td>
+                        </tr>
+                        <tr>
                             <td>H</td>
                             <td>Render help for the selected card</td>
                         </tr>
@@ -232,6 +238,9 @@ export default class SetModePanel extends React.Component {
                 break;
             case "r":
                 setMode(SetModePanel.REVEAL_MODE);
+                break;
+            case "f":
+                setMode(SetModePanel.FLIP_MODE);
                 break;
             case "h":
                 setMode(SetModePanel.HELP_MODE);
