@@ -13,6 +13,7 @@ export default class SetModePanel extends React.Component {
     static HELP_MODE = 'Help';
     static SHOW_HOTKEYS_MODE = 'Hotkeys';
     static GIVE_JUDGMENT_MODE = 'Give Judgment';
+    static COUNTRY_SCENE_MODE = 'Country Scene';
 
     componentDidMount() {
         document.addEventListener('keydown', this.handleHotkey);
@@ -32,6 +33,7 @@ export default class SetModePanel extends React.Component {
                 {this.renderButton(SetModePanel.STEAL_MODE)}
                 {this.renderButton(SetModePanel.REVEAL_MODE)}
                 {this.renderButton(SetModePanel.FLIP_MODE)}
+                {this.renderSpecialModeButton()}
                 {this.renderButton(SetModePanel.HELP_MODE)}
                 {this.renderButton(SetModePanel.SHOW_HOTKEYS_MODE)}
             </div>
@@ -96,6 +98,18 @@ export default class SetModePanel extends React.Component {
             >
                 {'No discard'}
             </button>
+        }
+    }
+
+    renderSpecialModeButton() {
+        const { G, playerID } = this.props;
+        const { characters } = G;
+        const character = characters[playerID];
+        if (character === undefined) {
+            return;
+        }
+        if (character.name === 'Da Qiao') {
+            return this.renderButton(SetModePanel.COUNTRY_SCENE_MODE);
         }
     }
 

@@ -33,14 +33,14 @@ function judgment(G, ctx) {
     discard(G, ctx, card);
 }
 
-function play(G, ctx, index, targetPlayerID) {
+function play(G, ctx, index, targetPlayerID, forceCategory) {
     const { hands, equipment } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
     if (card === undefined) {
         return;
     }
-    const category = CARD_CATEGORIES[card.type];
+    const category = forceCategory || CARD_CATEGORIES[card.type];
     if (category) {
         if (targetPlayerID === undefined) {
             targetPlayerID = playerID;

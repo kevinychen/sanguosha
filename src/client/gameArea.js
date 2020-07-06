@@ -197,6 +197,11 @@ export default class GameArea extends React.Component {
             };
         } else if (mode === SetModePanel.HELP_MODE) {
             onClick = () => this.setState({ helpCard: { key: character.name, src: `./characters/${character.name}.jpg` } });
+        } else if (mode === SetModePanel.COUNTRY_SCENE_MODE && selectedIndex !== undefined) {
+            onClick = () => {
+                moves.play(selectedIndex, player, 'Capture');
+                this.setState({ mode: SetModePanel.DEFAULT_MODE });
+            };
         }
         characterCards.push({
             key: character ? `character-${character.name}` : `character-back-${player}`,
@@ -484,6 +489,10 @@ export default class GameArea extends React.Component {
                     };
                 } else if (mode === SetModePanel.HELP_MODE) {
                     onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
+                } else if (mode === SetModePanel.COUNTRY_SCENE_MODE && selectedIndex === undefined) {
+                    if (card.suit === 'DIAMOND') {
+                        onClick = () => this.setState({ mode: SetModePanel.COUNTRY_SCENE_MODE, selectedIndex: i });
+                    }
                 }
                 normalCards.push({
                     key: `card-${card.id}`,
@@ -637,7 +646,8 @@ export default class GameArea extends React.Component {
             }
         } else if ((mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined)
             || (mode === SetModePanel.REVEAL_MODE && selectedIndex !== undefined)
-            || mode === SetModePanel.GIVE_JUDGMENT_MODE) {
+            || mode === SetModePanel.GIVE_JUDGMENT_MODE
+            || (mode === SetModePanel.COUNTRY_SCENE_MODE && selectedIndex !== undefined)) {
             actionButton = {
                 text: 'Select player',
                 type: 'disabled',
