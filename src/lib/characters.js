@@ -203,4 +203,54 @@ export default [
         health: 3,
         gender: 'M',
     },
+
+    // Fire Expansion
+    {
+        name: 'Zhuge Liang 8',
+        country: 'Shu',
+        health: 3,
+        gender: 'M',
+    },
+    {
+        name: 'Pang Tong',
+        country: 'Shu',
+        health: 3,
+        gender: 'M',
+    },
+    {
+        name: 'Dian Wei',
+        country: 'Wei',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Xun Yu',
+        country: 'Wei',
+        health: 3,
+        gender: 'M',
+    },
+    {
+        name: 'Tai Shi Ci',
+        country: 'Wu',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Yuan Shao',
+        country: 'Kingdomless',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Pang De',
+        country: 'Kingdomless',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Yan Liang Wen Chou',
+        country: 'Kingdomless',
+        health: 4,
+        gender: 'M',
+    },
 ];
