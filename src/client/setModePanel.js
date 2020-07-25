@@ -14,6 +14,7 @@ export default class SetModePanel extends React.Component {
     static SHOW_HOTKEYS_MODE = 'Hotkeys';
     static GIVE_JUDGMENT_MODE = 'Give Judgment';
     static COUNTRY_SCENE_MODE = 'Country Scene';
+    static MAGIC_TRICK_MODE = 'Magic';
 
     componentDidMount() {
         document.addEventListener('keydown', this.handleHotkey);
@@ -110,6 +111,8 @@ export default class SetModePanel extends React.Component {
         }
         if (character.name === 'Da Qiao') {
             return this.renderButton(SetModePanel.COUNTRY_SCENE_MODE);
+        } else if (character.name === 'Tommy') {
+            return this.renderButton(SetModePanel.MAGIC_TRICK_MODE);
         }
     }
 
@@ -242,8 +245,9 @@ export default class SetModePanel extends React.Component {
     }
 
     handleHotkey = e => {
-        const { G, mode, moves, setMode, setSelectedIndex } = this.props;
-        const { harvest } = G;
+        const { G, mode, moves, playerID, setMode, setSelectedIndex } = this.props;
+        const { characters, harvest } = G;
+        const character = characters[playerID];
         if (e.altKey || e.ctrlKey || e.metaKey) {
             return;
         }
@@ -265,6 +269,11 @@ export default class SetModePanel extends React.Component {
                 break;
             case "f":
                 setMode(SetModePanel.FLIP_MODE);
+                break;
+            case "m":
+                if (character.name === 'Tommy') {
+                    setMode(SetModePanel.MAGIC_TRICK_MODE);
+                }
                 break;
             case "h":
                 setMode(SetModePanel.HELP_MODE);

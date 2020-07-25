@@ -80,6 +80,7 @@ export default class GameArea extends React.Component {
         // Once cards of some type are found, remaining cards are rendered transparently.
         // We splice from the beginning so that these transparent cards don't block existing ones.
         const middleCards = [];
+        middleCards.splice(0, 0, ...this.getMagicTrickCards());
         middleCards.splice(0, 0, ...this.getPrivateZoneCards(middleCards.length > 0));
         middleCards.splice(0, 0, ...this.getHarvestCards(middleCards.length > 0));
         middleCards.splice(0, 0, ...this.getDiscardCards(middleCards.length > 0));
@@ -454,7 +455,7 @@ export default class GameArea extends React.Component {
     addMyHand(normalCards) {
         const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
         const { mode, selectedIndex } = this.state;
-        const { hands, isFlipped, harvest } = G;
+        const { hands, isFlipped, harvest, magicTrick } = G;
         const myHand = hands[playerID];
         if (myHand) {
             const spacing = Math.min(scaledWidth + DELTA, (width - (2 + DECK_RATIO) * scaledWidth - 5 * DELTA) / (hands[playerID].length - 1));
@@ -493,6 +494,8 @@ export default class GameArea extends React.Component {
                     if (card.suit === 'DIAMOND') {
                         onClick = () => this.setState({ mode: SetModePanel.COUNTRY_SCENE_MODE, selectedIndex: i });
                     }
+                } else if (mode === SetModePanel.MAGIC_TRICK_MODE && magicTrick === undefined) {
+                    onClick = () => moves.setMagicTrick(i);
                 }
                 normalCards.push({
                     key: `card-${card.id}`,
@@ -508,6 +511,30 @@ export default class GameArea extends React.Component {
         }
     }
  
+    getMagicTrickCards() {
+        const { G, moves, width, height, scaledWidth, scaledHeight } = this.props;
+        const { mode } = this.state;
+        const { magicTrick } = G;
+        const normalCards = [];
+        if (mode === SetModePanel.MAGIC_TRICK_MODE && magicTrick) {
+            normalCards.push({
+                key: `card-${magicTrick.id}`,
+                className: 'shadow',
+                card: magicTrick,
+                faceUp: true,
+                opacity: 1,
+                left: (width - scaledWidth * MIDDLE_CARD_RATIO) / 2,
+                top: (height - scaledHeight * MIDDLE_CARD_RATIO) / 2,
+                scale: MIDDLE_CARD_RATIO,
+                onClick: () => {
+                    moves.getMagicTrick();
+                    this.setState({ mode: SetModePanel.DEFAULT_MODE });
+                },
+            });
+        }
+        return normalCards;
+    }
+
     getPrivateZoneCards(middleCardsFound) {
         const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
         const { mode } = this.state;

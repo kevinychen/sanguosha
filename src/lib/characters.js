@@ -253,4 +253,66 @@ export default [
         health: 4,
         gender: 'M',
     },
+
+    // Fan Expansion
+    {
+        name: 'Becky',
+        country: 'Fan',
+        health: 4,
+        gender: 'F',
+    },
+    {
+        name: 'Eva',
+        country: 'Fan',
+        health: 4,
+        gender: 'F',
+    },
+    {
+        name: 'Jeff',
+        country: 'Fan',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Kevin',
+        country: 'Fan',
+        health: 5,
+        gender: 'M',
+    },
+    {
+        name: 'Michael Wu',
+        country: 'Fan',
+        health: 4,
+        gender: 'M',
+    },
+    // {
+    //     name: 'Michael Xu',
+    //     country: 'Fan',
+    //     health: 4,
+    //     gender: 'M',
+    // },
+    {
+        name: 'Natalle',
+        country: 'Fan',
+        health: 4,
+        gender: 'F',
+    },
+    // {
+    //     name: 'Snaky',
+    //     country: 'Fan',
+    //     health: 4,
+    //     gender: 'M',
+    // },
+    {
+        name: 'Tommy',
+        country: 'Fan',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Yi-Shiuan',
+        country: 'Fan',
+        health: 4,
+        gender: 'M',
+    },
 ];

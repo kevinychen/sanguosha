@@ -7,7 +7,8 @@ import { drawCard, drawCards, discard, nextAlivePlayerPos } from './helper.js';
 function selectCharacter(G, ctx, index) {
     const { startPlayerIndex, characterChoices, characters, healths } = G;
     const { numPlayers, playerID, playOrder } = ctx;
-    const character = characterChoices[playerID][index];
+    const allChosenCharacters = Object.values(characters).map(character => character.name);
+    const character = characterChoices[playerID].filter(c => !allChosenCharacters.includes(c.name))[index];
     characterChoices[playerID] = undefined;
     characters[playerID] = character;
     let maxHealth = character.health;
@@ -204,6 +205,24 @@ function refusingDeath(G, ctx, change) {
     }
 }
 
+function setMagicTrick(G, ctx, index) {
+    const { hands, magicTrick } = G;
+    const { playerID } = ctx;
+    if (magicTrick === undefined) {
+        const [card] = hands[playerID].splice(index, 1);
+        G.magicTrick = card;
+    }
+}
+
+function getMagicTrick(G, ctx) {
+    const { hands, magicTrick } = G;
+    const { playerID } = ctx;
+    if (magicTrick !== undefined) {
+        hands[playerID].push(magicTrick);
+        G.magicTrick = undefined;
+    }
+}
+
 function updateHealth(G, ctx, change) {
     const { healths } = G;
     const { playerID } = ctx;
@@ -276,20 +295,20 @@ export const SanGuoSha = {
             }
         }
 
-        const newCharacters = { ...characters };
-        const areAllCharactersChosen = Object.values(characterChoices).every(choices => choices === undefined);
-        if (!areAllCharactersChosen) {
-            for (let i = 0; i < numPlayers; i++) {
-                if (playOrder[i] !== playerID && newRoles[i].name !== 'King') {
-                    delete newCharacters[playOrder[i]];
-                }
+        const allChosenCharacters = Object.values(characters).map(character => character.name);
+        const newCharacterChoices = {};
+        for (let i = 0; i < numPlayers; i++) {
+            if (characterChoices[i] !== undefined) {
+                newCharacterChoices[playOrder[i]] = characterChoices[playOrder[i]]
+                    .filter(character => !allChosenCharacters.includes(character.name))
+                    .slice(0, 4);
             }
         }
 
         return {
             ...G,
             roles: newRoles,
-            characters: newCharacters,
+            characterChoices: newCharacterChoices,
         };
     },
 
@@ -298,15 +317,10 @@ export const SanGuoSha = {
             start: true,
 
             onBegin: (G, ctx) => {
-                const { startPlayerIndex } = G;
-                const { events, playOrder } = ctx;
+                const { events } = ctx;
                 events.setActivePlayers({
-                    value: {[playOrder[startPlayerIndex]]: 'selectCharacter'},
+                    all: 'selectCharacter',
                     moveLimit: 1,
-                    next: {
-                        others: 'selectCharacter',
-                        moveLimit: 1,
-                    }
                 });
 
                 // make character choices automatically for easier testing
@@ -365,6 +379,8 @@ export const SanGuoSha = {
                             finishAstrology,
                             refusingDeath,
                             updateHealth,
+                            setMagicTrick,
+                            getMagicTrick,
                             die,
                             endPlay,
                          },

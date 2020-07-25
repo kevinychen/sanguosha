@@ -5,8 +5,6 @@
 import CHARACTERS from './characters.js';
 import { ROLE_DIST, ROLE_DIST_LABELS } from './roles.js';
 
-const NUM_CHARACTER_CHOICES = 3;
-
 const CARDS = [
     { value: 'A', suit: 'CLUB', type: 'Crossbow' },
     { value: 'A', suit: 'CLUB', type: 'Duel' },
@@ -185,10 +183,9 @@ export default function setup(ctx) {
     }
     const startPlayerIndex = roles.findIndex(role => role.name === 'King');
 
-    const normalCharacters = random.Shuffle(CHARACTERS.filter(c => !c.isMonarch));
-    const characterChoices = Object.fromEntries(playOrder.map((player, i) =>
-        [player, normalCharacters.slice(NUM_CHARACTER_CHOICES * i, NUM_CHARACTER_CHOICES * (i + 1))]));
-    characterChoices[playOrder[startPlayerIndex]].push(...CHARACTERS.filter(c => c.isMonarch));
+    const fanCharacters = CHARACTERS.filter(c => c.country === 'Fan');
+    const characterChoices = Object.fromEntries(playOrder.map((player, i) => [player, random.Shuffle(fanCharacters)]));
+
     const characters = {};
     const healths = {};
     const isAlive = Object.fromEntries(playOrder.map(player => [player, true]));
