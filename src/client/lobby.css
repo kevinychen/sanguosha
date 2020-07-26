@@ -15,7 +15,11 @@
 }
 
 .lobby #lobby-view {
-    padding: 0px !important;
+    padding: 50px !important;
+    width: 50%;
+    margin: 0 auto;
+    background-color: #202020;
+    border-radius: 50px;
 }
 
 .lobby .hidden {
@@ -65,4 +69,9 @@
 
 .toggle-sound.on {
     background-image: url('/sound-on.png');
+}
+
+body {
+    background-image: url('/disco.gif');
+    background-size: cover;
 }
