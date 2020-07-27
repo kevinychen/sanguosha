@@ -14,6 +14,7 @@ class App extends React.Component {
         this.audio.loop = true;
         this.audio.play();
         this.state = { volume: 0.1, hasToggled: false };
+        window.audio = this.audio;
     }
 
     render() {
