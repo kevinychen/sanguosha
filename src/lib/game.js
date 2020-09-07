@@ -34,14 +34,14 @@ function judgment(G, ctx) {
 }
 
 function play(G, ctx, index, targetPlayerID, forceCategory) {
-    const { hands, equipment } = G;
+    const { hands, equipment, isFlipped } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
     if (card === undefined) {
         return;
     }
     const category = forceCategory || CARD_CATEGORIES[card.type];
-    if (category) {
+    if (!isFlipped[card.id] && category) {
         if (targetPlayerID === undefined) {
             targetPlayerID = playerID;
         }

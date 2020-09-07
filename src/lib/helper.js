@@ -1,11 +1,14 @@
 export function drawCard(G, ctx) {
-    const { deck, discard } = G;
+    const { deck, discard, isFlipped } = G;
     const { random } = ctx;
 
     const card = deck.pop();
     if (deck.length === 0) {
         // shuffle cards in discard back into the deck
         deck.push(...random.Shuffle(discard.splice(0, discard.length)));
+    }
+    if (isFlipped[card.id]) {
+        delete isFlipped[card.id];
     }
     return card;
 }
