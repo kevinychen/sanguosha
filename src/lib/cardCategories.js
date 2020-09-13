@@ -1,5 +1,6 @@
+export const BASIC = ['Attack', 'Escape', 'Peach', 'Fire Attack', 'Lightning Attack', 'Wine'];
 
-export default {
+export const EQUIPMENT = {
     'Lightning': 'Lightning',
     'Capture': 'Capture',
     'Starvation': 'Starvation',

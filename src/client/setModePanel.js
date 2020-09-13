@@ -14,6 +14,8 @@ export default class SetModePanel extends React.Component {
     static SHOW_HOTKEYS_MODE = 'Hotkeys';
     static GIVE_JUDGMENT_MODE = 'Give Judgment';
     static COUNTRY_SCENE_MODE = 'Country Scene';
+    static BLOCKADE_MODE = 'Blockade';
+    static ALLIANCE_MODE = 'Alliance';
 
     componentDidMount() {
         document.addEventListener('keydown', this.handleHotkey);
@@ -111,6 +113,12 @@ export default class SetModePanel extends React.Component {
         if (character.name === 'Da Qiao') {
             return this.renderButton(SetModePanel.COUNTRY_SCENE_MODE);
         }
+        if (character.name === 'Xu Huang') {
+            return this.renderButton(SetModePanel.BLOCKADE_MODE);
+        }
+        if (character.name === 'Lu Su') {
+            return this.renderButton(SetModePanel.ALLIANCE_MODE);
+        }
     }
 
     renderSpecialButton() {
@@ -138,6 +146,14 @@ export default class SetModePanel extends React.Component {
                     {'Astrology'}
                 </button>;
             }
+        }
+        if (character.name === 'Dong Zhuo') {
+            return <button
+                className='clickable'
+                onClick={() => moves.collapse()}
+            >
+                {'Collapse'}
+            </button>;
         }
     }
 

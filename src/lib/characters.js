@@ -253,4 +253,54 @@ export default [
         health: 4,
         gender: 'M',
     },
+
+    // Wood Expansion
+    {
+        name: 'Meng Huo',
+        country: 'Shu',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Zhu Rong',
+        country: 'Shu',
+        health: 4,
+        gender: 'F',
+    },
+    {
+        name: 'Xu Huang',
+        country: 'Wei',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Cao Pi',
+        country: 'Wei',
+        health: 3,
+        gender: 'M',
+    },
+    {
+        name: 'Sun Jian',
+        country: 'Wu',
+        health: 4,
+        gender: 'M',
+    },
+    {
+        name: 'Lu Su',
+        country: 'Wu',
+        health: 3,
+        gender: 'M',
+    },
+    {
+        name: 'Dong Zhuo',
+        country: 'Kingdomless',
+        health: 8,
+        gender: 'M',
+    },
+    {
+        name: 'Jia Xu',
+        country: 'Kingdomless',
+        health: 3,
+        gender: 'M',
+    },
 ];

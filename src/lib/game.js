@@ -1,4 +1,4 @@
-import CARD_CATEGORIES from './cardCategories.js';
+import { EQUIPMENT } from './cardCategories.js';
 import setup from './setup.js';
 import { drawCard, drawCards, discard, nextAlivePlayerPos } from './helper.js';
 
@@ -40,7 +40,7 @@ function play(G, ctx, index, targetPlayerID, forceCategory) {
     if (card === undefined) {
         return;
     }
-    const category = forceCategory || CARD_CATEGORIES[card.type];
+    const category = forceCategory || EQUIPMENT[card.type];
     if (!isFlipped[card.id] && category) {
         if (targetPlayerID === undefined) {
             targetPlayerID = playerID;
@@ -204,6 +204,25 @@ function refusingDeath(G, ctx, change) {
     }
 }
 
+function alliance(G, _ctx, player1, player2) {
+    const { hands } = G;
+    const temp = hands[player1];
+    hands[player1] = hands[player2];
+    hands[player2] = temp;
+}
+
+function collapse(G, ctx) {
+    const { healths } = G;
+    const { playerID } = ctx;
+    healths[playerID].max--;
+    if (healths[playerID].max < 0) {
+        healths[playerID].max = 8;
+    }
+    if (healths[playerID].current > healths[playerID].max) {
+        healths[playerID].current--;
+    }
+}
+
 function updateHealth(G, ctx, change) {
     const { healths } = G;
     const { playerID } = ctx;
@@ -364,6 +383,8 @@ export const SanGuoSha = {
                             astrology,
                             finishAstrology,
                             refusingDeath,
+                            alliance,
+                            collapse,
                             updateHealth,
                             die,
                             endPlay,

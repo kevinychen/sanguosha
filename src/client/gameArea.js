@@ -1,6 +1,6 @@
 import * as classNames from 'classnames';
 import React from 'react';
-import CARD_CATEGORIES from '../lib/cardCategories.js';
+import { BASIC, EQUIPMENT } from '../lib/cardCategories.js';
 import RULES from '../lib/rules.json';
 import SetModePanel from './setModePanel';
 import AnimatedBoard from './animatedBoard';
@@ -202,6 +202,20 @@ export default class GameArea extends React.Component {
                 moves.play(selectedIndex, player, 'Capture');
                 this.setState({ mode: SetModePanel.DEFAULT_MODE });
             };
+        } else if (mode === SetModePanel.BLOCKADE_MODE && selectedIndex !== undefined) {
+            onClick = () => {
+                moves.play(selectedIndex, player, 'Starvation');
+                this.setState({ mode: SetModePanel.DEFAULT_MODE });
+            };
+        } else if (mode === SetModePanel.ALLIANCE_MODE) {
+            if (selectedIndex === undefined) {
+                onClick = () => this.setState({ selectedIndex: player });
+            } else {
+                onClick = () => {
+                    moves.alliance(selectedIndex, player);
+                    this.setState({ mode: SetModePanel.DEFAULT_MODE, selectedIndex: undefined });
+                };
+            }
         }
         characterCards.push({
             key: character ? `character-${character.name}` : `character-back-${player}`,
@@ -463,7 +477,7 @@ export default class GameArea extends React.Component {
                 if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'play') {
                     if (harvest.length > 0) {
                         onClick = () => moves.putDownHarvest(i);
-                    } else if (['Capture', 'Starvation'].includes(CARD_CATEGORIES[card.type])) {
+                    } else if (['Capture', 'Starvation'].includes(EQUIPMENT[card.type])) {
                         onClick = () => this.setState({ mode: SetModePanel.GIVE_JUDGMENT_MODE, selectedIndex: i });
                     } else {
                         onClick = () => moves.play(i);
@@ -491,6 +505,10 @@ export default class GameArea extends React.Component {
                     onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
                 } else if (mode === SetModePanel.COUNTRY_SCENE_MODE && selectedIndex === undefined) {
                     if (card.suit === 'DIAMOND') {
+                        onClick = () => this.setState({ mode: SetModePanel.COUNTRY_SCENE_MODE, selectedIndex: i });
+                    }
+                } else if (mode === SetModePanel.BLOCKADE_MODE && selectedIndex === undefined) {
+                    if (['CLUB', 'SPADE'].includes(card.suit) && (BASIC.includes(card.type) || EQUIPMENT[card.type])) {
                         onClick = () => this.setState({ mode: SetModePanel.COUNTRY_SCENE_MODE, selectedIndex: i });
                     }
                 }
@@ -647,9 +665,16 @@ export default class GameArea extends React.Component {
         } else if ((mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined)
             || (mode === SetModePanel.REVEAL_MODE && selectedIndex !== undefined)
             || mode === SetModePanel.GIVE_JUDGMENT_MODE
-            || (mode === SetModePanel.COUNTRY_SCENE_MODE && selectedIndex !== undefined)) {
+            || (mode === SetModePanel.COUNTRY_SCENE_MODE && selectedIndex !== undefined)
+            || (mode === SetModePanel.BLOCKADE_MODE && selectedIndex !== undefined)
+            || (mode === SetModePanel.ALLIANCE_MODE && selectedIndex === undefined)) {
             actionButton = {
                 text: 'Select player',
+                type: 'disabled',
+            };
+        } else if (mode === SetModePanel.ALLIANCE_MODE && selectedIndex !== undefined) {
+            actionButton = {
+                text: 'Select player 2',
                 type: 'disabled',
             };
         } else if (this.stage() === 'play' && currentPlayer === playerID && privateZone.length === 0) {
