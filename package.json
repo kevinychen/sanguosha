@@ -13,11 +13,14 @@
     "react-spring": "^8.0.27",
     "redux-logger": "^3.0.6"
   },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  },
   "scripts": {
-    "start": "REACT_APP_LOCAL=true react-scripts start",
+    "start": "cross-env REACT_APP_LOCAL=true react-scripts start",
     "build": "react-scripts build",
-    "client": "REACT_APP_PROXY=http://localhost:8098 react-scripts start",
-    "server": "PORT=8098 node -r esm src/server/server.js"
+    "client": "cross-env REACT_APP_PROXY=http://localhost:8098 react-scripts start",
+    "server": "cross-env PORT=8098 node -r esm src/server/server.js"
   },
   "browserslist": {
     "production": [
