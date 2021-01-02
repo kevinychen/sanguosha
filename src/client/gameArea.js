@@ -133,9 +133,9 @@ export default class GameArea extends React.Component {
     }
 
     addPlayerName(playerArea, playerIndex, player, nodes) {
-        const { ctx, playerID, gameMetadata, scaledWidth, scaledHeight } = this.props;
+        const { ctx, playerID, matchData, scaledWidth, scaledHeight } = this.props;
         const { currentPlayer } = ctx;
-        if (gameMetadata !== undefined && player !== playerID) {
+        if (matchData !== undefined && player !== playerID) {
             nodes.push(<div
                 key={`name-${playerIndex}`}
                 className={classNames('positioned player-name', { 'current-player': currentPlayer === player })}
@@ -146,7 +146,7 @@ export default class GameArea extends React.Component {
                     height: scaledHeight * 0.2,
                 }}
             >
-                {gameMetadata[playerIndex].name}
+                {matchData[playerIndex].name}
             </div>);
         }
     }
@@ -297,7 +297,7 @@ export default class GameArea extends React.Component {
                 }}
                 onClick={() => moves.die()}
             >
-                {'Die and leave game'}
+                {'Die'}
             </button>);
         }
         if (healths[playerID].current < healths[playerID].max) {
@@ -646,14 +646,20 @@ export default class GameArea extends React.Component {
     }
 
     renderActionButton() {
-        const { G, ctx, moves, playerID, width, height, scaledHeight } = this.props;
+        const { G, ctx, moves, playerID, width, height, scaledHeight, playAgain } = this.props;
         const { mode, selectedIndex } = this.state;
         const { isAlive, privateZone } = G;
-        const { currentPlayer } = ctx;
+        const { currentPlayer, gameover } = ctx;
         const ACTION_BUTTON_WIDTH = 160;
         const ACTION_BUTTON_HEIGHT = 30;
         let actionButton = undefined;
-        if (this.stage() === 'selectCharacter' && selectedIndex !== undefined) {
+        if (gameover && playAgain) {
+            actionButton = {
+                text: 'Play again',
+                type: 'selectable warn',
+                onClick: playAgain,
+            };
+        } else if (this.stage() === 'selectCharacter' && selectedIndex !== undefined) {
             actionButton = {
                 text: 'Select',
                 type: 'selectable warn',
@@ -662,6 +668,8 @@ export default class GameArea extends React.Component {
                     this.setState({ selectedIndex: undefined });
                 },
             }
+        } else if (!isAlive[playerID]) {
+            return undefined;
         } else if ((mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined)
             || (mode === SetModePanel.REVEAL_MODE && selectedIndex !== undefined)
             || mode === SetModePanel.GIVE_JUDGMENT_MODE
@@ -689,7 +697,7 @@ export default class GameArea extends React.Component {
                 type: 'disabled',
             };
         }
-        if (isAlive[playerID] && actionButton !== undefined) {
+        if (actionButton !== undefined) {
             const { text, type, onClick } = actionButton;
             return <button
                 className={`positioned ${type}`}

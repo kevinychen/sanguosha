@@ -66,3 +66,12 @@
 .toggle-sound.on {
     background-image: url('/sound-on.png');
 }
+
+.leave-button {
+    position: fixed;
+    bottom: 5px;
+    left: 40px;
+    background-color: red;
+    color: black;
+    cursor: pointer;
+}

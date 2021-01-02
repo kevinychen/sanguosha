@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "boardgame.io": "^0.39.10",
+    "boardgame.io": "^0.42.2",
     "classnames": "^2.2.6",
     "esm": "^3.2.25",
     "koa-static": "^5.0.0",

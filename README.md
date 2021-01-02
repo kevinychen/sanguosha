@@ -12,20 +12,18 @@ See the debut trailer [here](https://kevinychen.github.io/sanguosha).
 
 ## Quickstart
 
-Running this game requires npm v6+ and NodeJS v12+.
-
 Run:
 
-    npm install
-    npm run build   # build assets
-    npm run server  # start the server
+    yarn install
+    yarn build   # build assets
+    yarn server  # start the server
 
 Then go to http://localhost:8098.
 
 ## Development
 
-- First run `npm install` once.
-- To run a game client-side only, run `npm run start`. To run with the server, run `npm run server` and `npm run client` in two different consoles.
+- First run `yarn install` once.
+- To run a game client-side only, run `yarn start`. To run with the server, run `yarn server` and `yarn client` in two different consoles.
 - Go to http://localhost:3000.
 
 ## Credits
