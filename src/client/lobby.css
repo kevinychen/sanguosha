@@ -40,6 +40,11 @@
     padding: 10px;
 }
 
+.lobby .expansion {
+    text-transform: capitalize;
+    margin: 0 2px 0 0;
+}
+
 .lobby .bgio-client {
     position: fixed;
     top: 0px;

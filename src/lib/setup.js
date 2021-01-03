@@ -5,8 +5,6 @@
 import CHARACTERS from './characters.js';
 import { ROLE_DIST, ROLE_DIST_LABELS } from './roles.js';
 
-const NUM_CHARACTER_CHOICES = 3;
-
 const CARDS = [
     { value: 'A', suit: 'CLUB', type: 'Crossbow' },
     { value: 'A', suit: 'CLUB', type: 'Duel' },
@@ -170,8 +168,9 @@ const CARDS = [
     { value: 'K', suit: 'SPADE', type: 'Barbarians' },
 ];
 
-export default function setup(ctx) {
+export default function setup(ctx, setupData) {
     const { numPlayers, playOrder, random } = ctx;
+    const { expansions } = setupData;
 
     const unshuffledRoles = [];
     ROLE_DIST_LABELS.forEach((role, i) => {
@@ -185,10 +184,13 @@ export default function setup(ctx) {
     }
     const startPlayerIndex = roles.findIndex(role => role.name === 'King');
 
-    const normalCharacters = random.Shuffle(CHARACTERS.filter(c => !c.isMonarch));
+    const allCharacters = CHARACTERS.filter(c => c.expansion === undefined || expansions.includes(c.expansion));
+    const numCharacterChoices = 3 * (numPlayers + 1) <= allCharacters.length ? 3 : 2;
+    const monarchChoices = random.Shuffle(allCharacters.filter(c => c.isMonarch));
+    const normalCharacters = random.Shuffle(allCharacters.filter(c => !monarchChoices.includes(c)));
     const characterChoices = Object.fromEntries(playOrder.map((player, i) =>
-        [player, normalCharacters.slice(NUM_CHARACTER_CHOICES * i, NUM_CHARACTER_CHOICES * (i + 1))]));
-    characterChoices[playOrder[startPlayerIndex]].push(...CHARACTERS.filter(c => c.isMonarch));
+        [player, normalCharacters.slice(numCharacterChoices * i, numCharacterChoices * (i + 1))]));
+    characterChoices[playOrder[startPlayerIndex]].push(...monarchChoices.slice(0, numCharacterChoices));
     const characters = {};
     const healths = {};
     const isAlive = Object.fromEntries(playOrder.map(player => [player, true]));

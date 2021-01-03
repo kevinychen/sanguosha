@@ -10,6 +10,7 @@ const SERVER = process.env.REACT_APP_PROXY || document.location.toString().repla
 const NAME_KEY = 'name';
 const CREDENTIALS_KEY = 'credentials';
 const INPUT_NAME_ID = 'name-input';
+const EXPANSIONS = ['wind', 'fire', 'wood'];
 
 const SanGuoShaClient = Client({
     game: SanGuoSha,
@@ -123,7 +124,15 @@ export default class SanGuoShaLobby extends React.Component {
                 {this.maybeRenderCreateButton()}
                 <div id="instances">
                     <table>
-                        <tbody>{matches.map(this.renderMatch)}</tbody>
+                        <tbody>
+                            <tr>
+                                <th>{'Creation time'}</th>
+                                <th>{'Players'}</th>
+                                <th>{'Status'}</th>
+                                <th></th>
+                            </tr>
+                            {matches.map(this.renderMatch)}
+                        </tbody>
                     </table>
                 </div>
             </div>;
@@ -155,6 +164,15 @@ export default class SanGuoShaLobby extends React.Component {
             status = 'In progress';
         } else if (playerNames.length < SanGuoSha.minPlayers) {
             status = 'Waiting for more players';
+        } else if (playerNames[0] === name) {
+            status = ['Expansions:', ...EXPANSIONS.map(expansion => <span key={expansion} className='expansion'>
+                <input
+                    type='checkbox'
+                    value={this.state[`expansion-${expansion}`]}
+                    onChange={e => this.setState({ [`expansion-${expansion}`]: e.target.checked })}
+                />
+                {expansion}
+            </span>)];
         } else {
             status = 'Waiting for host to start';
         }
@@ -202,7 +220,7 @@ export default class SanGuoShaLobby extends React.Component {
             );
         }
         return <tr key={matchID}>
-            <td>{`Created ${new Date(createdAt).toLocaleString()}`}</td>
+            <td>{new Date(createdAt).toLocaleString()}</td>
             <td>{playerNames.join(', ')}</td>
             <td>{status}</td>
             <td>{buttons}</td>
@@ -220,7 +238,10 @@ export default class SanGuoShaLobby extends React.Component {
             SanGuoSha.name,
             {
                 numPlayers,
-                setupData: { parentMatchID },
+                setupData: {
+                    parentMatchID,
+                    expansions: EXPANSIONS.filter(expansion => this.state[`expansion-${expansion}`]),
+                },
             },
         );
         return matchID;
