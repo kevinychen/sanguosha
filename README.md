@@ -1,6 +1,6 @@
 # San Guo Sha (三国杀)
 
-San Guo Sha is a [popular Chinese card game](https://en.wikipedia.org/wiki/Legends_of_the_Three_Kingdoms). This online multiplayer English version supports all the characters and cards in the base set, as well as the [wind, fire, and wood expansions](http://sanguoshaenglish.blogspot.com/p/expansions.html).
+San Guo Sha is a [popular Chinese card game](https://en.wikipedia.org/wiki/Legends_of_the_Three_Kingdoms). This online multiplayer English version supports all the characters and cards in the base set, as well as the [wind, fire, and wood expansions](http://sanguoshaenglish.blogspot.com/p/expansions.html). Try it at https://util.in:8098.
 
 ![Sanguosha](docs/sanguosha.gif)
 
@@ -28,6 +28,7 @@ Then go to http://localhost:8098.
 
 ## Credits
 
+- [Sanguosha](https://www.sanguosha.com/) for the game
 - [Becky Shi](https://shenlab.stanford.edu/people/rebecca-shi), for composing the original game background music and producing the debut trailer
 - [boardgame.io](https://boardgame.io/), a very convenient framework for producing online multiplayer games
 - [react-spring](https://www.react-spring.io/), an amazing library for easily producing animations
