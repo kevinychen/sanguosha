@@ -170,7 +170,7 @@ const CARDS = [
 
 export default function setup(ctx, setupData) {
     const { numPlayers, playOrder, random } = ctx;
-    const { expansions } = setupData;
+    const expansions = (setupData || {}).expansions || [];
 
     const unshuffledRoles = [];
     ROLE_DIST_LABELS.forEach((role, i) => {
