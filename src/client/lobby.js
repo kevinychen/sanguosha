@@ -8,7 +8,7 @@ import './lobby.css';
 
 const SERVER = process.env.REACT_APP_PROXY || document.location.toString().replace(/\/$/, '');
 const NAME_KEY = 'name';
-const CREDENTIALS_KEY = 'credentials';
+const MATCH_INFO_KEY = 'matchInfo';
 const INPUT_NAME_ID = 'name-input';
 const EXPANSIONS = ['wind', 'fire', 'wood'];
 
@@ -24,10 +24,12 @@ export default class SanGuoShaLobby extends React.Component {
     constructor(props) {
         super(props);
         this.lobbyClient = new LobbyClient({ server: SERVER });
+        const matchInfo = window.localStorage.getItem(MATCH_INFO_KEY);
         this.state = {
             name: window.localStorage.getItem(NAME_KEY),
-            credentials: window.localStorage.getItem(CREDENTIALS_KEY),
+            matchInfo: matchInfo ? JSON.parse(matchInfo) : undefined, // { matchID, playerID, credentials }
             matches: [],
+            inGame: false,
         };
     }
 
@@ -42,51 +44,58 @@ export default class SanGuoShaLobby extends React.Component {
     }
 
     refreshLobbyState = async () => {
-        const { name } = this.state;
+        const { matchInfo } = this.state;
         const { matches } = await this.lobbyClient.listMatches(SanGuoSha.name);
-        const myMatch = matches.find(match => match.players.some(player => name !== undefined && player.name === name));
 
-        if (myMatch !== undefined) {
-            if (myMatch.setupData.parentMatchID !== undefined) {
-                this.setState({ matches, myMatch, activePlayerID: myMatch.players.find(player => player.name === name).id.toString() });
+        if (matchInfo !== undefined) {
+            const { matchID, playerID } = matchInfo;
+
+            const match = matches.find(match => match.matchID === matchID);
+            if (match === undefined) {
+                this.setState({ matchInfo: undefined });
+                this.refreshLobbyState();
                 return;
             }
 
-            const childMatch = matches.find(match => match.setupData.parentMatchID === myMatch.matchID);
+            if (match.setupData.parentMatchID !== undefined) {
+                this.setState({ inGame: true });
+                return;
+            }
+
+            const childMatch = matches.find(match => match.setupData.parentMatchID === matchID);
             if (childMatch !== undefined) {
-                const playerID = await this.leaveMatch(myMatch);
+                await this.leaveMatch();
                 await this.joinMatch(childMatch.matchID, playerID);
                 this.refreshLobbyState();
                 return;
             }
         }
 
-        this.setState({ matches, myMatch });
+        this.setState({ matches });
         clearTimeout(this.timeout);
         this.timeout = setTimeout(this.refreshLobbyState, 1000);
         return;
     }
 
     render() {
-        const { credentials, myMatch, watchingMatch, activePlayerID } = this.state;
-        if (activePlayerID !== undefined) {
+        const { matchInfo, inGame } = this.state;
+        if (inGame) {
+            const { matchID, playerID, credentials } = matchInfo;
             return <div>
                 <SanGuoShaClient
-                    matchID={(myMatch || watchingMatch).matchID}
-                    playerID={activePlayerID}
+                    matchID={matchID}
+                    playerID={playerID}
                     credentials={credentials}
-                    playAgain={myMatch === undefined ? undefined : () => {
-                        this.client = undefined;
-                        this.setState({ activePlayerID: undefined });
-                        this.playAgain((myMatch || watchingMatch).matchID, activePlayerID).then(this.refreshLobbyState);
+                    playAgain={playerID === '-1' ? undefined : () => {
+                        this.setState({ inGame: false });
+                        this.playAgain().then(this.refreshLobbyState);
                     }}
                 />
                 <button
                     className="leave-button"
                     onClick={() => {
-                        this.client = undefined;
-                        this.setState({ activePlayerID: undefined });
-                        this.leaveMatch(myMatch).then(this.refreshLobbyState);
+                        this.setState({ inGame: false });
+                        this.leaveMatch().then(this.refreshLobbyState);
                     }}
                 >
                     {'Leave'}
@@ -140,8 +149,8 @@ export default class SanGuoShaLobby extends React.Component {
     }
 
     maybeRenderCreateButton() {
-        const { myMatch } = this.state;
-        if (myMatch !== undefined) {
+        const { matchInfo } = this.state;
+        if (matchInfo !== undefined) {
             return;
         }
         return <button
@@ -154,7 +163,7 @@ export default class SanGuoShaLobby extends React.Component {
     }
 
     renderMatch = match => {
-        const { name, myMatch } = this.state;
+        const { name, matchInfo } = this.state;
         const { createdAt, gameover, matchID, players, setupData } = match;
         const playerNames = players.map(player => player.name).filter(name => name !== undefined);
         let status;
@@ -177,12 +186,12 @@ export default class SanGuoShaLobby extends React.Component {
             status = 'Waiting for host to start';
         }
         const buttons = [];
-        if (myMatch === undefined || matchID !== myMatch.matchID) {
+        if (matchInfo === undefined || matchInfo.matchID !== matchID) {
             if (!gameover && players.some(player => player.name === undefined)) {
                 buttons.push(
                     <button
                         key="join"
-                        onClick={() => this.leaveMatch(myMatch)
+                        onClick={() => this.leaveMatch()
                             .then(() => this.joinMatch(matchID, players.find(player => player.name === undefined).id.toString()))
                             .then(this.refreshLobbyState)}
                     >
@@ -193,8 +202,8 @@ export default class SanGuoShaLobby extends React.Component {
                 buttons.push(
                     <button
                         key="watch"
-                        onClick={() => this.leaveMatch(myMatch)
-                            .then(() => this.setState({ myMatch: undefined, watchingMatch: match, activePlayerID: "-1" }))}
+                        onClick={() => this.leaveMatch()
+                            .then(() => this.setState({ matchInfo: { matchID: matchID, playerID: '-1', }, inGame: true }))}
                     >
                         {'Watch'}
                     </button>
@@ -213,7 +222,7 @@ export default class SanGuoShaLobby extends React.Component {
             }
             buttons.push(
                 <button key="leave"
-                    onClick={() => this.leaveMatch(myMatch).then(this.refreshLobbyState)}
+                    onClick={() => this.leaveMatch().then(this.refreshLobbyState)}
                 >
                     {'Leave'}
                 </button>
@@ -257,37 +266,41 @@ export default class SanGuoShaLobby extends React.Component {
                 playerName: name,
             },
         );
-        this.setState({ credentials: playerCredentials });
-        window.localStorage.setItem(CREDENTIALS_KEY, playerCredentials);
+        const matchInfo = {
+            matchID,
+            playerID,
+            credentials: playerCredentials,
+        };
+        this.setState({ matchInfo });
+        window.localStorage.setItem(MATCH_INFO_KEY, JSON.stringify(matchInfo));
     }
 
-    leaveMatch = async match => {
-        if (match === undefined) {
+    leaveMatch = async () => {
+        const { matchInfo } = this.state;
+        this.setState({ matchInfo: undefined, inGame: false });
+        if (matchInfo === undefined || matchInfo.credentials === undefined) {
             return;
         }
-        const { name, credentials } = this.state;
-        const { matchID, players } = match;
-        const player = players.find(player => player.name === name);
+        const { matchID, playerID, credentials } = matchInfo;
         await this.lobbyClient.leaveMatch(
             SanGuoSha.name,
             matchID,
             {
-                playerID: player.id.toString(),
+                playerID,
                 credentials,
             },
         );
-        return player.id.toString();
     }
 
-    playAgain = async (matchID, playerID) => {
-        const { credentials, myMatch } = this.state;
+    playAgain = async () => {
+        const { matchInfo: { matchID, playerID, credentials } } = this.state;
         const { nextMatchID } = await this.lobbyClient.playAgain(SanGuoSha.name, matchID, {
             playerID,
             credentials,
             numPlayers: SanGuoSha.maxPlayers,
             setupData: {},
         });
-        await this.leaveMatch(myMatch);
+        await this.leaveMatch();
         this.joinMatch(nextMatchID, playerID);
     }
 }
