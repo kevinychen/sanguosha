@@ -611,7 +611,7 @@ export default class GameArea extends React.Component {
         const { G, ctx, moves, playerID, width, height, scaledHeight, playAgain } = this.props;
         const { mode, selectedIndex } = this.state;
         const { isAlive, privateZone } = G;
-        const { currentPlayer, gameover } = ctx;
+        const { currentPlayer, gameover, phase, activePlayers } = ctx;
         const ACTION_BUTTON_WIDTH = 160;
         const ACTION_BUTTON_HEIGHT = 30;
         let actionButton = undefined;
@@ -629,7 +629,12 @@ export default class GameArea extends React.Component {
                     moves.selectCharacter(selectedIndex);
                     this.setState({ selectedIndex: undefined });
                 },
-            }
+            };
+        } else if (phase === 'selectCharacters' && this.stage() === undefined) {
+            actionButton = {
+                text: activePlayers[currentPlayer] === 'selectCharacter' ? 'Waiting for king...' : 'Waiting for others...',
+                type: 'disabled',
+            };
         } else if (!isAlive[playerID]) {
             return undefined;
         } else if ((mode === SetModePanel.GIVE_MODE && selectedIndex !== undefined)
