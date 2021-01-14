@@ -65,6 +65,9 @@ function give(G, ctx, index, otherPlayerID) {
     const { hands } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
+    if (card === undefined) {
+        return;
+    }
     hands[otherPlayerID].push(card);
 }
 
@@ -108,6 +111,9 @@ function reveal(G, ctx, index, otherPlayerID) {
     const { hands, privateZone } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
+    if (card === undefined) {
+        return;
+    }
     privateZone.push({
         card,
         source: { playerID },
@@ -140,6 +146,9 @@ function putDownHarvest(G, ctx, index) {
     const { hands, harvest } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
+    if (card === undefined) {
+        return;
+    }
     harvest.push(card);
 }
 
@@ -259,6 +268,9 @@ function discardCard(G, ctx, index) {
     const { healths, hands } = G;
     const { events, playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
+    if (card === undefined) {
+        return;
+    }
     discard(G, ctx, card);
     if (hands[playerID].length <= healths[playerID].current) {
         events.endTurn();
