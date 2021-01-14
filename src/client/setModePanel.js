@@ -258,7 +258,7 @@ export default class SetModePanel extends React.Component {
     }
 
     handleHotkey = e => {
-        const { G, mode, moves, setMode, setSelectedIndex } = this.props;
+        const { G, moves, setMode, selectFunction } = this.props;
         const { harvest } = G;
         if (e.altKey || e.ctrlKey || e.metaKey) {
             return;
@@ -320,17 +320,9 @@ export default class SetModePanel extends React.Component {
                 break;
         }
         if (e.keyCode >= 49 && e.keyCode <= 57) {
-            const index = e.keyCode - 49;
-            if (mode === SetModePanel.DEFAULT_MODE) {
-                if (this.stage() === 'play') {
-                    moves.play(index);
-                } else if (this.stage() === 'discard') {
-                    moves.discardCard(index);
-                }
-            } else if (mode === SetModePanel.GIVE_MODE || mode === SetModePanel.REVEAL_MODE) {
-                setSelectedIndex(index);
-            } else if (mode === SetModePanel.DISMANTLE_MODE) {
-                moves.discardCard(index);
+            const func = selectFunction(e.keyCode - 49);
+            if (func) {
+                func();
             }
         }
     };

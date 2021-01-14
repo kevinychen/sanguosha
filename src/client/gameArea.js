@@ -466,52 +466,13 @@ export default class GameArea extends React.Component {
     }
 
     addMyHand(normalCards) {
-        const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
-        const { mode, selectedIndex } = this.state;
-        const { hands, isFlipped, harvest } = G;
+        const { G, playerID, width, height, scaledWidth, scaledHeight } = this.props;
+        const { hands, isFlipped } = G;
         const myHand = hands[playerID];
         if (myHand) {
             const spacing = Math.min(scaledWidth + DELTA, (width - (2 + DECK_RATIO) * scaledWidth - 5 * DELTA) / (hands[playerID].length - 1));
             hands[playerID].forEach((card, i) => {
-                let onClick = undefined;
-                if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'play') {
-                    if (harvest.length > 0) {
-                        onClick = () => moves.putDownHarvest(i);
-                    } else if (['Capture', 'Starvation'].includes(EQUIPMENT[card.type])) {
-                        onClick = () => this.setState({ mode: SetModePanel.GIVE_JUDGMENT_MODE, selectedIndex: i });
-                    } else {
-                        onClick = () => moves.play(i);
-                    }
-                } else if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'discard') {
-                    onClick = () => moves.discardCard(i);
-                } else if (mode === SetModePanel.GIVE_MODE && selectedIndex === undefined) {
-                    onClick = () => this.setState({ selectedIndex: i });
-                } else if (mode === SetModePanel.DISMANTLE_MODE) {
-                    onClick = () => {
-                        moves.dismantle({
-                            playerID,
-                            index: i,
-                        });
-                        this.setState({ mode: SetModePanel.DEFAULT_MODE });
-                    };
-                } else if (mode === SetModePanel.REVEAL_MODE && selectedIndex === undefined) {
-                    onClick = () => this.setState({ selectedIndex: i });
-                } else if (mode === SetModePanel.FLIP_MODE) {
-                    onClick = () => {
-                        moves.flipObject(card.id);
-                        this.setState({ mode: SetModePanel.DEFAULT_MODE });
-                    };
-                } else if (mode === SetModePanel.HELP_MODE) {
-                    onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
-                } else if (mode === SetModePanel.COUNTRY_SCENE_MODE && selectedIndex === undefined) {
-                    if (card.suit === 'DIAMOND') {
-                        onClick = () => this.setState({ mode: SetModePanel.COUNTRY_SCENE_MODE, selectedIndex: i });
-                    }
-                } else if (mode === SetModePanel.BLOCKADE_MODE && selectedIndex === undefined) {
-                    if (['CLUB', 'SPADE'].includes(card.suit) && (BASIC.includes(card.type) || EQUIPMENT[card.type])) {
-                        onClick = () => this.setState({ mode: SetModePanel.COUNTRY_SCENE_MODE, selectedIndex: i });
-                    }
-                }
+                const onClick = this.selectFunction(i);
                 normalCards.push({
                     key: `card-${card.id}`,
                     card,
@@ -520,7 +481,7 @@ export default class GameArea extends React.Component {
                     left: DECK_RATIO * scaledWidth + 2 * DELTA + spacing * i,
                     top: height - scaledHeight - DELTA,
                     scale: 1,
-                    onClick: onClick,
+                    onClick,
                 });
             })
         }
@@ -631,6 +592,7 @@ export default class GameArea extends React.Component {
             mode={mode}
             setMode={mode => this.setState({ mode, selectedIndex: undefined, helpCard: undefined })}
             setSelectedIndex={selectedIndex => this.setState({ selectedIndex })}
+            selectFunction={this.selectFunction}
         />;
     }
 
@@ -730,6 +692,51 @@ export default class GameArea extends React.Component {
                     {'X'}
                 </button>
             </div>;
+        }
+    }
+
+    selectFunction = index => {
+        const { G, moves, playerID } = this.props;
+        const { mode, selectedIndex } = this.state;
+        const { hands, harvest } = G;
+        const card = hands[playerID][index];
+        if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'play') {
+            if (harvest.length > 0) {
+                return () => moves.putDownHarvest(index);
+            } else if (['Capture', 'Starvation'].includes(EQUIPMENT[card.type])) {
+                return () => this.setState({ mode: SetModePanel.GIVE_JUDGMENT_MODE, selectedIndex: index });
+            } else {
+                return () => moves.play(index);
+            }
+        } else if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'discard') {
+            return () => moves.discardCard(index);
+        } else if (mode === SetModePanel.GIVE_MODE && selectedIndex === undefined) {
+            return () => this.setState({ selectedIndex: index });
+        } else if (mode === SetModePanel.DISMANTLE_MODE) {
+            return () => {
+                moves.dismantle({
+                    playerID,
+                    index: index,
+                });
+                this.setState({ mode: SetModePanel.DEFAULT_MODE });
+            };
+        } else if (mode === SetModePanel.REVEAL_MODE && selectedIndex === undefined) {
+            return () => this.setState({ selectedIndex: index });
+        } else if (mode === SetModePanel.FLIP_MODE) {
+            return () => {
+                moves.flipObject(card.id);
+                this.setState({ mode: SetModePanel.DEFAULT_MODE });
+            };
+        } else if (mode === SetModePanel.HELP_MODE) {
+            return () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
+        } else if (mode === SetModePanel.COUNTRY_SCENE_MODE && selectedIndex === undefined) {
+            if (card.suit === 'DIAMOND') {
+                return () => this.setState({ mode: SetModePanel.COUNTRY_SCENE_MODE, selectedIndex: index });
+            }
+        } else if (mode === SetModePanel.BLOCKADE_MODE && selectedIndex === undefined) {
+            if (['CLUB', 'SPADE'].includes(card.suit) && (BASIC.includes(card.type) || EQUIPMENT[card.type])) {
+                return () => this.setState({ mode: SetModePanel.COUNTRY_SCENE_MODE, selectedIndex: index });
+            }
         }
     }
 
