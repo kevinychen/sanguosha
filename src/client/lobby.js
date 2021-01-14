@@ -53,6 +53,7 @@ export default class SanGuoShaLobby extends React.Component {
             const match = matches.find(match => match.matchID === matchID);
             if (match === undefined) {
                 this.setState({ matchInfo: undefined });
+                await this.leaveMatch();
                 this.refreshLobbyState();
                 return;
             }
@@ -278,6 +279,7 @@ export default class SanGuoShaLobby extends React.Component {
     leaveMatch = async () => {
         const { matchInfo } = this.state;
         this.setState({ matchInfo: undefined, inGame: false });
+        window.localStorage.removeItem(MATCH_INFO_KEY);
         if (matchInfo === undefined || matchInfo.credentials === undefined) {
             return;
         }
