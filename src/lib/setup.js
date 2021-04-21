@@ -16,6 +16,7 @@ const CARDS = [
     { value: '3', suit: 'CLUB', type: 'Wine' },
     { value: '3', suit: 'CLUB', type: 'Break' },
     { value: '3', suit: 'CLUB', type: 'Attack' },
+    /*
     { value: '4', suit: 'CLUB', type: 'Starvation' },
     { value: '4', suit: 'CLUB', type: 'Attack' },
     { value: '4', suit: 'CLUB', type: 'Break' },
@@ -166,6 +167,8 @@ const CARDS = [
     { value: 'K', suit: 'SPADE', type: 'Da Yuan' },
     { value: 'K', suit: 'SPADE', type: 'Negate' },
     { value: 'K', suit: 'SPADE', type: 'Barbarians' },
+
+     */
 ];
 
 export default function setup(ctx, setupData) {
@@ -225,7 +228,6 @@ export default function setup(ctx, setupData) {
         isFlipped,
         harvest,
         privateZone,
-        unshuffledDeck,
         refusingDeath,
     };
 }
