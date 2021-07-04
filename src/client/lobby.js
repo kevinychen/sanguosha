@@ -164,7 +164,8 @@ export default class SanGuoShaLobby extends React.Component {
         return <button
             onClick={() => this.createMatch(SanGuoSha.maxPlayers, undefined)
                 .then(matchID => this.joinMatch(matchID, '0'))
-                .then(this.refreshLobbyState)}
+                .then(this.refreshLobbyState)
+                .then(EXPANSIONS.forEach((s) => this.setState({[`expansion-${s}`]: true})))}
         >
             {'Create new room'}
         </button>;
@@ -182,7 +183,6 @@ export default class SanGuoShaLobby extends React.Component {
         } else if (playerNames.length < SanGuoSha.minPlayers) {
             status = 'Waiting for more players';
         } else if (playerNames[0] === name) {
-            EXPANSIONS.forEach((s) => this.setState({[`expansion-${s}`]: true}));
             status = ['Expansions:', ...EXPANSIONS.map(expansion => <span key={expansion} className='expansion'>
                 <input
                     type='checkbox'
