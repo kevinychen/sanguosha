@@ -325,4 +325,5 @@ export default [
         gender: 'M',
         expansion: 'wood',
     },
+
 ];
