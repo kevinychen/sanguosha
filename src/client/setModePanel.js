@@ -168,6 +168,24 @@ export default class SetModePanel extends React.Component {
                 </button>;
             }
         }
+        if ((character.name === 'Ma Su') && currentPlayer === playerID) {
+            const doingHearts = privateZone.filter(item => item.source.deck).length > 0;
+            if (doingHearts) {
+                return <button
+                    className='clickable'
+                    onClick={() => moves.finishWinHearts()}
+                >
+                    {'Finish'}
+                </button>;
+            } else {
+                return <button
+                    className='clickable'
+                    onClick={() => moves.winHearts()}
+                >
+                    {'Winning Hearts'}
+                </button>;
+            }
+        }
         if (character.name === 'Dong Zhuo') {
             return <button
                 className='clickable'

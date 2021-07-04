@@ -229,6 +229,26 @@ function finishAstrology(G) {
     G.privateZone = privateZone.filter(item => !item.source.deck);
 }
 
+function winHearts(G, ctx) {
+    const { privateZone } = G;
+    const { playerID } = ctx;
+
+    for (let i = 0; i < 3; i++) {
+        const card = drawCard(G, ctx);
+        privateZone.push({
+            card,
+            source: { deck: true },
+            visibleTo: [playerID],
+        });
+    }
+}
+
+function finishWinHearts(G) {
+    const { discard, privateZone } = G;
+    discard.push(...privateZone.filter(item => item.source.deck).map(item => item.card));
+    G.privateZone = privateZone.filter(item => !item.source.deck);
+}
+
 function refusingDeath(G, ctx, change) {
     const { healths, refusingDeath } = G;
     const { playerID, random } = ctx;
@@ -389,7 +409,7 @@ export const SanGuoSha = {
 
                 // make character choices automatically for easier testing
                 // TODO remove
-                playOrder.forEach(player => selectCharacter(G, { ...ctx, playerID: player }, 0));
+                // playOrder.forEach(player => selectCharacter(G, { ...ctx, playerID: player }, 0));
             },
 
             // end select characters phase if everyone has made a character choice
@@ -445,6 +465,8 @@ export const SanGuoSha = {
                             passLightning,
                             astrology,
                             finishAstrology,
+                            winHearts,
+                            finishWinHearts,
                             refusingDeath,
                             alliance,
                             collapse,
