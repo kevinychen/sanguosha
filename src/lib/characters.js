@@ -405,7 +405,7 @@ export default [
     {
         name: 'Liu Biao',
         country: 'Kingdomless',
-        health: 3,
+        health: 4,
         gender: 'M',
         expansion: 'knight12',
     },
