@@ -53,6 +53,7 @@ export default class SetModePanel extends React.Component {
                 >
                     {'Lightning'}
                 </button>
+                {this.renderPutOnSelfButton()}
                 {this.renderFinishDiscardButton()}
                 {this.renderSpecialButton()}
                 {this.renderHotkeys()}
@@ -87,6 +88,26 @@ export default class SetModePanel extends React.Component {
                 onClick={() => moves.finishHarvest()}
             >
                 {'Finish'}
+            </button>;
+        }
+    }
+
+    renderPutOnSelfButton() {
+        const { G, moves, playerID } = this.props;
+        const { isCharacterZoneOpen } = G;
+        if (!(isCharacterZoneOpen[playerID])) {
+            return <button
+                className='clickable'
+                onClick={() => moves.openCharacterZone()}
+            >
+                {'Put on Self'}
+            </button>;
+        } else {
+            return <button
+                className='clickable'
+                onClick={() => moves.closeCharacterZone()}
+            >
+                {'Close'}
             </button>;
         }
     }
@@ -129,7 +150,7 @@ export default class SetModePanel extends React.Component {
         if (character === undefined) {
             return;
         }
-        if (character.name === 'Zhuge Liang' && currentPlayer === playerID) {
+        if ((character.name === 'Zhuge Liang' || character.name === "Jiang Wei") && currentPlayer === playerID) {
             const doingAstrology = privateZone.filter(item => item.source.deck).length > 0;
             if (doingAstrology) {
                 return <button
@@ -144,6 +165,24 @@ export default class SetModePanel extends React.Component {
                     onClick={() => moves.astrology()}
                 >
                     {'Astrology'}
+                </button>;
+            }
+        }
+        if ((character.name === 'Ma Su') && currentPlayer === playerID) {
+            const doingHearts = privateZone.filter(item => item.source.deck).length > 0;
+            if (doingHearts) {
+                return <button
+                    className='clickable'
+                    onClick={() => moves.finishWinHearts()}
+                >
+                    {'Finish'}
+                </button>;
+            } else {
+                return <button
+                    className='clickable'
+                    onClick={() => moves.winHearts()}
+                >
+                    {'Winning Hearts'}
                 </button>;
             }
         }
