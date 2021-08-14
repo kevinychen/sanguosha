@@ -18,3 +18,12 @@ server.run(PORT, () => {
         )
     )
 });
+
+// Clean up old matches
+const { db } = server.app.context;
+const week = 7 * 24 * 60 * 60 * 1000;
+setInterval(() => {
+    for (const matchID of (db.listMatches({ where: { updatedBefore: Date.now() - week } }))) {
+        db.wipe(matchID);
+    }
+}, week);
