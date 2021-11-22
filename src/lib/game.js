@@ -25,12 +25,16 @@ function draw(G, ctx) {
     const { hands } = G;
     const { playerID } = ctx;
     const card = drawCard(G, ctx);
-    hands[playerID].push(card);
+    if (card !== undefined) {
+        hands[playerID].push(card);
+    }
 }
 
 function judgment(G, ctx) {
     const card = drawCard(G, ctx);
-    discard(G, ctx, card);
+    if (card !== undefined) {
+        discard(G, ctx, card);
+    }
 }
 
 function play(G, ctx, index, targetPlayerID, forceCategory) {
@@ -138,7 +142,9 @@ function harvest(G, ctx) {
     const numPlayers = playOrder.filter(player => isAlive[player]).length;
     for (let i = 0; i < numPlayers; i++) {
         const card = drawCard(G, ctx);
-        harvest.push(card);
+        if (card !== undefined) {
+            harvest.push(card);
+        }
     }
 }
 
@@ -183,11 +189,13 @@ function astrology(G, ctx, numCards) {
     const actualNumCards = numCards || Math.min(playOrder.filter(player => isAlive[player]).length, 5);
     for (let i = 0; i < actualNumCards; i++) {
         const card = drawCard(G, ctx);
-        privateZone.push({
-            card,
-            source: { deck: true },
-            visibleTo: [playerID],
-        });
+        if (card !== undefined) {
+            privateZone.push({
+                card,
+                source: { deck: true },
+                visibleTo: [playerID],
+            });
+        }
     }
 }
 
