@@ -164,6 +164,38 @@ function finishHarvest(G) {
     discard.push(...harvest.splice(0, harvest.length).reverse());
 }
 
+function openCharacterZone(G, ctx, index) {
+    const { isCharacterZoneOpen } = G;
+    const { playerID } = ctx;
+    isCharacterZoneOpen[playerID] = true;
+}
+
+function closeCharacterZone(G, ctx, index) {
+    const { isCharacterZoneOpen } = G;
+    const { playerID } = ctx;
+    isCharacterZoneOpen[playerID] = false;
+}
+
+function putOnCharacter(G, ctx, index) {
+    const { hands, putOnCharacterZone } = G;
+    const { playerID } = ctx;
+    const [card] = hands[playerID].splice(index, 1);
+    if (card === undefined) {
+        return;
+    }
+    putOnCharacterZone.push({
+        card,
+        visibleTo: [playerID],
+    });
+}
+
+function pickUpCharacter(G, ctx, index) {
+    const { hands, putOnCharacterZone } = G;
+    const { playerID } = ctx;
+    const [card] = putOnCharacterZone.splice(index, 1);
+    hands[playerID].push(card.card);
+}
+
 function passLightning(G, ctx) {
     const { equipment } = G;
     const { numPlayers, playOrder } = ctx;
@@ -194,6 +226,26 @@ function astrology(G, ctx, numCards) {
 function finishAstrology(G) {
     const { deck, privateZone } = G;
     deck.splice(0, 0, ...privateZone.filter(item => item.source.deck).map(item => item.card));
+    G.privateZone = privateZone.filter(item => !item.source.deck);
+}
+
+function winHearts(G, ctx) {
+    const { privateZone } = G;
+    const { playerID } = ctx;
+
+    for (let i = 0; i < 3; i++) {
+        const card = drawCard(G, ctx);
+        privateZone.push({
+            card,
+            source: { deck: true },
+            visibleTo: [playerID],
+        });
+    }
+}
+
+function finishWinHearts(G) {
+    const { discard, privateZone } = G;
+    discard.push(...privateZone.filter(item => item.source.deck).map(item => item.card));
     G.privateZone = privateZone.filter(item => !item.source.deck);
 }
 
@@ -241,6 +293,21 @@ function updateHealth(G, ctx, change) {
     }
     if (healths[playerID].current < 0) {
         healths[playerID].current = 0;
+    }
+}
+
+function updateMaxHealth(G, ctx, change) {
+    const { healths } = G;
+    const { playerID } = ctx;
+    healths[playerID].max += change;
+    if (healths[playerID].max < 1) {
+        healths[playerID].max = 1;
+    }
+    if(healths[playerID].max > 10) {
+        healths[playerID].max = 10;
+    }
+    if (healths[playerID].current > healths[playerID].max) {
+        healths[playerID].current = healths[playerID].max;
     }
 }
 
@@ -342,7 +409,7 @@ export const SanGuoSha = {
 
                 // make character choices automatically for easier testing
                 // TODO remove
-                //playOrder.forEach(player => selectCharacter(G, { ...ctx, playerID: player }, 0));
+                // playOrder.forEach(player => selectCharacter(G, { ...ctx, playerID: player }, 0));
             },
 
             // end select characters phase if everyone has made a character choice
@@ -391,13 +458,20 @@ export const SanGuoSha = {
                             putDownHarvest,
                             pickUpHarvest,
                             finishHarvest,
+                            openCharacterZone,
+                            closeCharacterZone,
+                            putOnCharacter,
+                            pickUpCharacter,
                             passLightning,
                             astrology,
                             finishAstrology,
+                            winHearts,
+                            finishWinHearts,
                             refusingDeath,
                             alliance,
                             collapse,
                             updateHealth,
+                            updateMaxHealth,
                             die,
                             endPlay,
                          },

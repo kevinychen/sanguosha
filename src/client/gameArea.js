@@ -69,6 +69,7 @@ export default class GameArea extends React.Component {
             this.addPlayerEquipment(playerArea, player, normalCards);
             if (player !== playerID) {
                 this.addOtherPlayerHand(playerArea, player, normalCards, nodes);
+                this.addOtherPlayerCharacterZone(playerArea, player, normalCards, nodes);
             }
         });
 
@@ -80,9 +81,13 @@ export default class GameArea extends React.Component {
         // Once cards of some type are found, remaining cards are rendered transparently.
         // We splice from the beginning so that these transparent cards don't block existing ones.
         const middleCards = [];
-        middleCards.splice(0, 0, ...this.getPrivateZoneCards(middleCards.length > 0));
-        middleCards.splice(0, 0, ...this.getHarvestCards(middleCards.length > 0));
-        middleCards.splice(0, 0, ...this.getDiscardCards(middleCards.length > 0));
+        let selfZoneCards = this.getPutOnSelfZoneCards();
+        if(selfZoneCards.showing) {
+            middleCards.splice(0, 0, ...selfZoneCards.cards);
+        }
+        middleCards.splice(0, 0, ...this.getPrivateZoneCards(selfZoneCards.showing || middleCards.length > 0));
+        middleCards.splice(0, 0, ...this.getHarvestCards(selfZoneCards.showing || middleCards.length > 0));
+        middleCards.splice(0, 0, ...this.getDiscardCards(selfZoneCards.showing || middleCards.length > 0));
         normalCards.push(...middleCards);
 
         return <div>
@@ -313,6 +318,34 @@ export default class GameArea extends React.Component {
                 onClick={() => (isRefusingDeath ? moves.refusingDeath : moves.updateHealth)(+1)}
             />);
         }
+
+        if (healths[playerID].max > 1) {
+            nodes.push(<div
+                key='decrease-max-health'
+                className='positioned image-div selectable decrease-max-health'
+                style={{
+                    left: playerArea.x + scaledWidth * 0.265,
+                    top: playerArea.y + scaledHeight * 0.2,
+                    width: scaledWidth * 0.09,
+                    height: scaledHeight * 0.075,
+                }}
+                onClick={() => (moves.updateMaxHealth)(-1)}
+            />);
+        }
+
+        if (healths[playerID].max < 10) {
+            nodes.push(<div
+                key='increase-max-health'
+                className='positioned image-div selectable increase-max-health'
+                style={{
+                    left: playerArea.x + scaledWidth * 0.375,
+                    top: playerArea.y + scaledHeight * 0.2,
+                    width: scaledWidth * 0.09,
+                    height: scaledHeight * 0.075,
+                }}
+                onClick={() => (moves.updateMaxHealth)(1)}
+            />);
+        }
     }
 
     addChain(playerArea, player, nodes) {
@@ -438,6 +471,44 @@ export default class GameArea extends React.Component {
         }
     }
 
+    addOtherPlayerCharacterZone(playerArea, player, normalCards, nodes) {
+        const { G, scaledWidth, scaledHeight } = this.props;
+        const { putOnCharacterZone } = G;
+        const hand = putOnCharacterZone.filter(item => item.visibleTo.includes(player));
+        // Show the card backs
+        hand.forEach(card => {
+            let onClick = undefined;
+            normalCards.push({
+                key: `card-${card.id}`,
+                className: 'small-shadow',
+                card,
+                opacity: 1,
+                left: playerArea.x + INFO_DELTA + scaledWidth * 0.22,
+                top: playerArea.y + (1 - CARD_RATIO * 0.5) * scaledHeight - INFO_DELTA,
+                scale: CARD_RATIO * 0.5,
+                onClick,
+            });
+        });
+        // Show the card count
+        if (hand.length > 0) {
+            nodes.push(<div
+                key={`card-count-character-zone-${player}`}
+                className='game-label'
+                style={{
+                    left: playerArea.x + INFO_DELTA + scaledWidth * 0.22,
+                    top: playerArea.y + (1 - CARD_RATIO * 0.5) * scaledHeight - INFO_DELTA,
+                    width: scaledWidth * CARD_RATIO * 0.5,
+                    height: scaledHeight * CARD_RATIO * 0.5,
+                    marginLeft: scaledWidth * CARD_RATIO * 0.1,
+                    marginTop: scaledWidth * CARD_RATIO * 0.1,
+                    fontSize: scaledWidth * CARD_RATIO * 0.3,
+                }}
+            >
+                {hand.length}
+            </div>);
+        }
+    }
+
     addDeck(normalCards) {
         const { G, moves, height, scaledHeight } = this.props;
         const { mode } = this.state;
@@ -486,7 +557,7 @@ export default class GameArea extends React.Component {
             })
         }
     }
- 
+
     getPrivateZoneCards(middleCardsFound) {
         const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
         const { mode } = this.state;
@@ -514,6 +585,40 @@ export default class GameArea extends React.Component {
             });
         });
         return normalCards;
+    }
+
+    getPutOnSelfZoneCards(middleCardsFound) {
+        const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
+        const { mode } = this.state;
+        const { putOnCharacterZone, isCharacterZoneOpen } = G;
+
+        const privateCards = putOnCharacterZone.filter(item => item.visibleTo.includes(playerID));
+        const startX = (width - privateCards.length * scaledWidth * MIDDLE_CARD_RATIO - (privateCards.length - 1) * DELTA) / 2;
+        const normalCards = [];
+
+        privateCards.forEach(({ card, visibleTo }, i) => {
+            let onClick = undefined;
+            if (mode === SetModePanel.DEFAULT_MODE) {
+                onClick = () => moves.pickUpCharacter(card.id);
+            } else if (mode === SetModePanel.HELP_MODE) {
+                onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
+            }
+            normalCards.push({
+                key: `card-${card.id}`,
+                className: 'shadow',
+                card,
+                faceUp: true,
+                opacity: middleCardsFound ? 0 : 1,
+                left: startX + (scaledWidth * MIDDLE_CARD_RATIO + DELTA) * i,
+                top: (height - scaledHeight * MIDDLE_CARD_RATIO) / 2,
+                scale: MIDDLE_CARD_RATIO,
+                onClick: middleCardsFound ? undefined : onClick,
+            });
+        });
+        return {
+            cards: normalCards,
+            showing: !!isCharacterZoneOpen[playerID]
+        };
     }
 
     getHarvestCards(middleCardsFound) {
@@ -703,10 +808,12 @@ export default class GameArea extends React.Component {
     selectFunction = index => {
         const { G, moves, playerID } = this.props;
         const { mode, selectedIndex } = this.state;
-        const { hands, harvest } = G;
+        const { hands, harvest, isCharacterZoneOpen } = G;
         const card = hands[playerID][index];
         if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'play') {
-            if (harvest.length > 0) {
+            if (isCharacterZoneOpen[playerID]) {
+                return () => moves.putOnCharacter(index);
+            } else if (harvest.length > 0) {
                 return () => moves.putDownHarvest(index);
             } else if (['Capture', 'Starvation'].includes(EQUIPMENT[card.type])) {
                 return () => this.setState({ mode: SetModePanel.GIVE_JUDGMENT_MODE, selectedIndex: index });

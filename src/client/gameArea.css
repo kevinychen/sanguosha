@@ -47,6 +47,18 @@ img {
     background-size: cover;
 }
 
+.decrease-max-health {
+    background-image: url('/health/health-minus.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.increase-max-health {
+    background-image: url('/health/health-plus.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
 .chain {
     background-image: url('/chain.png');
     background-size: cover;
