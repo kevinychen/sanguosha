@@ -8,9 +8,9 @@
     "esm": "^3.2.25",
     "koa-static": "^5.0.0",
     "node-persist": "^3.1.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "react-scripts": "^3.4.4",
     "react-spring": "^8.0.27",
     "redux-logger": "^3.0.6"
   },
