@@ -1,9 +1,12 @@
-import { Server } from 'boardgame.io/server';
+import { FlatFile, Server } from 'boardgame.io/server';
 import path from 'path';
 import serve from 'koa-static';
 import { SanGuoSha } from '../lib/game';
 
-const server = Server({ games: [SanGuoSha] });
+const server = Server({
+    games: [SanGuoSha],
+    db: new FlatFile({ dir: 'data' }),
+});
 const PORT = process.env.PORT;
 
 // Build path relative to the server.js file
@@ -18,3 +21,12 @@ server.run(PORT, () => {
         )
     )
 });
+
+// Clean up old matches
+const { db } = server.app.context;
+const week = 7 * 24 * 60 * 60 * 1000;
+setInterval(() => {
+    for (const matchID of (db.listMatches({ where: { updatedBefore: Date.now() - week } }))) {
+        db.wipe(matchID);
+    }
+}, week);

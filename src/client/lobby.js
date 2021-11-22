@@ -72,7 +72,7 @@ export default class SanGuoShaLobby extends React.Component {
             }
         }
 
-        this.setState({ matches });
+        this.setState({ matches: matches.slice().reverse() });
         clearTimeout(this.timeout);
         this.timeout = setTimeout(this.refreshLobbyState, 1000);
         return;

@@ -3,6 +3,9 @@ export function drawCard(G, ctx) {
     // const { random } = ctx;
 
     const card = deck.pop();
+    if (card === undefined) {
+        return;
+    }
 
     if (deck.length === 0) {
         // shuffle cards in discard back into the deck, using a modified version of Fisher-Yates
@@ -31,6 +34,9 @@ export function drawCards(G, ctx, playerID, count) {
     const { hands } = G;
     for (let i = 0; i < count; i++) {
         const card = drawCard(G, ctx);
+        if (card === undefined) {
+            return;
+        }
         hands[playerID].push(card);
     }
 }
