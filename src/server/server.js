@@ -1,9 +1,12 @@
-import { Server } from 'boardgame.io/server';
+import { FlatFile, Server } from 'boardgame.io/server';
 import path from 'path';
 import serve from 'koa-static';
 import { SanGuoSha } from '../lib/game';
 
-const server = Server({ games: [SanGuoSha] });
+const server = Server({
+    games: [SanGuoSha],
+    db: new FlatFile({ dir: 'data' }),
+});
 const PORT = process.env.PORT;
 
 // Build path relative to the server.js file
