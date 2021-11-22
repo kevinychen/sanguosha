@@ -208,10 +208,7 @@ export default function setup(ctx, setupData) {
     const isFlipped = {};
     const harvest = [];
     const privateZone = [];
-    const putOnCharacterZone = [];
-    const isCharacterZoneOpen = {
-
-    };
+    const selfZone = [];
     const refusingDeath = [1];
 
     return {
@@ -229,8 +226,7 @@ export default function setup(ctx, setupData) {
         isFlipped,
         harvest,
         privateZone,
-        putOnCharacterZone,
-        isCharacterZoneOpen,
+        selfZone,
         refusingDeath,
     };
 }

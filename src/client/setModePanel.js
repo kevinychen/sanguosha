@@ -10,6 +10,7 @@ export default class SetModePanel extends React.Component {
     static STEAL_MODE = 'Steal';
     static REVEAL_MODE = 'Reveal';
     static FLIP_MODE = 'Flip';
+    static SELF_ZONE_MODE = 'Self cards';
     static HELP_MODE = 'Help';
     static SHOW_HOTKEYS_MODE = 'Hotkeys';
     static GIVE_JUDGMENT_MODE = 'Give Judgment';
@@ -35,6 +36,7 @@ export default class SetModePanel extends React.Component {
                 {this.renderButton(SetModePanel.STEAL_MODE)}
                 {this.renderButton(SetModePanel.REVEAL_MODE)}
                 {this.renderButton(SetModePanel.FLIP_MODE)}
+                {this.renderButton(SetModePanel.SELF_ZONE_MODE)}
                 {this.renderSpecialModeButton()}
                 {this.renderButton(SetModePanel.HELP_MODE)}
                 {this.renderButton(SetModePanel.SHOW_HOTKEYS_MODE)}
@@ -53,7 +55,6 @@ export default class SetModePanel extends React.Component {
                 >
                     {'Lightning'}
                 </button>
-                {this.renderPutOnSelfButton()}
                 {this.renderFinishDiscardButton()}
                 {this.renderSpecialButton()}
                 {this.renderHotkeys()}
@@ -88,26 +89,6 @@ export default class SetModePanel extends React.Component {
                 onClick={() => moves.finishHarvest()}
             >
                 {'Finish'}
-            </button>;
-        }
-    }
-
-    renderPutOnSelfButton() {
-        const { G, moves, playerID } = this.props;
-        const { isCharacterZoneOpen } = G;
-        if (!(isCharacterZoneOpen[playerID])) {
-            return <button
-                className='clickable'
-                onClick={() => moves.openCharacterZone()}
-            >
-                {'Put on Self'}
-            </button>;
-        } else {
-            return <button
-                className='clickable'
-                onClick={() => moves.closeCharacterZone()}
-            >
-                {'Close'}
             </button>;
         }
     }

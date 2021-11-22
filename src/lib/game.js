@@ -170,35 +170,24 @@ function finishHarvest(G) {
     discard.push(...harvest.splice(0, harvest.length).reverse());
 }
 
-function openCharacterZone(G, ctx, index) {
-    const { isCharacterZoneOpen } = G;
-    const { playerID } = ctx;
-    isCharacterZoneOpen[playerID] = true;
-}
-
-function closeCharacterZone(G, ctx, index) {
-    const { isCharacterZoneOpen } = G;
-    const { playerID } = ctx;
-    isCharacterZoneOpen[playerID] = false;
-}
-
-function putOnCharacter(G, ctx, index) {
-    const { hands, putOnCharacterZone } = G;
+function putDownSelfZone(G, ctx, index) {
+    const { hands, selfZone } = G;
     const { playerID } = ctx;
     const [card] = hands[playerID].splice(index, 1);
     if (card === undefined) {
         return;
     }
-    putOnCharacterZone.push({
+    selfZone.push({
         card,
         visibleTo: [playerID],
     });
 }
 
-function pickUpCharacter(G, ctx, index) {
-    const { hands, putOnCharacterZone } = G;
+function pickUpSelfZone(G, ctx, id) {
+    const { hands, selfZone } = G;
     const { playerID } = ctx;
-    const [card] = putOnCharacterZone.splice(index, 1);
+    const index = selfZone.findIndex(item => item.card.id === id);
+    const [card] = selfZone.splice(index, 1);
     hands[playerID].push(card.card);
 }
 
@@ -417,7 +406,7 @@ export const SanGuoSha = {
 
                 // make character choices automatically for easier testing
                 // TODO remove
-                // playOrder.forEach(player => selectCharacter(G, { ...ctx, playerID: player }, 0));
+                //playOrder.forEach(player => selectCharacter(G, { ...ctx, playerID: player }, 0));
             },
 
             // end select characters phase if everyone has made a character choice
@@ -466,10 +455,8 @@ export const SanGuoSha = {
                             putDownHarvest,
                             pickUpHarvest,
                             finishHarvest,
-                            openCharacterZone,
-                            closeCharacterZone,
-                            putOnCharacter,
-                            pickUpCharacter,
+                            putDownSelfZone,
+                            pickUpSelfZone,
                             passLightning,
                             astrology,
                             finishAstrology,

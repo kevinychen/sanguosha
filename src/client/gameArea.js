@@ -42,6 +42,7 @@ export default class GameArea extends React.Component {
 
     render() {
         const { G, ctx, playerID, width, height, playerAreas, scaledWidth, scaledHeight } = this.props;
+        const { mode } = this.state;
         const { characters } = G;
         const { numPlayers, playOrder } = ctx;
 
@@ -81,13 +82,13 @@ export default class GameArea extends React.Component {
         // Once cards of some type are found, remaining cards are rendered transparently.
         // We splice from the beginning so that these transparent cards don't block existing ones.
         const middleCards = [];
-        let selfZoneCards = this.getPutOnSelfZoneCards();
-        if(selfZoneCards.showing) {
-            middleCards.splice(0, 0, ...selfZoneCards.cards);
+        if (mode === SetModePanel.SELF_ZONE_MODE) {
+            middleCards.splice(0, 0, ...this.getSelfZoneCards(middleCards.length > 0));
+        } else {
+            middleCards.splice(0, 0, ...this.getPrivateZoneCards(middleCards.length > 0));
+            middleCards.splice(0, 0, ...this.getHarvestCards(middleCards.length > 0));
+            middleCards.splice(0, 0, ...this.getDiscardCards(middleCards.length > 0));
         }
-        middleCards.splice(0, 0, ...this.getPrivateZoneCards(selfZoneCards.showing || middleCards.length > 0));
-        middleCards.splice(0, 0, ...this.getHarvestCards(selfZoneCards.showing || middleCards.length > 0));
-        middleCards.splice(0, 0, ...this.getDiscardCards(selfZoneCards.showing || middleCards.length > 0));
         normalCards.push(...middleCards);
 
         return <div>
@@ -473,8 +474,8 @@ export default class GameArea extends React.Component {
 
     addOtherPlayerCharacterZone(playerArea, player, normalCards, nodes) {
         const { G, scaledWidth, scaledHeight } = this.props;
-        const { putOnCharacterZone } = G;
-        const hand = putOnCharacterZone.filter(item => item.visibleTo.includes(player));
+        const { selfZone } = G;
+        const hand = selfZone.filter(item => item.visibleTo.includes(player));
         // Show the card backs
         hand.forEach(card => {
             let onClick = undefined;
@@ -516,7 +517,7 @@ export default class GameArea extends React.Component {
         const MAX_CARDS_SHOWN = 10;
         deck.slice(-MAX_CARDS_SHOWN).forEach((card, i) => {
             let onClick = undefined;
-            if (mode === SetModePanel.DEFAULT_MODE && card === deck[deck.length - 1]) {
+            if ((mode === SetModePanel.DEFAULT_MODE || mode === SetModePanel.SELF_ZONE_MODE) && card === deck[deck.length - 1]) {
                 const doingAstrology = privateZone.filter(item => item.source.deck).length > 0;
                 if (doingAstrology) {
                     onClick = () => moves.astrology(1);
@@ -565,7 +566,7 @@ export default class GameArea extends React.Component {
         const privateCards = privateZone.filter(item => item.visibleTo.includes(playerID));
         const startX = (width - privateCards.length * scaledWidth * MIDDLE_CARD_RATIO - (privateCards.length - 1) * DELTA) / 2;
         const normalCards = [];
-        privateCards.forEach(({ card, visibleTo }, i) => {
+        privateCards.forEach(({ card }, i) => {
             let onClick = undefined;
             if (mode === SetModePanel.DEFAULT_MODE) {
                 onClick = () => moves.returnCard(card.id);
@@ -587,22 +588,13 @@ export default class GameArea extends React.Component {
         return normalCards;
     }
 
-    getPutOnSelfZoneCards(middleCardsFound) {
+    getSelfZoneCards(middleCardsFound) {
         const { G, moves, playerID, width, height, scaledWidth, scaledHeight } = this.props;
-        const { mode } = this.state;
-        const { putOnCharacterZone, isCharacterZoneOpen } = G;
-
-        const privateCards = putOnCharacterZone.filter(item => item.visibleTo.includes(playerID));
-        const startX = (width - privateCards.length * scaledWidth * MIDDLE_CARD_RATIO - (privateCards.length - 1) * DELTA) / 2;
+        const { selfZone } = G;
+        const selfCards = selfZone.filter(item => item.visibleTo.includes(playerID));
+        const startX = (width - selfCards.length * scaledWidth * MIDDLE_CARD_RATIO - (selfCards.length - 1) * DELTA) / 2;
         const normalCards = [];
-
-        privateCards.forEach(({ card, visibleTo }, i) => {
-            let onClick = undefined;
-            if (mode === SetModePanel.DEFAULT_MODE) {
-                onClick = () => moves.pickUpCharacter(card.id);
-            } else if (mode === SetModePanel.HELP_MODE) {
-                onClick = () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
-            }
+        selfCards.forEach(({ card }, i) => {
             normalCards.push({
                 key: `card-${card.id}`,
                 className: 'shadow',
@@ -612,13 +604,10 @@ export default class GameArea extends React.Component {
                 left: startX + (scaledWidth * MIDDLE_CARD_RATIO + DELTA) * i,
                 top: (height - scaledHeight * MIDDLE_CARD_RATIO) / 2,
                 scale: MIDDLE_CARD_RATIO,
-                onClick: middleCardsFound ? undefined : onClick,
+                onClick: middleCardsFound ? undefined : () => moves.pickUpSelfZone(card.id),
             });
         });
-        return {
-            cards: normalCards,
-            showing: !!isCharacterZoneOpen[playerID]
-        };
+        return normalCards;
     }
 
     getHarvestCards(middleCardsFound) {
@@ -808,12 +797,10 @@ export default class GameArea extends React.Component {
     selectFunction = index => {
         const { G, moves, playerID } = this.props;
         const { mode, selectedIndex } = this.state;
-        const { hands, harvest, isCharacterZoneOpen } = G;
+        const { hands, harvest } = G;
         const card = hands[playerID][index];
         if (mode === SetModePanel.DEFAULT_MODE && this.stage() === 'play') {
-            if (isCharacterZoneOpen[playerID]) {
-                return () => moves.putOnCharacter(index);
-            } else if (harvest.length > 0) {
+            if (harvest.length > 0) {
                 return () => moves.putDownHarvest(index);
             } else if (['Capture', 'Starvation'].includes(EQUIPMENT[card.type])) {
                 return () => this.setState({ mode: SetModePanel.GIVE_JUDGMENT_MODE, selectedIndex: index });
@@ -839,6 +826,8 @@ export default class GameArea extends React.Component {
                 moves.flipObject(card.id);
                 this.setState({ mode: SetModePanel.DEFAULT_MODE });
             };
+        } else if (mode === SetModePanel.SELF_ZONE_MODE) {
+            return () => moves.putDownSelfZone(index);
         } else if (mode === SetModePanel.HELP_MODE) {
             return () => this.setState({ helpCard: { key: card.type, src: `./cards/${card.type}.jpg` } });
         } else if (mode === SetModePanel.COUNTRY_SCENE_MODE && selectedIndex === undefined) {

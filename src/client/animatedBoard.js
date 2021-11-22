@@ -91,9 +91,9 @@ export default class AnimatedBoard extends React.Component {
                         }}
                     >
                         <animated.div
-                            className={classNames('positioned', 'item', item?.className)}
+                            className={classNames('positioned', 'item', item.className)}
                             style={{
-                                transform: faceUp?.interpolate(faceUp => `rotateY(${faceUp * 180 - (faceUp > 0.5 ? 180 : 0)}deg)`),
+                                transform: faceUp.interpolate(faceUp => `rotateY(${faceUp * 180 - (faceUp > 0.5 ? 180 : 0)}deg)`),
                                 left: 0,
                                 top: 0,
                                 width: '100%',

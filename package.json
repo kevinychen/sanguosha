@@ -21,9 +21,7 @@
     "start": "cross-env REACT_APP_LOCAL=true react-scripts start",
     "build": "react-scripts build",
     "client": "cross-env REACT_APP_PROXY=http://localhost:8098 react-scripts start",
-    "server": "cross-env PORT=8098 node -r esm src/server/server.js",
-    "prod-start-dev": "cross-env NODE_ENV=production react-scripts build && react-scripts start",
-    "prod-start": "node -r esm src/server/server.js"
+    "server": "cross-env PORT=8098 node -r esm src/server/server.js"
   },
   "browserslist": {
     "production": [

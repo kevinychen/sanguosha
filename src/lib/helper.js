@@ -1,33 +1,19 @@
 export function drawCard(G, ctx) {
     const { deck, discard, isFlipped } = G;
-    // const { random } = ctx;
+    const { random } = ctx;
 
     const card = deck.pop();
     if (card === undefined) {
         return;
     }
-
     if (deck.length === 0) {
-        // shuffle cards in discard back into the deck, using a modified version of Fisher-Yates
-        // for some reason random wasn't working, this works much better
-
-        let array = discard.splice(0, discard.length);
-        shuffleArray(array);
-        deck.push(...array);
+        // shuffle cards in discard back into the deck
+        deck.push(...random.Shuffle(discard.splice(0, discard.length)));
     }
     if (isFlipped[card.id]) {
         delete isFlipped[card.id];
     }
     return card;
-}
-
-function shuffleArray(array) {
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
 }
 
 export function drawCards(G, ctx, playerID, count) {

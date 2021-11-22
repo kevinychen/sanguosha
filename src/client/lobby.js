@@ -114,7 +114,6 @@ export default class SanGuoShaLobby extends React.Component {
     resetName = () => {
         window.localStorage.removeItem(NAME_KEY);
         this.setState({ name: null });
-        this.renderLobby();
     }
 
     renderLobby() {
@@ -137,7 +136,7 @@ export default class SanGuoShaLobby extends React.Component {
         } else {
             return <div>
                 <p>{`Welcome, ${name}`}</p>
-                <button onClick={this.resetName}>Reset Name</button>
+                <button onClick={this.resetName}>Reset name</button>
                 {this.maybeRenderCreateButton()}
                 <div id="instances">
                     <table>
@@ -164,8 +163,7 @@ export default class SanGuoShaLobby extends React.Component {
         return <button
             onClick={() => this.createMatch(SanGuoSha.maxPlayers, undefined)
                 .then(matchID => this.joinMatch(matchID, '0'))
-                .then(this.refreshLobbyState)
-                .then(EXPANSIONS.forEach((s) => this.setState({[`expansion-${s}`]: true})))}
+                .then(this.refreshLobbyState)}
         >
             {'Create new room'}
         </button>;
@@ -188,7 +186,6 @@ export default class SanGuoShaLobby extends React.Component {
                     type='checkbox'
                     value={this.state[`expansion-${expansion}`]}
                     onChange={e => this.setState({ [`expansion-${expansion}`]: e.target.checked })}
-                    checked='true'
                 />
                 {expansion}
             </span>)];
