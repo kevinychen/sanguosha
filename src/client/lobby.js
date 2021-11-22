@@ -136,7 +136,7 @@ export default class SanGuoShaLobby extends React.Component {
         } else {
             return <div>
                 <p>{`Welcome, ${name}`}</p>
-                <button onClick={this.resetName}>Reset name</button>
+                <button onClick={this.resetName}>Change name</button>
                 {this.maybeRenderCreateButton()}
                 <div id="instances">
                     <table>

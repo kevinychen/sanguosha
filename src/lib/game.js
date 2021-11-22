@@ -300,7 +300,7 @@ function updateMaxHealth(G, ctx, change) {
     if (healths[playerID].max < 1) {
         healths[playerID].max = 1;
     }
-    if(healths[playerID].max > 10) {
+    if (healths[playerID].max > 10) {
         healths[playerID].max = 10;
     }
     if (healths[playerID].current > healths[playerID].max) {

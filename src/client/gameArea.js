@@ -70,7 +70,7 @@ export default class GameArea extends React.Component {
             this.addPlayerEquipment(playerArea, player, normalCards);
             if (player !== playerID) {
                 this.addOtherPlayerHand(playerArea, player, normalCards, nodes);
-                this.addOtherPlayerCharacterZone(playerArea, player, normalCards, nodes);
+                this.addOtherPlayerSelfZoneCards(playerArea, player, normalCards, nodes);
             }
         });
 
@@ -472,7 +472,7 @@ export default class GameArea extends React.Component {
         }
     }
 
-    addOtherPlayerCharacterZone(playerArea, player, normalCards, nodes) {
+    addOtherPlayerSelfZoneCards(playerArea, player, normalCards, nodes) {
         const { G, scaledWidth, scaledHeight } = this.props;
         const { selfZone } = G;
         const hand = selfZone.filter(item => item.visibleTo.includes(player));
