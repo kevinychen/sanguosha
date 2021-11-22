@@ -10,6 +10,7 @@ export default class SetModePanel extends React.Component {
     static STEAL_MODE = 'Steal';
     static REVEAL_MODE = 'Reveal';
     static FLIP_MODE = 'Flip';
+    static SELF_ZONE_MODE = 'Self cards';
     static HELP_MODE = 'Help';
     static SHOW_HOTKEYS_MODE = 'Hotkeys';
     static GIVE_JUDGMENT_MODE = 'Give Judgment';
@@ -35,6 +36,7 @@ export default class SetModePanel extends React.Component {
                 {this.renderButton(SetModePanel.STEAL_MODE)}
                 {this.renderButton(SetModePanel.REVEAL_MODE)}
                 {this.renderButton(SetModePanel.FLIP_MODE)}
+                {this.renderButton(SetModePanel.SELF_ZONE_MODE)}
                 {this.renderSpecialModeButton()}
                 {this.renderButton(SetModePanel.HELP_MODE)}
                 {this.renderButton(SetModePanel.SHOW_HOTKEYS_MODE)}
@@ -129,7 +131,7 @@ export default class SetModePanel extends React.Component {
         if (character === undefined) {
             return;
         }
-        if (character.name === 'Zhuge Liang' && currentPlayer === playerID) {
+        if ((character.name === 'Zhuge Liang' || character.name === "Jiang Wei") && currentPlayer === playerID) {
             const doingAstrology = privateZone.filter(item => item.source.deck).length > 0;
             if (doingAstrology) {
                 return <button
@@ -144,6 +146,24 @@ export default class SetModePanel extends React.Component {
                     onClick={() => moves.astrology()}
                 >
                     {'Astrology'}
+                </button>;
+            }
+        }
+        if ((character.name === 'Ma Su') && currentPlayer === playerID) {
+            const doingHearts = privateZone.filter(item => item.source.deck).length > 0;
+            if (doingHearts) {
+                return <button
+                    className='clickable'
+                    onClick={() => moves.finishWinHearts()}
+                >
+                    {'Finish'}
+                </button>;
+            } else {
+                return <button
+                    className='clickable'
+                    onClick={() => moves.winHearts()}
+                >
+                    {'Winning Hearts'}
                 </button>;
             }
         }

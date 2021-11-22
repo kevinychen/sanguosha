@@ -10,7 +10,7 @@ const SERVER = process.env.REACT_APP_PROXY || document.location.toString().repla
 const NAME_KEY = 'name';
 const MATCH_INFO_KEY = 'matchInfo';
 const INPUT_NAME_ID = 'name-input';
-const EXPANSIONS = ['wind', 'fire', 'wood'];
+const EXPANSIONS = ['wind', 'fire', 'wood', 'knight11', 'hill', 'sp11', 'knight12'];
 
 const SanGuoShaClient = Client({
     game: SanGuoSha,
@@ -111,6 +111,11 @@ export default class SanGuoShaLobby extends React.Component {
         </div>;
     }
 
+    resetName = () => {
+        window.localStorage.removeItem(NAME_KEY);
+        this.setState({ name: null });
+    }
+
     renderLobby() {
         const { name, matches } = this.state;
         if (name === null || name === undefined) {
@@ -131,6 +136,7 @@ export default class SanGuoShaLobby extends React.Component {
         } else {
             return <div>
                 <p>{`Welcome, ${name}`}</p>
+                <button onClick={this.resetName}>Reset name</button>
                 {this.maybeRenderCreateButton()}
                 <div id="instances">
                     <table>

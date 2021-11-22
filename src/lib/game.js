@@ -170,6 +170,27 @@ function finishHarvest(G) {
     discard.push(...harvest.splice(0, harvest.length).reverse());
 }
 
+function putDownSelfZone(G, ctx, index) {
+    const { hands, selfZone } = G;
+    const { playerID } = ctx;
+    const [card] = hands[playerID].splice(index, 1);
+    if (card === undefined) {
+        return;
+    }
+    selfZone.push({
+        card,
+        visibleTo: [playerID],
+    });
+}
+
+function pickUpSelfZone(G, ctx, id) {
+    const { hands, selfZone } = G;
+    const { playerID } = ctx;
+    const index = selfZone.findIndex(item => item.card.id === id);
+    const [card] = selfZone.splice(index, 1);
+    hands[playerID].push(card.card);
+}
+
 function passLightning(G, ctx) {
     const { equipment } = G;
     const { numPlayers, playOrder } = ctx;
@@ -202,6 +223,26 @@ function astrology(G, ctx, numCards) {
 function finishAstrology(G) {
     const { deck, privateZone } = G;
     deck.splice(0, 0, ...privateZone.filter(item => item.source.deck).map(item => item.card));
+    G.privateZone = privateZone.filter(item => !item.source.deck);
+}
+
+function winHearts(G, ctx) {
+    const { privateZone } = G;
+    const { playerID } = ctx;
+
+    for (let i = 0; i < 3; i++) {
+        const card = drawCard(G, ctx);
+        privateZone.push({
+            card,
+            source: { deck: true },
+            visibleTo: [playerID],
+        });
+    }
+}
+
+function finishWinHearts(G) {
+    const { discard, privateZone } = G;
+    discard.push(...privateZone.filter(item => item.source.deck).map(item => item.card));
     G.privateZone = privateZone.filter(item => !item.source.deck);
 }
 
@@ -249,6 +290,21 @@ function updateHealth(G, ctx, change) {
     }
     if (healths[playerID].current < 0) {
         healths[playerID].current = 0;
+    }
+}
+
+function updateMaxHealth(G, ctx, change) {
+    const { healths } = G;
+    const { playerID } = ctx;
+    healths[playerID].max += change;
+    if (healths[playerID].max < 1) {
+        healths[playerID].max = 1;
+    }
+    if(healths[playerID].max > 10) {
+        healths[playerID].max = 10;
+    }
+    if (healths[playerID].current > healths[playerID].max) {
+        healths[playerID].current = healths[playerID].max;
     }
 }
 
@@ -399,13 +455,18 @@ export const SanGuoSha = {
                             putDownHarvest,
                             pickUpHarvest,
                             finishHarvest,
+                            putDownSelfZone,
+                            pickUpSelfZone,
                             passLightning,
                             astrology,
                             finishAstrology,
+                            winHearts,
+                            finishWinHearts,
                             refusingDeath,
                             alliance,
                             collapse,
                             updateHealth,
+                            updateMaxHealth,
                             die,
                             endPlay,
                          },
