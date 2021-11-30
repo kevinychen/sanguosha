@@ -3,9 +3,10 @@ import path from 'path';
 import serve from 'koa-static';
 import { SanGuoSha } from '../lib/game';
 
+const db = new FlatFile({ dir: 'data '});
 const server = Server({
     games: [SanGuoSha],
-    db: new FlatFile({ dir: 'data' }),
+    db,
 });
 const PORT = process.env.PORT;
 
@@ -23,10 +24,11 @@ server.run(PORT, () => {
 });
 
 // Clean up old matches
-const { db } = server.app.context;
 const week = 7 * 24 * 60 * 60 * 1000;
 setInterval(() => {
-    for (const matchID of (db.listMatches({ where: { updatedBefore: Date.now() - week } }))) {
-        db.wipe(matchID);
-    }
+    db.listMatches({ where: { updatedBefore: Date.now() - week } }).then(matchIDs => {
+        for (const matchID of matchIDs) {
+            db.wipe(matchID);
+        }
+    });
 }, week);
