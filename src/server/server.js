@@ -3,7 +3,7 @@ import path from 'path';
 import serve from 'koa-static';
 import { SanGuoSha } from '../lib/game';
 
-const db = new FlatFile({ dir: 'data '});
+const db = new FlatFile({ dir: 'data' });
 const server = Server({
     games: [SanGuoSha],
     db,
