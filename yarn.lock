@@ -10376,9 +10376,9 @@ svelte-json-tree-auto@^0.1.0:
   integrity sha512-XDUBTV/BNStd/9WJDndzxQ9KqhoNoZBxkOo1H1d29qKW+YxG6eRrt2Yp0Cv/6KLKDtFLhJ9huJpqpOSe4yMG0Q==
 
 svelte@^3.24.0:
-  version "3.31.1"
-  resolved "https://registry.yarnpkg.com/svelte/-/svelte-3.31.1.tgz#1a1e2a2fe4eeb72be5c2542735e035c49c45be87"
-  integrity sha512-Q8xVz5U/IFFNjgvVSjdzKJPAX0MFytFwiJo1HAPfGwM7LkHA+BN2q2kL8vKcJwjku7/509MapLov8C9SjogNRg==
+  version "3.49.0"
+  resolved "https://registry.yarnpkg.com/svelte/-/svelte-3.49.0.tgz#5baee3c672306de1070c3b7888fc2204e36a4029"
+  integrity sha512-+lmjic1pApJWDfPCpUUTc1m8azDqYCG1JN9YEngrx/hUyIcFJo6VZhj0A1Ai0wqoHcEIuQy+e9tk+4uDgdtsFA==
 
 svg-parser@^2.0.0:
   version "2.0.4"
